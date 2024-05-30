@@ -7,8 +7,8 @@ void main() {
 }
 
 class MyApp extends StatelessWidget {
-  final _appRouterDelegate = AppRouterDelegate(); //AppRouterDelegate();
-  final _appRouteInformationParser = AppRouteInformationParser();//AppRouteInformationParser();
+  final _appRouterDelegate = AppRouterDelegate();
+  final _appRouteInformationParser = AppRouteInformationParser();
 
   @override
   Widget build(BuildContext context) {

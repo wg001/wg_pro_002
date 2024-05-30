@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
 class DetailsPage extends StatelessWidget {
-  final int id;
+  final String id;
 
   DetailsPage({required this.id});
 
@@ -10,7 +10,7 @@ class DetailsPage extends StatelessWidget {
     return Scaffold(
       appBar: AppBar(title: Text("Details Page")),
       body: Center(
-        child: Text("Viewing details for item $id"),
+        child: Text("Welcome to the Details Page with ID: $id"),
       ),
     );
   }

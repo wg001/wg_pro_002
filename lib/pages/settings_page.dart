@@ -6,7 +6,7 @@ class SettingsPage extends StatelessWidget {
     return Scaffold(
       appBar: AppBar(title: Text("Settings Page")),
       body: Center(
-        child: Text("Adjust your settings here"),
+        child: Text("Welcome to the Settings Page!"),
       ),
     );
   }

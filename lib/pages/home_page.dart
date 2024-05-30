@@ -1,5 +1,4 @@
 import 'dart:developer';
-
 import 'package:flutter/material.dart';
 
 class HomePage extends StatelessWidget {
@@ -15,14 +14,14 @@ class HomePage extends StatelessWidget {
             ElevatedButton(
               onPressed: () {
                 log("details");
-                Navigator.pushNamed(context, '/details/1');
+                Router.of(context).routerDelegate.setNewRoutePath(RouteSettings(name: '/details',arguments: ));
               },
               child: Text('Go to Details Page'),
             ),
             ElevatedButton(
               onPressed: () {
                 log("settings");
-                Navigator.pushNamed(context, '/settings');
+                Router.of(context).routerDelegate.setNewRoutePath(RouteSettings(name: '/settings'));
               },
               child: Text('Go to Settings Page'),
             ),

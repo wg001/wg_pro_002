@@ -1,41 +1,40 @@
 import 'package:flutter/material.dart';
-import 'app_route_path.dart';
 
-class AppRouteInformationParser extends RouteInformationParser<AppRoutePath> {
+class AppRouteInformationParser extends RouteInformationParser<RouteSettings> {
   @override
-  Future<AppRoutePath> parseRouteInformation(RouteInformation routeInformation) async {
+  Future<RouteSettings> parseRouteInformation(RouteInformation routeInformation) async {
     final uri = Uri.parse(routeInformation.location ?? '');
-    // Handle '/'
+
     if (uri.pathSegments.isEmpty) {
-      return AppRoutePath.home();
+      return RouteSettings(name: '/');
     }
 
-    // Handle '/details/:id'
     if (uri.pathSegments.length == 2 && uri.pathSegments.first == 'details') {
-      var id = int.tryParse(uri.pathSegments[1]);
-      if (id != null) return AppRoutePath.details(id);
+      final id = uri.pathSegments[1];
+      return RouteSettings(name: '/details', arguments: id);
     }
 
-    // Handle '/settings'
-    if (uri.pathSegments.length == 1 && uri.pathSegments.first == 'settings') {
-      return AppRoutePath.settings();
+    if (uri.pathSegments.first == 'settings') {
+      return RouteSettings(name: '/settings');
     }
 
-    // Handle unknown routes
-    return AppRoutePath.home();
+    return RouteSettings(name: '/');
   }
 
   @override
-  RouteInformation? restoreRouteInformation(AppRoutePath path) {
-    if (path.isHomePage) {
+  RouteInformation? restoreRouteInformation(RouteSettings configuration) {
+    if (configuration.name == '/') {
       return RouteInformation(location: '/');
     }
-    if (path.id != null) {
-      return RouteInformation(location: '/details/${path.id}');
+
+    if (configuration.name == '/details') {
+      return RouteInformation(location: '/details/${configuration.arguments}');
     }
-    if (path.id == null && !path.isHomePage) {
+
+    if (configuration.name == '/settings') {
       return RouteInformation(location: '/settings');
     }
+
     return null;
   }
 }

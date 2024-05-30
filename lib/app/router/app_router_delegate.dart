@@ -2,32 +2,35 @@ import 'package:flutter/material.dart';
 import 'package:wg_pro_002/pages/home_page.dart';
 import 'package:wg_pro_002/pages/details_page.dart';
 import 'package:wg_pro_002/pages/settings_page.dart';
-import 'app_route_path.dart';
 
-class AppRouterDelegate extends RouterDelegate<AppRoutePath>
-    with ChangeNotifier, PopNavigatorRouterDelegateMixin<AppRoutePath> {
-  final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
+class AppRouterDelegate extends RouterDelegate<RouteSettings>
+    with ChangeNotifier, PopNavigatorRouterDelegateMixin<RouteSettings> {
+  final GlobalKey<NavigatorState> navigatorKey;
 
-  AppRoutePath _currentPath = AppRoutePath.home();
+  RouteSettings? _currentRoute;
 
-  @override
-  AppRoutePath get currentConfiguration => _currentPath;
+  AppRouterDelegate() : navigatorKey = GlobalKey<NavigatorState>();
+
+  RouteSettings? get currentConfiguration => _currentRoute;
 
   @override
   Widget build(BuildContext context) {
     return Navigator(
       key: navigatorKey,
       pages: [
-        MaterialPage(key: ValueKey('HomePage'), child: HomePage()),
-        if (!_currentPath.isHomePage)
+        MaterialPage(child: HomePage()),
+        if (_currentRoute?.name == '/details')
           MaterialPage(
-              key: ValueKey('DetailsPage'),
-              child: DetailsPage(id: _currentPath.id!)),
-        // Add other pages here
+            child: DetailsPage(id: _currentRoute?.arguments as String),
+          ),
+        if (_currentRoute?.name == '/settings')
+          MaterialPage(child: SettingsPage()),
       ],
       onPopPage: (route, result) {
-        if (!route.didPop(result)) return false;
-        _currentPath = AppRoutePath.home();
+        if (!route.didPop(result)) {
+          return false;
+        }
+        _currentRoute = null;
         notifyListeners();
         return true;
       },
@@ -35,13 +38,18 @@ class AppRouterDelegate extends RouterDelegate<AppRoutePath>
   }
 
   @override
-  Future<void> setNewRoutePath(AppRoutePath configuration) async {
-    _currentPath = configuration;
+  Future<void> setNewRoutePath(RouteSettings configuration) async {
+    _currentRoute = configuration;
+    notifyListeners();
   }
 
-  // Add a method to handle navigation to the details page
-  void handleNavigationToDetails(int id) {
-    _currentPath = AppRoutePath.details(id);
-    notifyListeners();
+  @override
+  Future<bool> popRoute() {
+    if (_currentRoute != null) {
+      _currentRoute = null;
+      notifyListeners();
+      return Future.value(true);
+    }
+    return Future.value(false);
   }
 }
