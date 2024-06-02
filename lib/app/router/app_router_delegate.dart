@@ -21,7 +21,7 @@ class AppRouterDelegate extends RouterDelegate<RouteSettings>
         MaterialPage(child: HomePage()),
         if (_currentRoute?.name == '/details')
           MaterialPage(
-            child: DetailsPage(id: _currentRoute?.arguments as String),
+            child: DetailsPage(Params: _currentRoute?.arguments as Map<String,dynamic>?),
           ),
         if (_currentRoute?.name == '/settings')
           MaterialPage(child: SettingsPage()),
