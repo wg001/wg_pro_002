@@ -2,11 +2,13 @@ import 'dart:developer';
 import 'package:flutter/material.dart';
 
 class HomePage extends StatelessWidget {
+  const HomePage({super.key});
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-          title: Text("Home Page"),
+        title: Text("Home Page"),
       ),
       floatingActionButton: FloatingActionButton(
         key: ValueKey('add todo'),
@@ -17,7 +19,7 @@ class HomePage extends StatelessWidget {
         backgroundColor: Colors.orange,
         onPressed: () async {
           showDialog(
-              context: context, 
+              context: context,
               builder: (BuildContext context) {
                 return AlertDialog(
                   title: Text('wg'),
@@ -90,19 +92,26 @@ class HomePage extends StatelessWidget {
             ElevatedButton(
               onPressed: () {
                 log("details");
-                 Map<String,String> args = {
-                   'id':'32',
-                   'phone':'12442',
-                   'email':'aksdf@gmail.com',
-                 };
-                Router.of(context).routerDelegate.setNewRoutePath(RouteSettings(name: '/details',arguments: args));
+                Map<String, String> args = {
+                  'id': '32',
+                  'phone': '12442',
+                  'email': 'aksdf@gmail.com',
+                };
+                Router
+                    .of(context)
+                    .routerDelegate
+                    .setNewRoutePath(
+                    RouteSettings(name: '/details', arguments: args));
               },
               child: Text('Go to Details Page'),
             ),
             ElevatedButton(
               onPressed: () {
                 log("settings");
-                Router.of(context).routerDelegate.setNewRoutePath(RouteSettings(name: '/settings'));
+                Router
+                    .of(context)
+                    .routerDelegate
+                    .setNewRoutePath(RouteSettings(name: '/settings'));
               },
               child: Text('Go to Settings Page'),
             ),

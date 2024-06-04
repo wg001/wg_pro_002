@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:wg_pro_002/pages/home_page.dart';
 import 'package:wg_pro_002/pages/details_page.dart';
+import 'package:wg_pro_002/pages/main_page.dart';
 import 'package:wg_pro_002/pages/settings_page.dart';
 
 class AppRouterDelegate extends RouterDelegate<RouteSettings>
@@ -18,7 +19,7 @@ class AppRouterDelegate extends RouterDelegate<RouteSettings>
     return Navigator(
       key: navigatorKey,
       pages: [
-        MaterialPage(child: HomePage()),
+        MaterialPage(child: MainPage()),
         if (_currentRoute?.name == '/details')
           MaterialPage(
             child: DetailsPage(Params: _currentRoute?.arguments as Map<String,dynamic>?),
