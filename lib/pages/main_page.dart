@@ -1,13 +1,13 @@
-
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:wg_pro_002/common/app_colors.dart';
 import 'package:wg_pro_002/common/text_styles.dart';
 import 'package:wg_pro_002/common/font_size.dart';
 import 'package:wg_pro_002/pages/details_page.dart';
+import 'package:wg_pro_002/pages/forget_password_page.dart';
 import 'package:wg_pro_002/pages/home_page.dart';
 import 'package:wg_pro_002/pages/profil_page.dart';
-import 'package:wg_pro_002/utils/response_conf.dart';
+import 'package:wg_pro_002/common/response_conf.dart';
 
 class MainPage extends StatefulWidget {
   const MainPage({Key? key}) : super(key: key);
@@ -20,8 +20,8 @@ class _MainViewState extends State<MainPage> {
   final _pages = [
     const HomePage(),
     const DetailsPage(),
+    const ForgetPasswordPage(),
     const ProfilPage(),
-
   ];
   int _currentIndex = 0;
   @override
@@ -55,10 +55,9 @@ class _MainViewState extends State<MainPage> {
           type: BottomNavigationBarType.fixed,
           showUnselectedLabels: false,
           iconSize: getSize(24),
-          selectedItemColor: Pallete.orangePrimary,//Pallete.orangePrimary,
-          selectedLabelStyle: TextStyles.bodySmallMedium.copyWith(
-              fontSize: getFontSize(FontSizes.small)
-          ),
+          selectedItemColor: Pallete.orangePrimary, //Pallete.orangePrimary,
+          selectedLabelStyle: TextStyles.bodySmallMedium
+              .copyWith(fontSize: getFontSize(FontSizes.small)),
           unselectedItemColor: Pallete.neutral50,
           items: const [
             BottomNavigationBarItem(
@@ -69,8 +68,8 @@ class _MainViewState extends State<MainPage> {
               icon: Icon(Icons.shopping_bag),
               label: "Cart",
             ),
-            // BottomNavigationBarItem(
-            //     icon: Icon(CupertinoIcons.chat_bubble), label: "Messenger"),
+             BottomNavigationBarItem(
+                 icon: Icon(CupertinoIcons.chat_bubble), label: "Messenger"),
             BottomNavigationBarItem(icon: Icon(Icons.person), label: "Profil"),
           ],
           elevation: 0,
