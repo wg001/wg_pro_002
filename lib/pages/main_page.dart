@@ -10,13 +10,15 @@ import 'package:wg_pro_002/pages/profil_page.dart';
 import 'package:wg_pro_002/common/response_conf.dart';
 
 class MainPage extends StatefulWidget {
+  static const String sName = "main";
+
   const MainPage({Key? key}) : super(key: key);
 
   @override
-  State<MainPage> createState() => _MainViewState();
+  _HomePageState createState() => _HomePageState();
 }
 
-class _MainViewState extends State<MainPage> {
+class _HomePageState extends State<MainPage> {
   final _pages = [
     const HomePage(),
     const DetailsPage(),
@@ -68,8 +70,8 @@ class _MainViewState extends State<MainPage> {
               icon: Icon(Icons.shopping_bag),
               label: "Cart",
             ),
-             BottomNavigationBarItem(
-                 icon: Icon(CupertinoIcons.chat_bubble), label: "Messenger"),
+            BottomNavigationBarItem(
+                icon: Icon(CupertinoIcons.chat_bubble), label: "Messenger"),
             BottomNavigationBarItem(icon: Icon(Icons.person), label: "Profil"),
           ],
           elevation: 0,
