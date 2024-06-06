@@ -1,102 +1,206 @@
-import 'dart:math';
-
+import 'dart:async';
 import 'package:flutter/material.dart';
-import 'package:gap/gap.dart';
-import 'package:wg_pro_002/common/app_colors.dart';
-import 'package:wg_pro_002/common/response_conf.dart';
-import 'package:wg_pro_002/common/text_styles.dart';
-import 'package:wg_pro_002/pages/common_pages/default_button.dart';
-import 'package:wg_pro_002/pages/common_pages/default_field.dart';
-import 'package:wg_pro_002/utils/logger_util.dart';
+import 'package:fluttertoast/fluttertoast.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class LoginPage extends StatefulWidget {
   static const String sName = 'login';
-  const LoginPage({Key? key}) : super(key: key);
+  const LoginPage({super.key});
 
   @override
   _LoginPageState createState() => _LoginPageState();
 }
 
 class _LoginPageState extends State<LoginPage> {
-  final TextEditingController emailController = TextEditingController();
+  final TextEditingController phoneController = TextEditingController();
+  final TextEditingController validCodeController = TextEditingController();
+
+  bool isButtonDisabled = false;
+  int countdown = 60;
+  Timer? timer;
 
   @override
-  void dispose() {
-    emailController.dispose();
-    super.dispose();
+  void initState() {
+    super.initState();
+    _loadCountdown();
   }
 
-  bool isValidEmail(String email) {
-    return RegExp(r'^[a-zA-Z0-9.]+@[a-zA-Z0-9]+\.[a-zA-Z]+').hasMatch(email);
+  void startTimer() {
+    try {
+      setState(() {
+        isButtonDisabled = true;
+      });
+      timer = Timer.periodic(Duration(seconds: 1), (timer) {
+        try {
+          setState(() {
+            if (countdown > 0) {
+              countdown--;
+              _saveCountdown(countdown);
+            } else {
+              timer.cancel();
+              countdown = 60;
+              isButtonDisabled = false;
+              _saveCountdown(countdown);
+            }
+          });
+        } catch (e, stackTrace) {
+          print('Caught exception in Timer: $e');
+          print('Stack trace: $stackTrace');
+        }
+      });
+    } catch (e, stackTrace) {
+      print('Caught exception in startTimer: $e');
+      print('Stack trace: $stackTrace');
+    }
   }
 
-  void navigateToSettings() {
-    //LogUtils
-    LogUtils.logInfo(
-        "This is an informational message:${emailController.text}");
-    // (emailController.text)
-    if (isValidEmail(emailController.text)) {
-      Router.of(context)
-          .routerDelegate
-          .setNewRoutePath(RouteSettings(name: '/settings'));
-    } else {
-      showDialog(
-        context: context,
-        builder: (context) => AlertDialog(
-          title: Text('Invalid Email'),
-          content: Text('Please enter a valid email address.'),
-          actions: <Widget>[
-            TextButton(
-              onPressed: () {
-                Navigator.of(context).pop();
-              },
-              child: Text('OK'),
-            ),
-          ],
-        ),
-      );
+  Future<void> _loadCountdown() async {
+    try {
+      SharedPreferences prefs = await SharedPreferences.getInstance();
+      int? savedCountdown = prefs.getInt('countdown');
+      bool? savedIsButtonDisabled = prefs.getBool('isButtonDisabled');
+      if (savedCountdown != null && savedIsButtonDisabled != null) {
+        setState(() {
+          countdown = savedCountdown;
+          isButtonDisabled = savedIsButtonDisabled;
+          if (isButtonDisabled) {
+            startTimer();
+          }
+        });
+      }
+    } catch (e, stackTrace) {
+      print('Caught exception in _loadCountdown: $e');
+      print('Stack trace: $stackTrace');
+    }
+  }
+
+  Future<void> _saveCountdown(int countdown) async {
+    try {
+      SharedPreferences prefs = await SharedPreferences.getInstance();
+      await prefs.setInt('countdown', countdown);
+      await prefs.setBool('isButtonDisabled', isButtonDisabled);
+    } catch (e, stackTrace) {
+      print('Caught exception in _saveCountdown: $e');
+      print('Stack trace: $stackTrace');
     }
   }
 
   @override
-  Widget build(BuildContext context) {
-    MathUtils.init(context);
+  void dispose() {
+    phoneController.dispose();
+    validCodeController.dispose();
+    timer?.cancel();
+    super.dispose();
+  }
 
-    return Scaffold(
-      body: Padding(
-        padding: EdgeInsets.symmetric(horizontal: getWidth(24)).copyWith(
-          top: MediaQuery.of(context).viewPadding.top,
-        ),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            const Gap(32),
-            Text(
-              "Forgot password?",
-              style: TextStyles.headingH4SemiBold.copyWith(
-                  color: Pallete.neutral100, fontSize: getFontSize(32)),
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      behavior: HitTestBehavior.translucent,
+      onTap: () {
+        FocusScope.of(context).requestFocus(FocusNode());
+      },
+      child: Scaffold(
+        body: Container(
+          color: Colors.orange,
+          child: Center(
+            child: SingleChildScrollView(
+              child: Card(
+                elevation: 5.0,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.all(Radius.circular(10.0)),
+                ),
+                color: Colors.white,
+                margin: const EdgeInsets.only(left: 30, right: 30),
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  mainAxisSize: MainAxisSize.min,
+                  children: <Widget>[
+                    const Padding(padding: EdgeInsets.all(10.0)),
+                    TextField(
+                      controller: phoneController,
+                      decoration: const InputDecoration(
+                        hintText: "请输入用户名",
+                        icon: Icon(Icons.person),
+                      ),
+                    ),
+                    const Padding(padding: EdgeInsets.all(30.0)),
+                    Row(
+                      children: [
+                        Expanded(
+                          child: TextField(
+                            controller: validCodeController,
+                            obscureText: true,
+                            decoration: const InputDecoration(
+                              hintText: "请输入验证码",
+                              icon: Icon(Icons.lock),
+                            ),
+                          ),
+                        ),
+                        SizedBox(width: 10),
+                        ElevatedButton(
+                          onPressed: isButtonDisabled
+                              ? null
+                              : () {
+                                  Fluttertoast.showToast(
+                                    msg: '验证码已发送',
+                                    gravity: ToastGravity.CENTER,
+                                    toastLength: Toast.LENGTH_SHORT,
+                                  );
+                                  startTimer();
+                                },
+                          child: Text(isButtonDisabled ? '$countdown 秒' : '获取验证码'),
+                        ),
+                      ],
+                    ),
+                    const Padding(padding: EdgeInsets.all(15.0)),
+                    LayoutBuilder(
+                      builder: (context, constraints) {
+                        return SizedBox(
+                          height: 40,
+                          width: constraints.maxWidth * 0.6,
+                          child: TextButton(
+                            style: TextButton.styleFrom(
+                              textStyle: const TextStyle(color: Colors.orange),
+                              backgroundColor: Colors.orange,
+                            ),
+                            onPressed: loginIn,
+                            child: Text(
+                              "登陆",
+                              style: TextStyle(fontSize: 14, color: Colors.white),
+                              textAlign: TextAlign.center,
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                          ),
+                        );
+                      },
+                    ),
+                    const Padding(padding: EdgeInsets.all(15.0)),
+                  ],
+                ),
+              ),
             ),
-            const Gap(8),
-            Text(
-              "Enter your email address and we’ll send you confirmation code to reset your password",
-              style: TextStyles.bodyMediumMedium.copyWith(
-                  color: Pallete.neutral60, fontSize: getFontSize(14)),
-            ),
-            // const Gap(32),
-            DefaultField(
-              hintText: "Enter Email",
-              controller: emailController,
-              labelText: "Email Address",
-            ),
-            const Spacer(),
-            DefaultButton(
-              btnContent: "Continue",
-              function: navigateToSettings,
-            ),
-            const Gap(32),
-          ],
+          ),
         ),
       ),
     );
+  }
+
+  void loginIn() async {
+    try {
+      Fluttertoast.showToast(
+        msg: 'You are logging in...',
+        toastLength: Toast.LENGTH_LONG,
+        gravity: ToastGravity.CENTER,
+        timeInSecForIosWeb: 1,
+        backgroundColor: Colors.black,
+        textColor: Colors.white,
+        fontSize: 16.0,
+      );
+    } catch (e, stackTrace) {
+      print('Caught exception in loginIn: $e');
+      print('Stack trace: $stackTrace');
+    }
   }
 }

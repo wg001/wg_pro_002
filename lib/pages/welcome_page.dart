@@ -13,8 +13,6 @@ import 'package:wg_pro_002/widget/diff_scale_text.dart';
 import 'package:wg_pro_002/widget/mole_widget.dart';
 
 /// 欢迎页
-/// Created by guoshuyu
-/// Date: 2018-07-16
 
 class WelcomePage extends StatefulWidget {
   static const String sName = "/";
@@ -62,7 +60,7 @@ class _WelcomePageState extends State<WelcomePage> {
       //   }
       //   return true;
       // });
-      NavigatorUtils.goMainPage(context);
+      NavigatorUtils.goLogin(context);
     });
   }
 

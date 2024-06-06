@@ -43,6 +43,10 @@ dependencies:
   google_fonts: 4.0.4
   supercharged: 2.1.1
   simple_animations: 5.0.2
+  shared_preferences: 2.0.10
+  shared_preferences_web: ^2.0.0
+
+ 
 
 dev_dependencies:
   flutter_test:
