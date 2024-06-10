@@ -4,6 +4,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:wg_pro_002/pages/login_page.dart';
 import 'package:wg_pro_002/pages/main_page.dart';
+import 'package:wg_pro_002/pages/settings_page.dart';
 import 'package:wg_pro_002/widget/never_overscroll_indicator.dart';
 
 /// 导航栏
@@ -51,6 +52,10 @@ class NavigatorUtils {
     Navigator.pushReplacementNamed(context, LoginPage.sName);
   }
 
+  static goSetting(BuildContext context) {
+    Navigator.pushReplacementNamed(context, SettingsPage.sName);
+  }
+
   ///公共打开方式
   static NavigatorRouter(BuildContext context, Widget widget) {
     return Navigator.push(
@@ -93,4 +98,6 @@ class NavigatorUtils {
               ));
         });
   }
+
+  ///弹出 dialog
 }

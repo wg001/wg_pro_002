@@ -1,7 +1,10 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
+import 'package:flutter_redux/flutter_redux.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:wg_pro_002/redux/login_redux.dart';
+import 'package:wg_pro_002/redux/wg_state.dart';
 
 class LoginPage extends StatefulWidget {
   static const String sName = 'login';
@@ -11,7 +14,7 @@ class LoginPage extends StatefulWidget {
   _LoginPageState createState() => _LoginPageState();
 }
 
-class _LoginPageState extends State<LoginPage> {
+class _LoginPageState extends State<LoginPage> with LoginBLoC {
   final TextEditingController phoneController = TextEditingController();
   final TextEditingController validCodeController = TextEditingController();
 
@@ -149,7 +152,8 @@ class _LoginPageState extends State<LoginPage> {
                                   );
                                   startTimer();
                                 },
-                          child: Text(isButtonDisabled ? '$countdown 秒' : '获取验证码'),
+                          child:
+                              Text(isButtonDisabled ? '$countdown 秒' : '获取验证码'),
                         ),
                       ],
                     ),
@@ -167,7 +171,8 @@ class _LoginPageState extends State<LoginPage> {
                             onPressed: loginIn,
                             child: Text(
                               "登陆",
-                              style: TextStyle(fontSize: 14, color: Colors.white),
+                              style:
+                                  TextStyle(fontSize: 14, color: Colors.white),
                               textAlign: TextAlign.center,
                               maxLines: 1,
                               overflow: TextOverflow.ellipsis,
@@ -186,21 +191,64 @@ class _LoginPageState extends State<LoginPage> {
       ),
     );
   }
+}
 
-  void loginIn() async {
-    try {
-      Fluttertoast.showToast(
-        msg: 'You are logging in...',
-        toastLength: Toast.LENGTH_LONG,
-        gravity: ToastGravity.CENTER,
-        timeInSecForIosWeb: 1,
-        backgroundColor: Colors.black,
-        textColor: Colors.white,
-        fontSize: 16.0,
-      );
-    } catch (e, stackTrace) {
-      print('Caught exception in loginIn: $e');
-      print('Stack trace: $stackTrace');
+mixin LoginBLoC on State<LoginPage> {
+  final TextEditingController phoneController = TextEditingController();
+
+  final TextEditingController validCodeController = TextEditingController();
+
+  String? _phone = "";
+
+  String? _validcode = "";
+
+  @override
+  void initState() {
+    super.initState();
+    _initState();
+    phoneController.addListener(_phoneChange);
+    validCodeController.addListener(_validcodeChange);
+  }
+
+  @override
+  void dispose() {
+    super.dispose();
+    phoneController.removeListener(_phoneChange);
+    validCodeController.removeListener(_validcodeChange);
+  }
+
+  _phoneChange() {
+    _phone = phoneController.text;
+  }
+
+  _validcodeChange() {
+    _validcode = validCodeController.text;
+  }
+
+  _initState() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    String? _phone = prefs.getString("phone");
+    String? _validcode = prefs.getString("validcode");
+    // _phone = await (prefs.get("phone") as Future<String?>);
+    // _validcode = await (prefs.get("validcode") as Future<String?>);
+    phoneController.value = TextEditingValue(text: _phone ?? "");
+    validCodeController.value = TextEditingValue(text: _validcode ?? "");
+  }
+
+  loginIn() async {
+    if (_phone == null || _phone!.isEmpty) {
+      return;
     }
+    if (_validcode == null || _validcode!.isEmpty) {
+      return;
+    }
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    await prefs.setString("validcode", _validcode!);
+    await prefs.setString("phone", _phone!);
+    print("dodo action");
+
+    ///通过 redux 去执行登陆流程
+    StoreProvider.of<WGState>(context)
+        .dispatch(LoginAction(context, _phone, _validcode));
   }
 }

@@ -1,5 +1,6 @@
 import 'package:wg_pro_002/app/model/User.dart';
 import 'package:wg_pro_002/redux/login_redux.dart';
+import 'package:wg_pro_002/redux/middleware/epic_middleware.dart';
 import 'package:wg_pro_002/redux/user_redux.dart';
 import 'package:redux/redux.dart';
 
@@ -20,5 +21,5 @@ WGState appReducer(WGState state, action) {
 }
 
 final List<Middleware<WGState>> middleware = [
-  LoginMiddleware(),
+  EpicMiddleware<WGState>(loginEpic),
 ];

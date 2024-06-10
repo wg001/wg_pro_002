@@ -8,6 +8,7 @@ import 'package:redux/redux.dart';
 import 'package:wg_pro_002/app/model/User.dart';
 import 'package:wg_pro_002/pages/login_page.dart';
 import 'package:wg_pro_002/pages/main_page.dart';
+import 'package:wg_pro_002/pages/settings_page.dart';
 import 'package:wg_pro_002/pages/welcome_page.dart';
 import 'package:wg_pro_002/redux/wg_state.dart';
 import 'package:wg_pro_002/utils/navigator_utils.dart';
@@ -59,6 +60,10 @@ class _FlutterReduxAppState extends State<FlutterReduxApp>
               },
               LoginPage.sName: (context) {
                 return NavigatorUtils.pageContainer(const LoginPage(), context);
+              },
+              SettingsPage.sName: (context) {
+                return NavigatorUtils.pageContainer(
+                    const SettingsPage(), context);
               },
             });
 
