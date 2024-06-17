@@ -8,6 +8,7 @@ import 'package:wg_pro_002/common/text_styles.dart';
 import 'package:wg_pro_002/pages/common_pages/default_button.dart';
 import 'package:wg_pro_002/pages/common_pages/default_field.dart';
 import 'package:wg_pro_002/utils/logger_util.dart';
+import 'package:wg_pro_002/utils/navigator_utils.dart';
 
 class ForgetPasswordPage extends StatefulWidget {
   const ForgetPasswordPage({Key? key}) : super(key: key);
@@ -31,13 +32,11 @@ class _ForgetPasswordPageState extends State<ForgetPasswordPage> {
 
   void navigateToSettings() {
     //LogUtils
-    LogUtils.logInfo("This is an informational message:${emailController.text}");
+    LogUtils.logInfo(
+        "This is an informational message:${emailController.text}");
     // (emailController.text)
     if (isValidEmail(emailController.text)) {
-       Router
-                    .of(context)
-                    .routerDelegate
-                    .setNewRoutePath(RouteSettings(name: '/settings'));
+      NavigatorUtils.goSetting(context);
     } else {
       showDialog(
         context: context,

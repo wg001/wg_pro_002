@@ -72,7 +72,7 @@ class _HomePageState extends State<MainPage> {
             ),
             BottomNavigationBarItem(
                 icon: Icon(CupertinoIcons.chat_bubble), label: "Messenger"),
-            BottomNavigationBarItem(icon: Icon(Icons.person), label: "Profil"),
+            BottomNavigationBarItem(icon: Icon(Icons.people), label: "Profil"),
           ],
           elevation: 0,
         ),

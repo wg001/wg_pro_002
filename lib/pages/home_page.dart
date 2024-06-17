@@ -50,6 +50,32 @@ class HomePage extends StatelessWidget {
             children: <Widget>[
               SizedBox(
                   // height: 0.4 * MediaQuery.of(context).size.height,
+                  height: screenHeight * 0.1,
+                  child: Card(
+                    child: Column(
+                      children: <Widget>[
+                        Row(
+                          children: <Widget>[
+                            ListTile(
+                              leading:
+                                  Icon(Icons.bug_report, color: Colors.black),
+                              title: Text(
+                                "Report an Issue",
+                                key: ValueKey(''),
+                              ),
+                              subtitle: Text(
+                                "Having an issue ? Report it here",
+                                key: ValueKey(''),
+                              ),
+                              //onTap: () => launchURL(ISSUE_URL)),
+                            ),
+                          ],
+                        )
+                      ],
+                    ),
+                  )),
+              SizedBox(
+                  // height: 0.4 * MediaQuery.of(context).size.height,
                   height: screenHeight * 0.4,
                   child: Card(
                     child: Column(

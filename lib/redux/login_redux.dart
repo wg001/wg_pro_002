@@ -16,7 +16,7 @@ final LoginReducer = combineReducers<bool?>([
 bool? _loginResult(bool? result, LoginSuccessAction action) {
   if (action.success == true) {
     print("login successfully");
-    NavigatorUtils.goSetting(action.context);
+    NavigatorUtils.goMainPage(action.context);
   }
   return action.success;
 }

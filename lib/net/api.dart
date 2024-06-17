@@ -2,7 +2,11 @@ import 'dart:collection';
 
 import 'package:dio/dio.dart';
 import 'package:wg_pro_002/net/code.dart';
+import 'package:wg_pro_002/net/interceptors/error_interceptor.dart';
+import 'package:wg_pro_002/net/interceptors/header_interceptor.dart';
+import 'package:wg_pro_002/net/interceptors/response_interceptor.dart';
 import 'package:wg_pro_002/net/interceptors/token_interceptor.dart';
+import 'package:wg_pro_002/net/interceptors/log_interceptor.dart';
 import 'package:wg_pro_002/net/result_data.dart';
 
 class HttpManager {
@@ -12,7 +16,11 @@ class HttpManager {
   final TokenInterceptor _tokenInterceptors = TokenInterceptor();
 
   HttpManager() {
+    _dio.interceptors.add(HeaderInterceptor());
     _dio.interceptors.add(_tokenInterceptors);
+    _dio.interceptors.add(WGLogInterceptor());
+    _dio.interceptors.add(ErrorInterceptor());
+    _dio.interceptors.add(ResponseInterceptor());
   }
 
   Future<ResultData?> netFetch(
@@ -58,3 +66,5 @@ class HttpManager {
     return response.data;
   }
 }
+
+final HttpManager httpManager = HttpManager();

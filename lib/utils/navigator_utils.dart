@@ -53,7 +53,8 @@ class NavigatorUtils {
   }
 
   static goSetting(BuildContext context) {
-    Navigator.pushReplacementNamed(context, SettingsPage.sName);
+    // Navigator.pushReplacementNamed(context, SettingsPage.sName);
+    Navigator.pushNamed(context, SettingsPage.sName);
   }
 
   ///公共打开方式

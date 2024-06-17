@@ -8,7 +8,9 @@ class SettingsPage extends StatefulWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text("Settings Page")),
+      appBar: AppBar(
+        title: Text('Setting Page'),
+      ),
       body: Center(
         child: Text("Welcome to the Settings Page!"),
       ),

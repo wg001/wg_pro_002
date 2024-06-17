@@ -60,7 +60,7 @@ class _WelcomePageState extends State<WelcomePage> {
       //   }
       //   return true;
       // });
-      NavigatorUtils.goLogin(context);
+      NavigatorUtils.goMainPage(context);
     });
   }
 
