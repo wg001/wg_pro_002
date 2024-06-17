@@ -28,6 +28,7 @@ class HttpManager {
       {noTip = false}) async {
     Map<String, dynamic> headers = HashMap();
     if (header != null) {
+      if (!header.containsKey('Access-Control-Allow-Origin')) {}
       headers.addAll(header);
     } else {
       option = Options(method: "get");

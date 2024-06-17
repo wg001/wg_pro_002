@@ -17,7 +17,11 @@ class WGLogInterceptor extends InterceptorsWrapper {
       if (kDebugMode) {
         print("请求url：${options.path} ${options.method}");
       }
-      options.headers.forEach((k, v) => options.headers[k] = v ?? "");
+      //  options.headers.forEach((k, v) => options.headers[k] = v ?? "");
+      Map<String, dynamic> modifiedHeaders = {};
+      options.headers.forEach((k, v) => modifiedHeaders[k] = v ?? "");
+      options.headers = modifiedHeaders;
+
       if (kDebugMode) {
         print('请求头: ${options.headers}');
       }

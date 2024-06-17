@@ -30,7 +30,10 @@ class UserDao {
         print(resMap["ret"]);
 
         // Process the returned data
-        resultData = resMap["ret"];
+        if(resMap["ret"] is Map && resMap['ret'].containsKey('token')){
+
+        }
+
         return DataResult(resultData, true);
       }
     } catch (e) {

@@ -2,8 +2,9 @@ import 'dart:developer';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'dart:io';
-
 import 'package:flutter/widgets.dart';
+import 'package:wg_pro_002/utils/logger_util.dart';
+import 'package:wg_pro_002/utils/navigator_utils.dart';
 
 class HomePage extends StatelessWidget {
   const HomePage({super.key});
@@ -49,56 +50,40 @@ class HomePage extends StatelessWidget {
           child: ListView(
             children: <Widget>[
               SizedBox(
-                  // height: 0.4 * MediaQuery.of(context).size.height,
-                  height: screenHeight * 0.1,
-                  child: Card(
-                    child: Column(
-                      children: <Widget>[
-                        Row(
-                          children: <Widget>[
-                            ListTile(
-                              leading:
-                                  Icon(Icons.bug_report, color: Colors.black),
-                              title: Text(
-                                "Report an Issue",
-                                key: ValueKey(''),
-                              ),
-                              subtitle: Text(
-                                "Having an issue ? Report it here",
-                                key: ValueKey(''),
-                              ),
-                              //onTap: () => launchURL(ISSUE_URL)),
-                            ),
-                          ],
-                        )
-                      ],
+                height: screenHeight * 0.1,
+                child: Card(
+                  child: ListTile(
+                    leading: Icon(Icons.bug_report, color: Colors.black),
+                    title: Text("Report an Issue"),
+                    subtitle: Text("Having an issue? Report it here"),
+                    trailing: ElevatedButton(
+                      onPressed: ()=>navigateToLogin(context),
+                      child: Text('Login'),
                     ),
-                  )),
+                  ),
+                ),
+              ),
               SizedBox(
-                  // height: 0.4 * MediaQuery.of(context).size.height,
-                  height: screenHeight * 0.4,
-                  child: Card(
-                    child: Column(
-                      children: <Widget>[
-                        ListTile(
-                          leading: Icon(Icons.bug_report, color: Colors.black),
-                          title: Text(
-                            "Report an Issue",
-                            key: ValueKey(''),
-                          ),
-                          subtitle: Text(
-                            "Having an issue ? Report it here",
-                            key: ValueKey(''),
-                          ),
-                          //onTap: () => launchURL(ISSUE_URL)),
-                        )
-                      ],
-                    ),
-                  ))
+                height: screenHeight * 0.4,
+                child: Card(
+                  child: ListTile(
+                    leading: Icon(Icons.bug_report, color: Colors.black),
+                    title: Text("Report an Issue"),
+                    subtitle: Text("Having an issue? Report it here"),
+                  ),
+                ),
+              ),
             ],
           ),
         ),
       ),
     );
+  }
+
+  void navigateToLogin(context) {
+    //LogUtils
+    LogUtils.logInfo("This is an informational message:。。。");
+    // (emailController.text)
+    NavigatorUtils.goLogin(context);
   }
 }
