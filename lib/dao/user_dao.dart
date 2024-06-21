@@ -3,7 +3,9 @@ import 'dart:convert';
 import 'package:dio/dio.dart';
 import 'package:flutter/foundation.dart';
 import 'package:logger/logger.dart';
+import 'package:wg_pro_002/config/config.dart';
 import 'package:wg_pro_002/dao/dao_result.dart';
+import 'package:wg_pro_002/local/local_storage.dart';
 import 'package:wg_pro_002/net/address.dart';
 import 'package:wg_pro_002/net/api.dart';
 import 'package:wg_pro_002/net/result_data.dart';
@@ -31,7 +33,7 @@ class UserDao {
 
         // Process the returned data
         if(resMap["ret"] is Map && resMap['ret'].containsKey('token')){
-
+            await LocalStorage.save(Config.TOKEN_KEY,resMap['ret']['token']);
         }
 
         return DataResult(resultData, true);

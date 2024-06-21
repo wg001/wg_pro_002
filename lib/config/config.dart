@@ -1,8 +1,6 @@
 class Config {
   static bool? DEBUG = true;
 
-
-
   static const PAGE_SIZE = 20;
 
   /// //////////////////////////////////////常量////////////////////////////////////// ///
@@ -17,4 +15,24 @@ class Config {
   static const REFRESH_LANGUAGE = "refreshLanguageApp";
   static const THEME_COLOR = "theme-color";
   static const LOCALE = "locale";
+
+  static const APP_NAME_KEY = 'app-name';
+  static const APP_VERSION_KEY = 'app-version';
+  static const API_VERSION_KEY = 'api-version';
+
+  String appName = "Prima Loan";
+  String clientVersion = "1.9.9";
+  String apiVersion = "1.5";
+
+  void setAppName(String name) {
+    appName = name;
+  }
+
+  static final Config _singleton = Config._internal();
+
+  factory Config() {
+    return _singleton;
+  }
+
+  Config._internal();
 }

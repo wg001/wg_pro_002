@@ -14,18 +14,3 @@ void main() {
   ));
 }
 
-// class MyApp extends StatelessWidget {
-//   final _appRouterDelegate = AppRouterDelegate();
-//   final _appRouteInformationParser = AppRouteInformationParser();
-
-//   @override
-//   Widget build(BuildContext context) {
-//     return MaterialApp.router(
-//       title: 'Flutter Demo',
-//       routerDelegate: _appRouterDelegate,
-//       routeInformationParser: _appRouteInformationParser,
-//       debugShowCheckedModeBanner: false,
-//     );
-//   }
-// }
-
