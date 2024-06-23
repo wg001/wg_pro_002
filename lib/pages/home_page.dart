@@ -5,6 +5,8 @@ import 'dart:io';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_redux/flutter_redux.dart';
 import 'package:redux/redux.dart';
+import 'package:wg_pro_002/pages/home/home_page_logged_in.dart';
+import 'package:wg_pro_002/pages/home/home_page_logged_out.dart';
 import 'package:wg_pro_002/redux/wg_state.dart';
 import 'package:wg_pro_002/utils/logger_util.dart';
 import 'package:wg_pro_002/utils/navigator_utils.dart';
@@ -17,7 +19,7 @@ class HomePage extends StatelessWidget {
     final screenHeight = MediaQuery.of(context).size.height;
     //  Store<WGState> store = StoreProvider.of(context);
     Store<WGState> store = StoreProvider.of(context);
-   bool? isLoggedIn = store.state.login??false;
+    bool? isLoggedIn = store.state.login ?? false;
     return Scaffold(
       appBar: AppBar(
         title: Text("Home Page"),
@@ -50,39 +52,15 @@ class HomePage extends StatelessWidget {
         },
       ),
       body: Container(
-        color: Colors.orange,
-        child: Padding(
-          padding: const EdgeInsets.all(8.0),
-          child: ListView(
-            children: <Widget>[
-              SizedBox(
-                height: screenHeight * 0.1,
-                child: Card(
-                  child: ListTile(
-                    leading: Icon(Icons.bug_report, color: Colors.black),
-                    title: Text("Report an Issue"),
-                    subtitle: Text("Having an issue? Report it here"),
-                   trailing: !isLoggedIn?ElevatedButton(
-                      onPressed: () => navigateToLogin(context),
-                      child: Text('Login'),
-                    ):null,
-                  ),
-                ),
-              ),
-              SizedBox(
-                height: screenHeight * 0.4,
-                child: Card(
-                  child: ListTile(
-                    leading: Icon(Icons.bug_report, color: Colors.black),
-                    title: Text("Report an Issue"),
-                    subtitle: Text("Having an issue? Report it here"),
-                  ),
-                ),
-              ),
-            ],
-          ),
-        ),
-      ),
+          color: Colors.orange,
+          child: Padding(
+            padding: const EdgeInsets.all(8.0),
+            child: Center(
+              child: isLoggedIn
+                  ? HomePageLoggedIn() // Assuming this is a custom widget for logged-in users
+                  : HomePageLoggedOut(), // And this one for logged-out users
+            ),
+          )),
     );
   }
 

@@ -24,6 +24,7 @@ class WGLogInterceptor extends InterceptorsWrapper {
 
       if (kDebugMode) {
         print('请求头: ${options.headers}');
+        print('请求方法: ${options.method}');
       }
       if (options.data != null) {
         if (kDebugMode) {

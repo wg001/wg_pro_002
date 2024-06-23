@@ -4,4 +4,8 @@ class Address {
   static getLogin() {
     return "${host}/philippines_loan/user/login";
   }
+
+  static getPageIndex() {
+    return "${host}/philippines_loan/user/get_user_info";
+  }
 }

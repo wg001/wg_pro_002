@@ -23,15 +23,17 @@ class HttpManager {
     _dio.interceptors.add(ResponseInterceptor());
   }
 
-  Future<ResultData?> netFetch(
-      url, params, Map<String, dynamic>? header, Options? option,
-      {noTip = false}) async {
+  Future<ResultData?> netFetch(url,
+      {params,
+      Map<String, dynamic>? header,
+      Options? option,
+      noTip = false}) async {
     Map<String, dynamic> headers = HashMap();
     if (header != null) {
       if (!header.containsKey('Access-Control-Allow-Origin')) {}
       headers.addAll(header);
     } else {
-      option = Options(method: "get");
+      option = Options(method: "POST");
       option.headers = headers;
     }
 
