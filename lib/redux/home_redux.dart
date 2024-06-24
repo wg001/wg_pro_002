@@ -9,22 +9,27 @@ import 'package:wg_pro_002/utils/common_utils.dart';
 
 import 'middleware/epic_store.dart';
 
-final homePageDataReducer = combineReducers<HomeRet>([
+final homePageDataReducer = combineReducers<HomeRet?>([
   TypedReducer<HomeRet?, FetchHomePageDataAction>(_startFetchHomePageData),
-  TypedReducer<HomeRet?, FetchHomePageDataSuccessAction>(_fetchHomePageDataSuccess),
-  TypedReducer<HomeRet?, FetchHomePageDataFailureAction>(_fetchHomePageDataFailure),
+  TypedReducer<HomeRet?, FetchHomePageDataSuccessAction>(
+      _fetchHomePageDataSuccess),
+  TypedReducer<HomeRet?, FetchHomePageDataFailureAction>(
+      _fetchHomePageDataFailure),
 ]);
 
-HomeRet? _startFetchHomePageData(HomeRet state, FetchHomePageDataAction action) {
+HomeRet? _startFetchHomePageData(
+    HomeRet? state, FetchHomePageDataAction action) {
   // 返回当前状态，因为 FetchHomePageDataAction 不会改变 homePageData
   return state;
 }
 
-HomeRet? _fetchHomePageDataSuccess(HomeRet state, FetchHomePageDataSuccessAction action) {
+HomeRet? _fetchHomePageDataSuccess(
+    HomeRet? state, FetchHomePageDataSuccessAction action) {
   return action.data;
 }
 
-HomeRet? _fetchHomePageDataFailure(HomeRet state, FetchHomePageDataFailureAction action) {
+HomeRet? _fetchHomePageDataFailure(
+    HomeRet? state, FetchHomePageDataFailureAction action) {
   // 返回当前状态，因为 FetchHomePageDataFailureAction 不会改变 homePageData
   return state;
 }
@@ -33,7 +38,8 @@ final lastFetchTimeReducer = combineReducers<DateTime?>([
   TypedReducer<DateTime?, FetchHomePageDataSuccessAction>(_updateLastFetchTime),
 ]);
 
-DateTime? _updateLastFetchTime(DateTime? state, FetchHomePageDataSuccessAction action) {
+DateTime? _updateLastFetchTime(
+    DateTime? state, FetchHomePageDataSuccessAction action) {
   return action.timestamp;
 }
 
@@ -51,34 +57,35 @@ bool _resetForceUpdate(bool state, dynamic action) {
   return false;
 }
 
-WGState homePageReducer(WGState state, dynamic action) {
-  if (action is FetchHomePageDataAction) {
-    return WGState(
-        userInfo: state.userInfo,
-        login: state.login,
-        forceUpdate: false,
-        lastFetchTime: state.lastFetchTime,
-        homePageData: state.homePageData);
-  } else if (action is FetchHomePageDataSuccessAction) {
-    return WGState(
-      homePageData: action.data,
-      lastFetchTime: action.timestamp,
-      forceUpdate: false,
-      userInfo: state.userInfo,
-      login: state.login,
-    );
-  } else if (action is FetchHomePageDataFailureAction) {
-    return WGState(
-      homePageData: state.homePageData,
-      lastFetchTime: state.lastFetchTime,
-      forceUpdate: true,
-      userInfo: state.userInfo,
-      login: state.login,
-    );
-  }
+// WGState homePageReducer(WGState state, dynamic action) {
+//   if (action is FetchHomePageDataAction) {
+//     return WGState(
+//         userInfo: state.userInfo,
+//         login: state.login,
+//         forceUpdate: false,
+//         lastFetchTime: state.lastFetchTime,
+//         homePageData: state.homePageData);
+//   } else if (action is FetchHomePageDataSuccessAction) {
+//     return WGState(
+//       homePageData: action.data,
+//       lastFetchTime: action.timestamp,
+//       forceUpdate: false,
+//       userInfo: state.userInfo,
+//       login: state.login,
+//     );
+//   } else if (action is FetchHomePageDataFailureAction) {
+//     return WGState(
+//       homePageData: state.homePageData,
+//       lastFetchTime: state.lastFetchTime,
+//       forceUpdate: true,
+//       userInfo: state.userInfo,
+//       login: state.login,
+//     );
+//   }
 
-  return state;
-}
+//   return state;
+// }
+
 class FetchHomePageDataAction {}
 
 class FetchHomePageDataSuccessAction {
@@ -96,21 +103,26 @@ class FetchHomePageDataFailureAction {
 
 class ForceFetchHomePageDataAction {}
 
-void homePageMiddleware(Store<WGState> store, dynamic action, NextDispatcher next) async {
-  if (action is FetchHomePageDataAction || action is ForceFetchHomePageDataAction) {
+void homePageMiddleware(
+    Store<WGState> store, dynamic action, NextDispatcher next) async {
+  if (action is FetchHomePageDataAction ||
+      action is ForceFetchHomePageDataAction) {
     final now = DateTime.now();
     final lastFetchTime = store.state.lastFetchTime;
     final threshold = Duration(minutes: 10); // 设置更新间隔
 
     // 检查是否需要更新数据
-    if (store.state.forceUpdate || lastFetchTime == null || now.difference(lastFetchTime) > threshold) {
+    if (store.state.forceUpdate ||
+        lastFetchTime == null ||
+        now.difference(lastFetchTime) > threshold) {
       try {
         DataResult dataResult = await LoanDao.getPageIndex();
-       
+
         if (dataResult.result) {
           store.dispatch(FetchHomePageDataSuccessAction(dataResult.data, now));
         } else {
-          store.dispatch(FetchHomePageDataFailureAction('Failed to fetch data'));
+          store
+              .dispatch(FetchHomePageDataFailureAction('Failed to fetch data'));
         }
       } catch (e) {
         store.dispatch(FetchHomePageDataFailureAction(e.toString()));
@@ -120,4 +132,3 @@ void homePageMiddleware(Store<WGState> store, dynamic action, NextDispatcher nex
 
   next(action);
 }
-

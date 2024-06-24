@@ -1,7 +1,12 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_redux/flutter_redux.dart';
+import 'package:fluttertoast/fluttertoast.dart';
+import 'package:wg_pro_002/app/model/Home.dart';
 import 'package:wg_pro_002/common/response_conf.dart';
 import 'package:wg_pro_002/dao/loan_dao.dart';
+import 'package:wg_pro_002/redux/home_redux.dart';
+import 'package:wg_pro_002/redux/wg_state.dart';
 
 class HomePageLoggedIn extends StatefulWidget {
   const HomePageLoggedIn({Key? key}) : super(key: key);
@@ -11,61 +16,62 @@ class HomePageLoggedIn extends StatefulWidget {
 }
 
 class _HomePageLoggedInState extends State<HomePageLoggedIn> {
-  bool isLoading = false;
-  String? welcomeMessage;
-  List<Issue>? issues;
-  dynamic? Ret;
-
   @override
   void initState() {
     super.initState();
-    isLoading = true; // Set loading to true before starting the fetch.
-    fetchInitialData();
+    // // 在组件初始化时触发异步操作
+    // StoreProvider.of<WGState>(context).dispatch(FetchHomePageDataAction());
   }
 
-  Future<void> fetchInitialData() async {
-    try {
-      var result = await LoanDao.getPageIndex();
-      setState(() {
-        Ret = result.data;
-        isLoading = false;
-      });
-      print("Data Retrieved: ${Ret['user_base_info']['phone']}");
-    } catch (e) {
-      setState(() {
-        isLoading =
-            false; // Ensures the loading state is updated even on failure.
-      });
-      print("Error fetching data: $e");
-    }
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    // 在 didChangeDependencies 中触发异步操作
+    StoreProvider.of<WGState>(context).dispatch(FetchHomePageDataAction());
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: isLoading
-          ? Center(child: CircularProgressIndicator())
-          : ListView(
-              children: <Widget>[
-                SizedBox(
-                    height: MathUtils.screenHeight * 0.1,
-                    child: Card(
-                      child: ListTile(
-                        leading: Icon(Icons.bug_report, color: Colors.black),
-                        title: Text(welcomeMessage ?? "Default Welcome"),
-                        subtitle: Text(
-                            "Welcome ${Ret?['user_base_info']?['phone'] ?? 'Guest'}!!!"),
-                      ),
-                    )) // Additional UI elements here
-              ],
-            ),
+      body: StoreConnector<WGState, HomeRet?>(
+        converter: (store) => store.state.homePageData,
+        builder: (context, homePageData) {
+          if (homePageData == null) {
+            return Center(child: CircularProgressIndicator());
+          }
+          return HomePageContent(homePageData: homePageData);
+        },
+      ),
     );
   }
 }
 
-class Issue {
-  final String title;
-  final String description;
+class HomePageContent extends StatelessWidget {
+  final HomeRet homePageData;
 
-  Issue(this.title, this.description);
+  HomePageContent({required this.homePageData});
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+        color: Colors.orange, // 确保 Card 背景颜色为透明
+        child: ListView(
+          children: <Widget>[
+            Card(
+                elevation: 0, // 移除 Card 阴影
+                child: ListTile(
+                  leading: Icon(Icons.business, color: Colors.black),
+                  title:
+                      Text("Welcome Sir:${homePageData.userBaseInfo?.phone}"),
+                  subtitle: Text(
+                      "Find out more about our company. ${homePageData.userLoanInfo.remindTip}"),
+                  trailing: ElevatedButton(
+                    onPressed: () => Fluttertoast.showToast(msg: "hello"),
+                    child: Text('LoginOut'),
+                  ),
+                ))
+            // 其他内容
+          ],
+        ));
+  }
 }

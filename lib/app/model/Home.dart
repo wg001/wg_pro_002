@@ -17,18 +17,20 @@ class RewardBox {
     this.showRewardBox,
   });
 
-  factory RewardBox.fromJson(Map<String, dynamic> json) => _$RewardBoxFromJson(json);
+  factory RewardBox.fromJson(Map<String, dynamic> json) =>
+      _$RewardBoxFromJson(json);
   Map<String, dynamic> toJson() => _$RewardBoxToJson(this);
 }
 
 @JsonSerializable()
 class UserBaseInfo {
   final String? slogen;
-  final String phone;
+  final String? phone;
 
-  UserBaseInfo({this.slogen, required this.phone});
+  UserBaseInfo({this.slogen, this.phone});
 
-  factory UserBaseInfo.fromJson(Map<String, dynamic> json) => _$UserBaseInfoFromJson(json);
+  factory UserBaseInfo.fromJson(Map<String, dynamic> json) =>
+      _$UserBaseInfoFromJson(json);
   Map<String, dynamic> toJson() => _$UserBaseInfoToJson(this);
 }
 
@@ -73,7 +75,8 @@ class UserLoanInfo {
     this.deviceInfoCompleted,
   });
 
-  factory UserLoanInfo.fromJson(Map<String, dynamic> json) => _$UserLoanInfoFromJson(json);
+  factory UserLoanInfo.fromJson(Map<String, dynamic> json) =>
+      _$UserLoanInfoFromJson(json);
   Map<String, dynamic> toJson() => _$UserLoanInfoToJson(this);
 }
 
@@ -84,7 +87,8 @@ class ModalInfo {
 
   ModalInfo({this.image, this.link});
 
-  factory ModalInfo.fromJson(Map<String, dynamic> json) => _$ModalInfoFromJson(json);
+  factory ModalInfo.fromJson(Map<String, dynamic> json) =>
+      _$ModalInfoFromJson(json);
   Map<String, dynamic> toJson() => _$ModalInfoToJson(this);
 }
 
@@ -105,7 +109,8 @@ class HistoryApp {
     this.status,
   });
 
-  factory HistoryApp.fromJson(Map<String, dynamic> json) => _$HistoryAppFromJson(json);
+  factory HistoryApp.fromJson(Map<String, dynamic> json) =>
+      _$HistoryAppFromJson(json);
   Map<String, dynamic> toJson() => _$HistoryAppToJson(this);
 }
 
@@ -114,39 +119,39 @@ class HomeRet {
   @JsonKey(name: 'reward_box')
   final RewardBox? rewardBox;
   @JsonKey(name: 'user_base_info')
-  final UserBaseInfo userBaseInfo;
+  final UserBaseInfo? userBaseInfo;
   @JsonKey(name: 'user_loan_info')
   final UserLoanInfo userLoanInfo;
-  final bool displayRecommendList;
-  final bool needLocation;
-  final bool picturePageDisplay;
-  final String feedbackSwitch;
-  final String isNewGuest;
-  final String phoneLocked;
-  final String phoneLockedToastMsg;
-  final String refreshFailedOrder;
+  final bool? displayRecommendList;
+  final bool? needLocation;
+  final bool? picturePageDisplay;
+  final String? feedbackSwitch;
+  final String? isNewGuest;
+  final String? phoneLocked;
+  final String? phoneLockedToastMsg;
+  final String? refreshFailedOrder;
   final ModalInfo? modalInfo;
-  final String userLostContact;
+  final String? userLostContact;
   final List<HistoryApp>? historyApp;
-  final String canApply;
-  final String uploadSms;
-  final bool additionalTips;
-  final String privacyPolicy;
-  final String manupPrivacyPolicy;
-  final String manupServiceAgreement;
-  final String manupWelcome;
-  final String uploadPop;
-  final String updateGooglePlay;
-  final String guestPhone;
+  final String? canApply;
+  final String? uploadSms;
+  final bool? additionalTips;
+  final String? privacyPolicy;
+  final String? manupPrivacyPolicy;
+  final String? manupServiceAgreement;
+  final String? manupWelcome;
+  final String? uploadPop;
+  final String? updateGooglePlay;
+  final String? guestPhone;
   final List<String>? guestPhoneV1;
-  final String customerService;
-  final String fbAccount;
-  final String harasseReportEmail;
-  final String permissionStatementSwitch;
-  final bool kratos;
+  final String? customerService;
+  final String? fbAccount;
+  final String? harasseReportEmail;
+  final String? permissionStatementSwitch;
+  final bool? kratos;
   final String? lastOrderInfo;
-  final String kratosSwitch;
-  final String productCharacteristics;
+  final String? kratosSwitch;
+  final String? productCharacteristics;
 
   HomeRet({
     this.rewardBox,
@@ -155,36 +160,36 @@ class HomeRet {
     this.displayRecommendList = false,
     this.needLocation = false,
     this.picturePageDisplay = false,
-    required this.feedbackSwitch,
-    required this.isNewGuest,
-    required this.phoneLocked,
-    required this.phoneLockedToastMsg,
-    required this.refreshFailedOrder,
+    this.feedbackSwitch,
+    this.isNewGuest,
+    this.phoneLocked,
+    this.phoneLockedToastMsg,
+    this.refreshFailedOrder,
     this.modalInfo,
-    required this.userLostContact,
+    this.userLostContact,
     this.historyApp,
-    required this.canApply,
-    required this.uploadSms,
+    this.canApply,
+    this.uploadSms,
     this.additionalTips = false,
-    required this.privacyPolicy,
-    required this.manupPrivacyPolicy,
-    required this.manupServiceAgreement,
-    required this.manupWelcome,
-    required this.uploadPop,
-    required this.updateGooglePlay,
-    required this.guestPhone,
+    this.privacyPolicy,
+    this.manupPrivacyPolicy,
+    this.manupServiceAgreement,
+    this.manupWelcome,
+    this.uploadPop,
+    this.updateGooglePlay,
+    this.guestPhone,
     this.guestPhoneV1,
-    required this.customerService,
-    required this.fbAccount,
-    required this.harasseReportEmail,
-    required this.permissionStatementSwitch,
-    required this.kratos,
+    this.customerService,
+    this.fbAccount,
+    this.harasseReportEmail,
+    this.permissionStatementSwitch,
+    this.kratos,
     this.lastOrderInfo,
-    required this.kratosSwitch,
-    required this.productCharacteristics,
+    this.kratosSwitch,
+    this.productCharacteristics,
   });
 
- factory HomeRet.fromJson(Map<String, dynamic> json) => _$HomeRetFromJson(json);
+  factory HomeRet.fromJson(Map<String, dynamic> json) =>
+      _$HomeRetFromJson(json);
   Map<String, dynamic> toJson() => _$HomeRetToJson(this);
 }
-

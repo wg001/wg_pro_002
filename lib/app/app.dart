@@ -29,9 +29,11 @@ class _FlutterReduxAppState extends State<FlutterReduxApp>
 
       ///初始化数据
       initialState: WGState(
-        userInfo: User.empty(),
-        login: false,
-      ));
+          userInfo: User.empty(),
+          login: false,
+          homePageData: null,
+          forceUpdate: true,
+          lastFetchTime: null));
   @override
   Widget build(BuildContext context) {
     return StoreProvider(

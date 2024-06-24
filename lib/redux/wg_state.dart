@@ -22,7 +22,7 @@ class WGState {
   WGState(
       {required this.userInfo,
       required this.login,
-      required this.homePageData,
+      this.homePageData,
       required this.lastFetchTime,
       required this.forceUpdate});
 }
@@ -36,7 +36,7 @@ WGState appReducer(WGState state, action) {
       ),
       forceUpdate: false,
       lastFetchTime: null,
-      homePageData: homePageReducer(state.homePageData, action));
+      homePageData: homePageDataReducer(state.homePageData, action));
 }
 
 final List<Middleware<WGState>> middleware = [

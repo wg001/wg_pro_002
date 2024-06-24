@@ -20,7 +20,7 @@ Map<String, dynamic> _$RewardBoxToJson(RewardBox instance) => <String, dynamic>{
 
 UserBaseInfo _$UserBaseInfoFromJson(Map<String, dynamic> json) => UserBaseInfo(
       slogen: json['slogen'] as String?,
-      phone: json['phone'] as String,
+      phone: json['phone'] as String?,
     );
 
 Map<String, dynamic> _$UserBaseInfoToJson(UserBaseInfo instance) =>
@@ -89,46 +89,48 @@ HomeRet _$HomeRetFromJson(Map<String, dynamic> json) => HomeRet(
       rewardBox: json['reward_box'] == null
           ? null
           : RewardBox.fromJson(json['reward_box'] as Map<String, dynamic>),
-      userBaseInfo:
-          UserBaseInfo.fromJson(json['user_base_info'] as Map<String, dynamic>),
+      userBaseInfo: json['user_base_info'] == null
+          ? null
+          : UserBaseInfo.fromJson(
+              json['user_base_info'] as Map<String, dynamic>),
       userLoanInfo:
           UserLoanInfo.fromJson(json['user_loan_info'] as Map<String, dynamic>),
       displayRecommendList: json['displayRecommendList'] as bool? ?? false,
       needLocation: json['needLocation'] as bool? ?? false,
       picturePageDisplay: json['picturePageDisplay'] as bool? ?? false,
-      feedbackSwitch: json['feedbackSwitch'] as String,
-      isNewGuest: json['isNewGuest'] as String,
-      phoneLocked: json['phoneLocked'] as String,
-      phoneLockedToastMsg: json['phoneLockedToastMsg'] as String,
-      refreshFailedOrder: json['refreshFailedOrder'] as String,
+      feedbackSwitch: json['feedbackSwitch'] as String?,
+      isNewGuest: json['isNewGuest'] as String?,
+      phoneLocked: json['phoneLocked'] as String?,
+      phoneLockedToastMsg: json['phoneLockedToastMsg'] as String?,
+      refreshFailedOrder: json['refreshFailedOrder'] as String?,
       modalInfo: json['modalInfo'] == null
           ? null
           : ModalInfo.fromJson(json['modalInfo'] as Map<String, dynamic>),
-      userLostContact: json['userLostContact'] as String,
+      userLostContact: json['userLostContact'] as String?,
       historyApp: (json['historyApp'] as List<dynamic>?)
           ?.map((e) => HistoryApp.fromJson(e as Map<String, dynamic>))
           .toList(),
-      canApply: json['canApply'] as String,
-      uploadSms: json['uploadSms'] as String,
+      canApply: json['canApply'] as String?,
+      uploadSms: json['uploadSms'] as String?,
       additionalTips: json['additionalTips'] as bool? ?? false,
-      privacyPolicy: json['privacyPolicy'] as String,
-      manupPrivacyPolicy: json['manupPrivacyPolicy'] as String,
-      manupServiceAgreement: json['manupServiceAgreement'] as String,
-      manupWelcome: json['manupWelcome'] as String,
-      uploadPop: json['uploadPop'] as String,
-      updateGooglePlay: json['updateGooglePlay'] as String,
-      guestPhone: json['guestPhone'] as String,
+      privacyPolicy: json['privacyPolicy'] as String?,
+      manupPrivacyPolicy: json['manupPrivacyPolicy'] as String?,
+      manupServiceAgreement: json['manupServiceAgreement'] as String?,
+      manupWelcome: json['manupWelcome'] as String?,
+      uploadPop: json['uploadPop'] as String?,
+      updateGooglePlay: json['updateGooglePlay'] as String?,
+      guestPhone: json['guestPhone'] as String?,
       guestPhoneV1: (json['guestPhoneV1'] as List<dynamic>?)
           ?.map((e) => e as String)
           .toList(),
-      customerService: json['customerService'] as String,
-      fbAccount: json['fbAccount'] as String,
-      harasseReportEmail: json['harasseReportEmail'] as String,
-      permissionStatementSwitch: json['permissionStatementSwitch'] as String,
-      kratos: json['kratos'] as bool,
+      customerService: json['customerService'] as String?,
+      fbAccount: json['fbAccount'] as String?,
+      harasseReportEmail: json['harasseReportEmail'] as String?,
+      permissionStatementSwitch: json['permissionStatementSwitch'] as String?,
+      kratos: json['kratos'] as bool?,
       lastOrderInfo: json['lastOrderInfo'] as String?,
-      kratosSwitch: json['kratosSwitch'] as String,
-      productCharacteristics: json['productCharacteristics'] as String,
+      kratosSwitch: json['kratosSwitch'] as String?,
+      productCharacteristics: json['productCharacteristics'] as String?,
     );
 
 Map<String, dynamic> _$HomeRetToJson(HomeRet instance) => <String, dynamic>{
