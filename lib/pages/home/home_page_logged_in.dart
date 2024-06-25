@@ -7,6 +7,7 @@ import 'package:wg_pro_002/common/response_conf.dart';
 import 'package:wg_pro_002/dao/loan_dao.dart';
 import 'package:wg_pro_002/redux/home_redux.dart';
 import 'package:wg_pro_002/redux/wg_state.dart';
+import 'package:flutter_html/flutter_html.dart';
 
 class HomePageLoggedIn extends StatefulWidget {
   const HomePageLoggedIn({Key? key}) : super(key: key);
@@ -69,7 +70,16 @@ class HomePageContent extends StatelessWidget {
                     onPressed: () => Fluttertoast.showToast(msg: "hello"),
                     child: Text('LoginOut'),
                   ),
-                ))
+                )),
+            Card(
+              elevation: 0, // Remove Card shadow
+              child: Padding(
+                padding: const EdgeInsets.all(16.0),
+                child: Html(
+                  data: homePageData.productCharacteristics,
+                ),
+              ),
+            ),
             // 其他内容
           ],
         ));

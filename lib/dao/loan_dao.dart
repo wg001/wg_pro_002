@@ -33,6 +33,8 @@ class LoanDao {
         }
         resultData = resMap["ret"];
         HomeRet homeRet = HomeRet.fromJson(resMap["ret"]);
+        print('-------------');
+        print(homeRet.productCharacteristics);
         return DataResult(homeRet, true);
       }
     } catch (e) {
