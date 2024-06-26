@@ -34,8 +34,8 @@ WGState appReducer(WGState state, action) {
         state.login,
         action,
       ),
-      forceUpdate: false,
-      lastFetchTime: null,
+      forceUpdate: forceUpdateReducer(state.forceUpdate, action),
+      lastFetchTime: lastFetchTimeReducer(state.lastFetchTime, action),
       homePageData: homePageDataReducer(state.homePageData, action));
 }
 

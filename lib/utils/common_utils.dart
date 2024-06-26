@@ -199,6 +199,13 @@ class CommonUtils {
     );
   }
 
+  static showToast(String message) {
+    Fluttertoast.showToast(
+        msg: message,
+        gravity: ToastGravity.CENTER,
+        toastLength: Toast.LENGTH_LONG);
+  }
+
   static Future<void> showLoadingDialog(BuildContext context) {
     return NavigatorUtils.showWGDialog(
         context: context,
