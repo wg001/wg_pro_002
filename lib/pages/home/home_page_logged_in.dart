@@ -8,6 +8,7 @@ import 'package:wg_pro_002/dao/loan_dao.dart';
 import 'package:wg_pro_002/redux/home_redux.dart';
 import 'package:wg_pro_002/redux/wg_state.dart';
 import 'package:flutter_html/flutter_html.dart';
+import 'package:wg_pro_002/utils/common_utils.dart';
 
 class HomePageLoggedIn extends StatefulWidget {
   const HomePageLoggedIn({Key? key}) : super(key: key);
@@ -79,6 +80,68 @@ class HomePageContent extends StatelessWidget {
                   data: homePageData.productCharacteristics,
                 ),
               ),
+            ),
+            SizedBox(height: MathUtils.screenHeight * 0.3),
+            Column(
+              children: <Widget>[
+                Container(
+                  decoration: BoxDecoration(
+                    color: Colors.blue.withOpacity(0.1), // 透明背景色
+                    borderRadius: BorderRadius.circular(15),
+                  ),
+                  child: Table(
+                    columnWidths: const <int, TableColumnWidth>{
+                      0: FlexColumnWidth(1), // 描述列宽度
+                      1: FlexColumnWidth(1), // 数值列宽度
+                    },
+                    defaultVerticalAlignment: TableCellVerticalAlignment.middle,
+                    children: [
+                      TableRow(
+                        children: [
+                          Padding(
+                            padding: const EdgeInsets.all(8.0),
+                            child: Text('Max Credit Amount:',
+                                style: TextStyle(fontSize: 14)),
+                          ),
+                          Padding(
+                              padding: const EdgeInsets.all(8.0),
+                              child: Text('₱ 60,000',
+                                  style: TextStyle(
+                                    fontSize: 14,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                  textAlign: TextAlign.left)),
+                        ],
+                      ),
+                      TableRow(
+                        children: [
+                          Padding(
+                            padding: const EdgeInsets.all(8.0),
+                            child: Text('APR:', style: TextStyle(fontSize: 16)),
+                          ),
+                          Padding(
+                              padding: const EdgeInsets.all(8.0),
+                              child: Text('up to 34.45%',
+                                  style: TextStyle(
+                                    fontSize: 14,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                  textAlign: TextAlign.left)),
+                        ],
+                      ),
+                    ],
+                  ),
+                ),
+                SizedBox(height: 20),
+                TextButton(
+                  onPressed: () {},
+                  child: Text('Contact Us'),
+                  style: TextButton.styleFrom(
+                    foregroundColor: Colors.white, // 文本颜色
+                    backgroundColor: Colors.blue, // 背景色
+                  ),
+                ),
+              ],
             ),
             // 其他内容
           ],
