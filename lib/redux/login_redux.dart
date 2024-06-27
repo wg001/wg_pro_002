@@ -14,8 +14,8 @@ final LoginReducer = combineReducers<bool?>([
 ]);
 
 bool? _loginResult(bool? result, LoginSuccessAction action) {
-  if (action.success == true) {
-    print("login successfully");
+  print("login successfully");
+  if (action.success && action.jump) {
     NavigatorUtils.goMainPage(action.context);
   }
   return action.success;
@@ -66,12 +66,18 @@ bool? _logoutResult(bool? result, LogoutAction action) {
 class LoginSuccessAction {
   final BuildContext context;
   final bool success;
+  final bool jump;
 
-  LoginSuccessAction(this.context, this.success);
+  LoginSuccessAction(this.context, this.success, {this.jump = true});
 }
 
 class LogoutAction {
   final BuildContext context;
 
   LogoutAction(this.context);
+}
+
+class UpdateLoginStatus {
+  final String token;
+  UpdateLoginStatus(this.token);
 }
