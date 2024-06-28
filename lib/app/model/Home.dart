@@ -35,48 +35,133 @@ class UserBaseInfo {
 }
 
 @JsonSerializable()
+class InstallmentRepaymentData {
+  @JsonKey(name: 'current_repay_date')
+  final String? currentRepayDate;
+  @JsonKey(name: 'current_amount')
+  final String? currentAmount;
+  @JsonKey(name: 'current_period')
+  final String? currentPeriod;
+  @JsonKey(name: 'next_repay_date')
+  final String? nextRepayDate;
+  @JsonKey(name: 'next_amount')
+  final String? nextAmount;
+  @JsonKey(name: 'next_period')
+  final String? nextPeriod;
+
+  InstallmentRepaymentData({
+    this.currentRepayDate,
+    this.currentAmount,
+    this.currentPeriod,
+    this.nextRepayDate,
+    this.nextAmount,
+    this.nextPeriod,
+  });
+
+  factory InstallmentRepaymentData.fromJson(Map<String, dynamic> json) =>
+      _$InstallmentRepaymentDataFromJson(json);
+
+  Map<String, dynamic> toJson() => _$InstallmentRepaymentDataToJson(this);
+}
+
+@JsonSerializable()
 class UserLoanInfo {
   @JsonKey(name: 'remind_tip')
   final String? remindTip;
-  final String action;
+  final String? action;
   @JsonKey(name: 'button_words')
   final String? buttonWords;
   @JsonKey(name: 'loan_max_amount_desc')
   final String? loanMaxAmountDesc;
-  @JsonKey(name: 'loan_max_amount', defaultValue: '0')
+  @JsonKey(name: 'loan_max_amount', defaultValue: '')
   final String? loanMaxAmount;
   @JsonKey(name: 'loan_period')
   final String? loanPeriod;
   @JsonKey(name: 'loan_apr')
   final String? loanApr;
-  @JsonKey(name: 'callinfo_completed', defaultValue: '0')
+  @JsonKey(name: 'status')
+  final String? status;
+  @JsonKey(name: 'callinfo_completed', defaultValue: '')
   final String? callinfoCompleted;
-  @JsonKey(name: 'sms_completed', defaultValue: '0')
+  @JsonKey(name: 'sms_completed', defaultValue: '')
   final String? smsCompleted;
-  @JsonKey(name: 'phonebook_completed', defaultValue: '0')
+  @JsonKey(name: 'phonebook_completed', defaultValue: '')
   final String? phonebookCompleted;
-  @JsonKey(name: 'install_completed', defaultValue: '0')
+  @JsonKey(name: 'install_completed', defaultValue: '')
   final String? installCompleted;
-  @JsonKey(name: 'device_info_completed', defaultValue: '0')
+  @JsonKey(name: 'device_info_completed', defaultValue: '')
   final String? deviceInfoCompleted;
 
+  @JsonKey(name: 'end_repay_time')
+  final String? endRepayTime;
+  @JsonKey(name: 'repay_day_des')
+  final String? repayDayDes;
+  @JsonKey(name: 'postponement_discounts')
+  final String? postponementDiscounts;
+
+  final String? interest;
+  @JsonKey(name: 'overdue_fee')
+  final String? overdueFee;
+  @JsonKey(name: 'upaid_amount')
+  final String? unpaidAmount;
+  @JsonKey(name: 'amount')
+  final String? amount;
+  @JsonKey(name: 'loan_daycount')
+  final String? loanDaycount;
+  @JsonKey(name: 'order_no')
+  final String? orderNo;
+
+  @JsonKey(name: 'display_postponement_button')
+  final bool? displayPostponementButton;
+
+  @JsonKey(name: 'installment_repayment_data')
+  final InstallmentRepaymentData? installmentRepaymentData;
+
+  @JsonKey(name: 'last_repayment_channel')
+  final String? lastRepaymentChannel;
+
+  @JsonKey(name: 'order_type')
+  final String? orderType;
+
+  @JsonKey(name: 'late_fee')
+  final String? lateFee;
+
   UserLoanInfo({
+    this.interest,
+    this.overdueFee,
+    this.unpaidAmount,
+    this.amount,
+    this.loanDaycount,
+    this.orderNo,
+    this.displayPostponementButton,
+    this.installmentRepaymentData,
+    this.lastRepaymentChannel,
+    this.orderType,
+    this.lateFee,
     this.remindTip,
-    required this.action,
+    this.action,
     this.buttonWords,
     this.loanMaxAmountDesc,
     this.loanMaxAmount,
     this.loanPeriod,
     this.loanApr,
+    this.status,
     this.callinfoCompleted,
     this.smsCompleted,
     this.phonebookCompleted,
     this.installCompleted,
     this.deviceInfoCompleted,
+    this.endRepayTime,
+    this.repayDayDes,
+    this.postponementDiscounts,
   });
 
-  factory UserLoanInfo.fromJson(Map<String, dynamic> json) =>
-      _$UserLoanInfoFromJson(json);
+  // factory UserLoanInfo.fromJson(Map<String, dynamic> json) =>
+  //     _$UserLoanInfoFromJson(json);
+  factory UserLoanInfo.fromJson(Map<String, dynamic> json) {
+    print("Parsing UserLoanInfo: $json");
+    return _$UserLoanInfoFromJson(json);
+  }
   Map<String, dynamic> toJson() => _$UserLoanInfoToJson(this);
 }
 
@@ -109,8 +194,11 @@ class HistoryApp {
     this.status,
   });
 
-  factory HistoryApp.fromJson(Map<String, dynamic> json) =>
-      _$HistoryAppFromJson(json);
+  factory HistoryApp.fromJson(Map<String, dynamic> json) {
+    print("Parsing HistoryApp: $json");
+    return _$HistoryAppFromJson(json);
+  }
+
   Map<String, dynamic> toJson() => _$HistoryAppToJson(this);
 }
 
@@ -171,8 +259,6 @@ class HomeRet {
   @JsonKey(name: 'permission_statement_switch')
   final String? permissionStatementSwitch;
   final bool? kratos;
-  @JsonKey(name: 'last_order_info')
-  final String? lastOrderInfo;
   @JsonKey(name: 'kratos_switch')
   final String? kratosSwitch;
   @JsonKey(name: 'product_characteristics')
@@ -209,7 +295,6 @@ class HomeRet {
     this.harasseReportEmail,
     this.permissionStatementSwitch,
     this.kratos,
-    this.lastOrderInfo,
     this.kratosSwitch,
     this.productCharacteristics,
   });

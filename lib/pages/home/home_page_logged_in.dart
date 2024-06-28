@@ -5,11 +5,17 @@ import 'package:fluttertoast/fluttertoast.dart';
 import 'package:wg_pro_002/app/model/Home.dart';
 import 'package:wg_pro_002/common/response_conf.dart';
 import 'package:wg_pro_002/dao/loan_dao.dart';
+import 'package:wg_pro_002/pages/home/actions/action_repay.dart';
+import 'package:wg_pro_002/pages/home/actions/action_start.dart';
 import 'package:wg_pro_002/redux/home_redux.dart';
 import 'package:wg_pro_002/redux/wg_state.dart';
 import 'package:flutter_html/flutter_html.dart';
 import 'package:wg_pro_002/utils/common_utils.dart';
 import 'package:wg_pro_002/utils/logger_util.dart';
+
+// ignore: constant_identifier_names
+const String HOME_ACTION_START = 'start';
+const String HOME_ACTION_REPAY = 'repay';
 
 class HomePageLoggedIn extends StatefulWidget {
   const HomePageLoggedIn({Key? key}) : super(key: key);
@@ -104,108 +110,21 @@ class HomePageContent extends StatelessWidget {
             //   ),
             // ),
             SizedBox(height: MathUtils.screenHeight * 0.02),
-            Column(
-              children: <Widget>[
-                Container(
-                  height: MathUtils.screenHeight * 0.3,
-                  decoration: BoxDecoration(
-                    color: Colors.blue.withOpacity(0.1), // 透明背景色
-                    borderRadius: BorderRadius.circular(15),
-                  ),
-                  child: Center(
-                    child: Table(
-                      columnWidths: const <int, TableColumnWidth>{
-                        0: FlexColumnWidth(1), // 描述列宽度
-                        1: FlexColumnWidth(1), // 数值列宽度
-                      },
-                      defaultVerticalAlignment:
-                          TableCellVerticalAlignment.middle,
-                      children: [
-                        TableRow(
-                          children: [
-                            Padding(
-                              padding: const EdgeInsets.only(
-                                  left: 5, top: 8, bottom: 8),
-                              child: Text(
-                                  homePageData.userLoanInfo.loanMaxAmountDesc ??
-                                      '',
-                                  style: TextStyle(fontSize: 14)),
-                            ),
-                            Padding(
-                                padding: const EdgeInsets.only(
-                                    left: 5, top: 8, bottom: 8),
-                                child: Text(
-                                    '₱ ${homePageData.userLoanInfo.loanMaxAmount}',
-                                    style: TextStyle(
-                                      fontSize: 14,
-                                      fontWeight: FontWeight.bold,
-                                    ),
-                                    textAlign: TextAlign.left)),
-                          ],
-                        ),
-                        TableRow(
-                          children: [
-                            Padding(
-                              padding: const EdgeInsets.only(
-                                  left: 5, top: 16, bottom: 8),
-                              child:
-                                  Text('APR:', style: TextStyle(fontSize: 16)),
-                            ),
-                            Padding(
-                                padding: const EdgeInsets.only(
-                                    left: 5, top: 16, bottom: 8),
-                                child: Text(
-                                    homePageData.userLoanInfo.loanApr ?? '',
-                                    style: TextStyle(
-                                      fontSize: 14,
-                                      fontWeight: FontWeight.bold,
-                                    ),
-                                    textAlign: TextAlign.left)),
-                          ],
-                        ),
-                        TableRow(
-                          children: [
-                            Padding(
-                              padding: const EdgeInsets.only(
-                                  left: 5, top: 16, bottom: 8),
-                              child: Text('Loan Period:',
-                                  style: TextStyle(fontSize: 16)),
-                            ),
-                            Padding(
-                                padding: const EdgeInsets.only(
-                                    left: 5, top: 16, bottom: 8),
-                                child: Text(
-                                    homePageData.userLoanInfo.loanPeriod ?? '',
-                                    style: TextStyle(
-                                      fontSize: 14,
-                                      fontWeight: FontWeight.bold,
-                                    ),
-                                    textAlign: TextAlign.left)),
-                          ],
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
-                SizedBox(height: 20),
-                TextButton(
-                  onPressed: () {
-                    CommonUtils.showToast("to apply now");
-                  },
-                  child: Container(
-                    width: MathUtils.screenWidth * 0.5, // 设置按钮的宽度
-                    alignment: Alignment.center, // 居中对齐文本
-                    child: Text('Apply'),
-                  ),
-                  style: TextButton.styleFrom(
-                    foregroundColor: Colors.white, // 文本颜色
-                    backgroundColor: Colors.blue, // 背景色
-                  ),
-                ),
-              ],
-            ),
+            buildActionBasedContent(homePageData)
             // 其他内容
           ],
         ));
+  }
+
+  Widget buildActionBasedContent(HomeRet data) {
+    String action = data.userLoanInfo.action ?? 'default';
+    switch (action) {
+      case HOME_ACTION_START:
+        return HomePageStartContent(homePageData: data);
+      case HOME_ACTION_REPAY:
+        return HomePageRepayContent(homePageData: data);
+      default:
+       return HomePageStartContent(homePageData: data);
+    }
   }
 }

@@ -20,6 +20,10 @@ class Config {
   static const APP_VERSION_KEY = 'app-version';
   static const API_VERSION_KEY = 'api-version';
 
+
+  
+
+
   String appName = "Prima Loan";
   String clientVersion = "1.9.9";
   String apiVersion = "1.5";
