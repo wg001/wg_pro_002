@@ -77,15 +77,15 @@ class _HomePageState extends State<HomePage> {
               },
             ),
             body: Container(
-                color: Colors.orange,
+                // color: Colors.orange,
                 child: Padding(
-                  padding: const EdgeInsets.all(8.0),
-                  child: Center(
-                    child: isLoggedIn
-                        ? HomePageLoggedIn() // Assuming this is a custom widget for logged-in users
-                        : HomePageLoggedOut(), // And this one for logged-out users
-                  ),
-                )),
+              padding: EdgeInsets.zero,
+              child: Center(
+                child: isLoggedIn
+                    ? HomePageLoggedIn() // Assuming this is a custom widget for logged-in users
+                    : HomePageLoggedOut(), // And this one for logged-out users
+              ),
+            )),
           );
         });
   }
