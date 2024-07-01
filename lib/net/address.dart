@@ -8,4 +8,8 @@ class Address {
   static getPageIndex() {
     return "${host}/philippines_loan/user/get_user_info";
   }
+
+  static getUserInfo() {
+    return "${host}/philippines_loan/user/get_user_detail_info";
+  }
 }

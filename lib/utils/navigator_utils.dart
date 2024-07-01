@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:wg_pro_002/pages/login_page.dart';
 import 'package:wg_pro_002/pages/main_page.dart';
 import 'package:wg_pro_002/pages/settings_page.dart';
+import 'package:wg_pro_002/pages/user_info/user_info_page_1.dart';
 import 'package:wg_pro_002/widget/never_overscroll_indicator.dart';
 
 /// 导航栏
@@ -55,6 +56,9 @@ class NavigatorUtils {
   static goSetting(BuildContext context) {
     // Navigator.pushReplacementNamed(context, SettingsPage.sName);
     Navigator.pushNamed(context, SettingsPage.sName);
+  }
+  static goUserInfoPage1(BuildContext context) {
+    Navigator.pushNamed(context, UserInfoPage1.sName);
   }
 
   ///公共打开方式

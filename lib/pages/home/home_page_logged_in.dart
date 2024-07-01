@@ -172,9 +172,14 @@ class HomePageContent extends StatelessWidget {
           ),
         ],
       ),
-      child: Column(
-        mainAxisSize: MainAxisSize.min, // 使Column占用的空间尽可能小
-        children: <Widget>[Gap(20), content, Gap(20)],
+      child: ListView(
+        padding: EdgeInsets.all(0), // 移除默认的ListView padding
+        shrinkWrap: true, // 适应内部内容的高度
+        children: <Widget>[
+          Gap(20), // 顶部间隔
+          content, // 根据action显示相应内容
+          Gap(20), // 底部间隔
+        ],
       ),
     );
   }

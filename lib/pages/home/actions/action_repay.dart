@@ -30,7 +30,84 @@ class HomePageRepayContent extends StatelessWidget {
         ),
         SizedBox(height: 20),
         buildCard(),
+        buildButton(),
       ],
+    );
+  }
+
+  Padding buildButton() {
+    return Padding(
+      padding: EdgeInsets.only(top: 20, bottom: 10),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceEvenly, // 平均分配空间
+        children: <Widget>[
+          SizedBox(
+            width: MathUtils.screenWidth*0.3,
+            child: ElevatedButton(
+              onPressed: () {
+                // 按钮1的点击事件
+                print("Button 1 clicked");
+              },
+              child: FittedBox(
+                  fit: BoxFit.scaleDown, child: Text('settle in installments')),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.orange, // 设置按钮的背景颜色
+                foregroundColor: Colors.white, // 设置按钮文字颜色
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(5), // 明确设置圆角为1
+                ),
+                padding: EdgeInsets.symmetric(
+                    horizontal: 2, vertical: 2), // 设置按钮内部的填充
+                elevation: 10, // 设置阴影
+              ),
+            ),
+          ),
+          SizedBox(
+              width: MathUtils.screenWidth*0.3,
+              child: ElevatedButton(
+                onPressed: () {
+                  // 按钮1的点击事件
+                  print("full settlement");
+                },
+                child: FittedBox(
+                    fit: BoxFit.scaleDown, child: Text('full settlement')),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.orange, // 设置按钮的背景颜色
+                  foregroundColor: Colors.white, // 设置按钮文字颜色
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(5), // 明确设置圆角为1
+                  ),
+                  padding: EdgeInsets.symmetric(
+                      horizontal: 2, vertical: 2), // 设置按钮内部的填充
+                  elevation: 10, // 设置阴影
+                ),
+              )),
+          if (homePageData.userLoanInfo.displayPostponementButton ?? false)
+            // 条件判断
+            SizedBox(
+                width: MathUtils.screenWidth*0.3,
+                child: ElevatedButton(
+                  onPressed: () {
+                    // 按钮1的点击事件
+                    print("Button 3 clicked");
+                  },
+                  child: FittedBox(
+                    fit: BoxFit.scaleDown, // 缩小内容以确保全部显示
+                    child: Text('Extended Settlement'),
+                  ),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.orange, // 设置按钮的背景颜色
+                    foregroundColor: Colors.white, // 设置按钮文字颜色
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(5), // 明确设置圆角为1
+                    ),
+                    padding: EdgeInsets.symmetric(
+                        horizontal: 2, vertical: 2), // 设置按钮内部的填充
+                    elevation: 10, // 设置阴影
+                  ),
+                )),
+        ],
+      ),
     );
   }
 
