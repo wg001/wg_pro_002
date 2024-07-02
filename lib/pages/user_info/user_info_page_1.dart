@@ -1,7 +1,9 @@
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:wg_pro_002/app/model/UserInfo.dart';
 import 'package:wg_pro_002/app/model/UserInfoForm.dart';
+import 'package:wg_pro_002/common/response_conf.dart';
 import 'package:wg_pro_002/dao/dao_result.dart';
 import 'package:wg_pro_002/dao/user_dao.dart';
 import 'package:wg_pro_002/pages/user_info/user_info_page_2.dart';
@@ -70,6 +72,8 @@ class _UserInfoPage1State extends State<UserInfoPage1>
     super.dispose();
   }
 
+  EdgeInsets edgeInsets = EdgeInsets.only(left: 8, right: 8, top: 5);
+
   @override
   Widget build(BuildContext context) {
     if (isLoading) {
@@ -85,160 +89,153 @@ class _UserInfoPage1State extends State<UserInfoPage1>
         body: Center(child: Text("Failed to load user information")),
       );
     }
+
     return Scaffold(
-      appBar: AppBar(title: Text('User Information Page1')),
+      appBar: AppBar(
+        title: Text('User Information Page1'),
+        backgroundColor: Colors.orange,
+      ),
       body: isLoading
           ? Center(child: CircularProgressIndicator())
           : SingleChildScrollView(
               child: Form(
                 key: _formKey,
-                child: Column(
-                  children: <Widget>[
-                    Padding(
-                        padding: const EdgeInsets.all(8.0),
-                        child: GenericDropdown<IdTypeOption>(
-                          decoration: getDecoration('ID Type'),
-                          items: userInfo?.options?.idTypeOptions,
-                          getDisplayValue: (IdTypeOption item) =>
-                              item.value ?? '',
-                          getValue: (IdTypeOption item) => item.id ?? '',
-                          onChanged: (selectedId) {
-                            setState(() {
-                              idType = selectedId;
-                            });
-                            print("Selected idtype: $selectedId");
-                          },
-                          selectedValue: getDropListItemByValue(
-                              userInfo?.options?.idTypeOptions,
-                              idTypeController?.text ??
-                                  ''), // Optional: initially select "Bob"
-                        )),
-                    buildTableRow(
-                        "ID No.", idController, "Please enter your ID number"),
-                    buildTableRow("First Name", firstController,
-                        "Please enter your first name"),
-                    Padding(
-                        padding: const EdgeInsets.all(8.0),
-                        child: GenericDropdown<CommonListOption>(
-                          decoration: getDecoration('Gender'),
-                          items: userInfo?.options?.genderOptions,
-                          getDisplayValue: (CommonListOption item) =>
-                              item.value ?? '',
-                          getValue: (CommonListOption item) => item.id ?? '',
-                          onChanged: (selectedId) {
-                            setState(() {
-                              genderId = selectedId;
-                            });
-                            print("Selected User ID: $selectedId");
-                          },
-                          selectedValue: getDropListItemByValue(
-                              userInfo?.options?.genderOptions,
-                              userInfo?.gender ??
-                                  ''), // Optional: initially select "Bob"
-                        )),
-                    /**  Padding(
-                  padding: EdgeInsets.only(top: 8.0, bottom: 8),
-                  child: Row(
+                child: Container(
+                  height: MathUtils.screenHeight,
+                  decoration: BoxDecoration(color: Colors.orange),
+                  child: Column(
                     children: <Widget>[
-                      Expanded(
-                        child:
-                            buildDropdown('Province', 'Please select option 1'),
-                      ),
-                      SizedBox(width: 8.0), // 可以在中间添加间距
-                      Expanded(
-                        child: buildDropdown('City', 'Please select option 2'),
-                      ),
-                      SizedBox(width: 8.0), // 可以在中间添加间距
-                      Expanded(
-                        child: buildDropdown('Area', 'Please select option 3'),
+                      headLable(),
+                      Container(
+                        padding:
+                            const EdgeInsets.only(left: 8, right: 8, top: 5),
+                        decoration: BoxDecoration(
+                          color: Colors.white,
+                          borderRadius: BorderRadius.circular(20),
+                          boxShadow: [
+                            BoxShadow(
+                              color: Colors.black.withOpacity(0.2),
+                              blurRadius: 10,
+                              spreadRadius: 5,
+                            ),
+                          ],
+                        ),
+                        child: Column(
+                          children: <Widget>[
+                            buildTableRow("ID No.", idController,
+                                "Please enter your ID number"),
+                            Padding(
+                                padding: edgeInsets,
+                                child: GenericDropdown<CommonListOption>(
+                                  decoration: getDecoration('Gender'),
+                                  items: userInfo?.options?.genderOptions,
+                                  getDisplayValue: (CommonListOption item) =>
+                                      item.value ?? '',
+                                  getValue: (CommonListOption item) =>
+                                      item.id ?? '',
+                                  onChanged: (selectedId) {
+                                    setState(() {
+                                      genderId = selectedId;
+                                    });
+                                    print("Selected User ID: $selectedId");
+                                  },
+                                  selectedValue: getDropListItemByValue(
+                                      userInfo?.options?.genderOptions,
+                                      userInfo?.gender ??
+                                          ''), // Optional: initially select "Bob"
+                                )),
+                            buildTableRow("ID No.", idController,
+                                "Please enter your ID number"),
+                            buildTableRow("ID No.", idController,
+                                "Please enter your ID number"),
+                            buildTableRow("ID No.", idController,
+                                "Please enter your ID number"),
+                            ElevatedButton(
+                              onPressed: _submitForm,
+                              child: Text("Submit"),
+                            ),
+                          ],
+                        ),
                       ),
                     ],
-                  )),
-                  */
-                    ElevatedButton(
-                      onPressed: _submitForm,
-                      child: Text("Submit"),
-                    ),
-                  ],
+                  ),
                 ),
               ),
             ),
     );
   }
 
-  final List<String> options = ["Option 1", "Option 2", "Option 3"];
-  String? selectedOption;
-  Widget buildDropdown(
-      String label, TextEditingController controller, String emptyError) {
-    return Padding(
-      padding: const EdgeInsets.all(8.0),
-      child: DropdownButtonFormField<String>(
-        decoration: InputDecoration(
-          focusedBorder: OutlineInputBorder(
-            borderSide:
-                BorderSide(color: Colors.orange.withOpacity(0.5), width: 2.0),
-          ),
-          enabledBorder: OutlineInputBorder(
-            borderSide:
-                BorderSide(color: Colors.grey.withOpacity(0.5), width: 2.0),
-          ),
-          labelText: label,
+  Widget headLable() {
+    return SizedBox(
+      height: 50, // 预留足够空间让Card重叠
+      child: Card(
+        color: Colors.orange,
+        margin: EdgeInsets.zero,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.zero,
         ),
-        value: controller.text,
-        onChanged: (String? newValue) {
-          setState(() {
-            selectedOption = newValue;
-          });
-        },
-        items: options.map<DropdownMenuItem<String>>((String value) {
-          return DropdownMenuItem<String>(
-            value: value,
-            child: Text(value),
-          );
-        }).toList(),
-        validator: (value) {
-          if (value == null || value.isEmpty) {
-            Fluttertoast.showToast(msg: emptyError);
-            return emptyError;
-          }
-          return null;
-        },
-        isExpanded: true, // 让下拉菜单尽可能填满水平空间
+        elevation: 0,
+        child: ListTile(
+          title: Text("Base info"),
+        ),
       ),
     );
   }
 
   Widget buildTableRow(
       String label, TextEditingController controller, String emptyError) {
-    return Padding(
-      padding: const EdgeInsets.all(8.0),
-      child: TextFormField(
-        controller: controller,
-        onChanged: ,
-        decoration: InputDecoration(
-          focusedBorder: OutlineInputBorder(
-            borderSide: BorderSide(
-              color: Colors.orange.withOpacity(0.5), // 聚焦时的颜色
-              width: 2.0,
+    return Container(
+      height: 40,
+      margin: EdgeInsets.only(left: 8, top: 5, right: 8, bottom: 5),
+      padding: EdgeInsets.only(left: 8, top: 5, right: 8, bottom: 5),
+      decoration: BoxDecoration(
+        color: Color.fromARGB(255, 241, 241, 241),
+        borderRadius: BorderRadius.circular(5),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.2),
+            spreadRadius: 1,
+            blurRadius: 5,
+            offset: Offset(0, 3),
+          ),
+        ],
+      ),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.center,
+        mainAxisSize: MainAxisSize.min,
+        children: <Widget>[
+          Text(label),
+          Expanded(
+            child: Padding(
+              padding: EdgeInsets.only(left: 10),
+              child: TextFormField(
+                controller: controller,
+                style: TextStyle(
+                  fontSize: 16, // 控制字体大小
+                ),
+
+                textAlign: TextAlign.right, // 右对齐
+                cursorHeight: 20, // 设置光标的高度
+                decoration: InputDecoration(
+                  hintText: 'Please input',
+                  hintStyle: TextStyle(
+                    color: Colors.grey.withOpacity(0.3), // 设置提示文字的颜色和透明度
+                  ),
+                  errorStyle: TextStyle(height: 0),
+                  isDense: true, // 减少内部垂直填充
+                  contentPadding: EdgeInsets.symmetric(vertical: 1), // 垂直居中
+                  border: InputBorder.none,
+                ),
+                validator: (value) {
+                  if (value == null || value.isEmpty) {
+                    return '';
+                  }
+                  return null;
+                },
+              ),
             ),
           ),
-          // 启用时的边框
-          enabledBorder: OutlineInputBorder(
-            borderSide: BorderSide(
-              color: Colors.grey.withOpacity(0.5), // 启用时的颜色
-              width: 2.0,
-            ),
-          ),
-          labelText: label,
-          border: OutlineInputBorder(),
-        ),
-        validator: (value) {
-          if (value == null || value.isEmpty) {
-            Fluttertoast.showToast(msg: emptyError);
-            return emptyError; // Return a space to denote an error but not expand the TextFormField
-          }
-          return null;
-        },
+        ],
       ),
     );
   }
