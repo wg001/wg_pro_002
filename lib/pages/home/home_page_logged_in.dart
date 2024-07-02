@@ -60,7 +60,6 @@ class _HomePageLoggedInState extends State<HomePageLoggedIn>
     if (lastFetchTime == null ||
         timeNow.difference(lastFetchTime) > const Duration(seconds: 10) ||
         store.state.homePageData == null) {
-      LogUtils.logInfo('hittttt');
       store.dispatch(FetchHomePageDataAction());
       store.dispatch(FetchHomePageDataFailureAction(""));
     }

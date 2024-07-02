@@ -57,9 +57,6 @@ class NavigatorUtils {
     // Navigator.pushReplacementNamed(context, SettingsPage.sName);
     Navigator.pushNamed(context, SettingsPage.sName);
   }
-  static goUserInfoPage1(BuildContext context) {
-    Navigator.pushNamed(context, UserInfoPage1.sName);
-  }
 
   ///公共打开方式
   static NavigatorRouter(BuildContext context, Widget widget) {

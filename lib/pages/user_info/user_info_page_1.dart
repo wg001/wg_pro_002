@@ -1,20 +1,15 @@
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:wg_pro_002/app/model/UserInfo.dart';
+import 'package:wg_pro_002/app/model/UserInfoForm.dart';
 import 'package:wg_pro_002/dao/dao_result.dart';
 import 'package:wg_pro_002/dao/user_dao.dart';
-import 'package:wg_pro_002/utils/common_utils.dart';
+import 'package:wg_pro_002/pages/user_info/user_info_page_2.dart';
+import 'package:wg_pro_002/utils/navigator_utils.dart';
 import 'package:wg_pro_002/widget/custom_dropdown.dart';
 import 'package:wg_pro_002/widget/input_widget.dart';
 
-const TextStyle InputStyle = TextStyle(
-  color: Colors.grey, // 设置 hintText 的颜色
-  fontSize: 16.0,
-);
-
 class UserInfoPage1 extends StatefulWidget {
-  static const String sName = "userInfoPage1";
   const UserInfoPage1({super.key});
 
   @override
@@ -25,206 +20,265 @@ class _UserInfoPage1State extends State<UserInfoPage1>
     with AutomaticKeepAliveClientMixin<UserInfoPage1> {
   @override
   bool get wantKeepAlive => true;
-
-  late UserInfo userInfo;
-
   late TextEditingController idController;
   late TextEditingController firstController;
+  TextEditingController? genderIdController;
+  TextEditingController? idTypeController;
+
+  UserInfo? userInfo;
+
+  UserInfoForm userInfoForm = UserInfoForm();
+
+  String? genderId; //
+  String? idType; //
 
   bool isLoading = true; // 添加一个加载状态标志
 
-  final _formKey = GlobalKey<FormState>(); // 创建一个 Form 的 GlobalKey
+  final _formKey = GlobalKey<
+      FormState>(); // Keep using the form key for overall form validation
 
   @override
   void initState() {
     super.initState();
     idController = TextEditingController();
     firstController = TextEditingController();
-    // 模拟异步加载数据
+    genderIdController = TextEditingController();
+    idTypeController = TextEditingController();
     _loadUserData();
-  }
-
-  @override
-  void dispose() {
-    idController.dispose();
-    super.dispose();
   }
 
   Future<void> _loadUserData() async {
     DataResult res = await UserDao.getUserInfo();
     if (res.result && res.data is UserInfo) {
       setState(() {
-        UserInfo userInfo = res.data as UserInfo;
-        idController.text = userInfo.idNo ?? ''; // 假设 userInfo 有一个 id 字段
-        firstController.text = userInfo.firstName ?? '';
-        isLoading = false; // 数据加载完成
+        userInfo = res.data as UserInfo; // 初始化 userInfo
+        idController.text = userInfo?.idNo ?? '';
+        firstController.text = userInfo?.firstName ?? '';
+        idTypeController?.text = userInfo?.idType ?? '';
+        isLoading = false;
       });
+    } else {
+      // 处理加载失败的情况
+      Fluttertoast.showToast(msg: "Failed to load user data");
     }
   }
-  // @override
-  // Future<void> didChangeDependencies() async {
-  //   super.didChangeDependencies();
 
-  //   DataResult res = await UserDao.getUserInfo();
-  //   if (res.result && res.data is UserInfo) {
-  //     userInfo = res.data as UserInfo;
-  //   }
-  // }
+  @override
+  void dispose() {
+    idController.dispose();
+    firstController.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
-    super.build(context);
+    if (isLoading) {
+      return Scaffold(
+        appBar: AppBar(title: Text('Loading...')),
+        body: Center(child: CircularProgressIndicator()),
+      );
+    }
+
+    if (userInfo == null) {
+      return Scaffold(
+        appBar: AppBar(title: Text('Error')),
+        body: Center(child: Text("Failed to load user information")),
+      );
+    }
     return Scaffold(
-      appBar: AppBar(
-          title: Text(
-        'HomePage1',
-        maxLines: 1,
-        overflow: TextOverflow.ellipsis,
-      )),
+      appBar: AppBar(title: Text('User Information Page1')),
       body: isLoading
-          ? CircularProgressIndicator()
-          : Form(
-              key: _formKey,
-              child: Column(
-                  //  mainAxisAlignment: MainAxisAlignment.center,
+          ? Center(child: CircularProgressIndicator())
+          : SingleChildScrollView(
+              child: Form(
+                key: _formKey,
+                child: Column(
                   children: <Widget>[
-                    buildTable(),
-                    SubmitButton(),
-                  ])),
+                    Padding(
+                        padding: const EdgeInsets.all(8.0),
+                        child: GenericDropdown<IdTypeOption>(
+                          decoration: getDecoration('ID Type'),
+                          items: userInfo?.options?.idTypeOptions,
+                          getDisplayValue: (IdTypeOption item) =>
+                              item.value ?? '',
+                          getValue: (IdTypeOption item) => item.id ?? '',
+                          onChanged: (selectedId) {
+                            setState(() {
+                              idType = selectedId;
+                            });
+                            print("Selected idtype: $selectedId");
+                          },
+                          selectedValue: getDropListItemByValue(
+                              userInfo?.options?.idTypeOptions,
+                              idTypeController?.text ??
+                                  ''), // Optional: initially select "Bob"
+                        )),
+                    buildTableRow(
+                        "ID No.", idController, "Please enter your ID number"),
+                    buildTableRow("First Name", firstController,
+                        "Please enter your first name"),
+                    Padding(
+                        padding: const EdgeInsets.all(8.0),
+                        child: GenericDropdown<CommonListOption>(
+                          decoration: getDecoration('Gender'),
+                          items: userInfo?.options?.genderOptions,
+                          getDisplayValue: (CommonListOption item) =>
+                              item.value ?? '',
+                          getValue: (CommonListOption item) => item.id ?? '',
+                          onChanged: (selectedId) {
+                            setState(() {
+                              genderId = selectedId;
+                            });
+                            print("Selected User ID: $selectedId");
+                          },
+                          selectedValue: getDropListItemByValue(
+                              userInfo?.options?.genderOptions,
+                              userInfo?.gender ??
+                                  ''), // Optional: initially select "Bob"
+                        )),
+                    /**  Padding(
+                  padding: EdgeInsets.only(top: 8.0, bottom: 8),
+                  child: Row(
+                    children: <Widget>[
+                      Expanded(
+                        child:
+                            buildDropdown('Province', 'Please select option 1'),
+                      ),
+                      SizedBox(width: 8.0), // 可以在中间添加间距
+                      Expanded(
+                        child: buildDropdown('City', 'Please select option 2'),
+                      ),
+                      SizedBox(width: 8.0), // 可以在中间添加间距
+                      Expanded(
+                        child: buildDropdown('Area', 'Please select option 3'),
+                      ),
+                    ],
+                  )),
+                  */
+                    ElevatedButton(
+                      onPressed: _submitForm,
+                      child: Text("Submit"),
+                    ),
+                  ],
+                ),
+              ),
+            ),
     );
   }
 
-  Widget buildTable() {
-    return Table(
-      columnWidths: const <int, TableColumnWidth>{
-        0: FlexColumnWidth(1),
-        1: FlexColumnWidth(2),
-      },
-      border: TableBorder(
-        horizontalInside: BorderSide(
-          width: 1, // Thickness of the line
-          color: Color.fromARGB(255, 255, 255, 255)!
-              .withOpacity(0.5), // Color of the line
-          style: BorderStyle.solid, // Style of the line
+  final List<String> options = ["Option 1", "Option 2", "Option 3"];
+  String? selectedOption;
+  Widget buildDropdown(
+      String label, TextEditingController controller, String emptyError) {
+    return Padding(
+      padding: const EdgeInsets.all(8.0),
+      child: DropdownButtonFormField<String>(
+        decoration: InputDecoration(
+          focusedBorder: OutlineInputBorder(
+            borderSide:
+                BorderSide(color: Colors.orange.withOpacity(0.5), width: 2.0),
+          ),
+          enabledBorder: OutlineInputBorder(
+            borderSide:
+                BorderSide(color: Colors.grey.withOpacity(0.5), width: 2.0),
+          ),
+          labelText: label,
         ),
+        value: controller.text,
+        onChanged: (String? newValue) {
+          setState(() {
+            selectedOption = newValue;
+          });
+        },
+        items: options.map<DropdownMenuItem<String>>((String value) {
+          return DropdownMenuItem<String>(
+            value: value,
+            child: Text(value),
+          );
+        }).toList(),
+        validator: (value) {
+          if (value == null || value.isEmpty) {
+            Fluttertoast.showToast(msg: emptyError);
+            return emptyError;
+          }
+          return null;
+        },
+        isExpanded: true, // 让下拉菜单尽可能填满水平空间
       ),
-      // defaultVerticalAlignment: TableCellVerticalAlignment.,
-
-      children: [
-        buildTableRow(
-          'ID No.',
-          InputWidget(
-            hintText: "Enter your ID",
-            controller: idController,
-            cursorHeight: 20,
-            textStyle: TextStyle(height: 1.5),
-            errorStyle: TextStyle(
-              height: 0, // 减小错误文本的高度影响
-              color: Colors.transparent, // 使其透明
-            ),
-            border: OutlineInputBorder(
-              // 设置边框的颜色和宽度
-              borderSide:
-                  BorderSide(color: Colors.grey.withOpacity(0.5), width: 0.5),
-              // 设置边框的圆角
-              borderRadius: BorderRadius.circular(5.0),
-            ),
-            validator: (value) {
-              if (value == null || value.isEmpty) {
-                // Fluttertoast.showToast(
-                //     msg: "Please enter your ID number", // Toast message
-                //     toastLength:
-                //         Toast.LENGTH_SHORT, // Duration for message display
-                //     gravity: ToastGravity.CENTER, // Position of toast message
-                //     timeInSecForIosWeb: 1, // Duration in seconds for iOS
-                //     backgroundColor:
-                //         Colors.red, // Background color for toast message
-                //     textColor: Colors.white, // Text color
-                //     fontSize: 16.0 // Font size
-                //     );
-                CommonUtils.showToast('Please enter your ID number');
-                return '';
-              }
-              return null; // 无错误时返回null
-            },
-          ),
-        ),
-
-        buildTableRow(
-          'First Name',
-          InputWidget(
-            hintText: "Enter your First Name",
-            controller: firstController,
-            cursorHeight: 20,
-            textStyle: TextStyle(height: 1.5),
-            errorStyle: TextStyle(
-              height: 0, // 减小错误文本的高度影响
-              color: Colors.transparent, // 使其透明
-            ),
-            border: OutlineInputBorder(
-              // 设置边框的颜色和宽度
-              borderSide:
-                  BorderSide(color: Colors.grey.withOpacity(0.5), width: 0.5),
-              // 设置边框的圆角
-              borderRadius: BorderRadius.circular(5.0),
-            ),
-            validator: (value) {
-              if (value == null || value.isEmpty) {
-                // Fluttertoast.showToast(
-                //     msg: "Please enter your ID number", // Toast message
-                //     toastLength:
-                //         Toast.LENGTH_SHORT, // Duration for message display
-                //     gravity: ToastGravity.CENTER, // Position of toast message
-                //     timeInSecForIosWeb: 1, // Duration in seconds for iOS
-                //     backgroundColor:
-                //         Colors.red, // Background color for toast message
-                //     textColor: Colors.white, // Text color
-                //     fontSize: 16.0 // Font size
-                //     );
-                CommonUtils.showToast('Please enter your First Name');
-                return '';
-              }
-              return null; // 无错误时返回null
-            },
-          ),
-        ),
-
-        // buildTableRow('Please Select Gender', CustomDropdown(null,)),
-      ],
     );
   }
 
-  TableRow buildTableRow(String leftText, Widget item) {
-    return TableRow(
-      children: [
-        Container(
-          height: 40,
-          padding: EdgeInsets.only(left: 8.0, top: 5), // 水平内边距
-          alignment: Alignment.centerLeft, // 水平靠左
-          child: Text(leftText),
+  Widget buildTableRow(
+      String label, TextEditingController controller, String emptyError) {
+    return Padding(
+      padding: const EdgeInsets.all(8.0),
+      child: TextFormField(
+        controller: controller,
+        onChanged: ,
+        decoration: InputDecoration(
+          focusedBorder: OutlineInputBorder(
+            borderSide: BorderSide(
+              color: Colors.orange.withOpacity(0.5), // 聚焦时的颜色
+              width: 2.0,
+            ),
+          ),
+          // 启用时的边框
+          enabledBorder: OutlineInputBorder(
+            borderSide: BorderSide(
+              color: Colors.grey.withOpacity(0.5), // 启用时的颜色
+              width: 2.0,
+            ),
+          ),
+          labelText: label,
+          border: OutlineInputBorder(),
         ),
-        Container(
-          height: 40,
-          padding: EdgeInsets.only(right: 8.0, top: 5), // 水平内边距
-          alignment: Alignment.centerLeft, // 水平靠左
-          child: item,
-        ),
-      ],
+        validator: (value) {
+          if (value == null || value.isEmpty) {
+            Fluttertoast.showToast(msg: emptyError);
+            return emptyError; // Return a space to denote an error but not expand the TextFormField
+          }
+          return null;
+        },
+      ),
     );
   }
 
-  Widget SubmitButton() {
-    return ElevatedButton(
-      onPressed: () {
-        if (_formKey.currentState?.validate() ?? false) {
-          // 表单验证成功
-          print('Form is valid');
-        } else {
-          // 表单验证失败
-          print('Form is not valid');
-        }
-      },
-      child: Text("Submit"),
+  void _submitForm() {
+    if (_formKey.currentState?.validate() ?? false) {
+      // 如果表单验证通过
+      Fluttertoast.showToast(msg: "Form is valid");
+      // 使用Flutter标准的导航方法
+      Navigator.of(context).push(MaterialPageRoute(
+        builder: (context) => UserInfoPage2(),
+      ));
+    } else {
+      // 如果表单验证不通过，也可以在这里处理
+      Fluttertoast.showToast(msg: "Please correct the errors in the form.");
+    }
+  }
+
+  dynamic getDropListItemByValue(List<dynamic>? list, String val) {
+    if (list == null) {
+      return null;
+    }
+    for (var item in list) {
+      if (item.value == val) {
+        return item;
+      }
+    }
+    return null;
+  }
+
+  InputDecoration getDecoration(String label) {
+    return InputDecoration(
+      focusedBorder: OutlineInputBorder(
+        borderSide:
+            BorderSide(color: Colors.orange.withOpacity(0.5), width: 2.0),
+      ),
+      enabledBorder: OutlineInputBorder(
+        borderSide: BorderSide(color: Colors.grey.withOpacity(0.5), width: 2.0),
+      ),
+      labelText: label,
     );
   }
 }

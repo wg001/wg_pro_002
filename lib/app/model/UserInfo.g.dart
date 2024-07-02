@@ -214,97 +214,77 @@ Map<String, dynamic> _$ContactListToJson(ContactList instance) =>
 
 Options _$OptionsFromJson(Map<String, dynamic> json) => Options(
       jobCategoryOptions: (json['job_category_options'] as List<dynamic>?)
-          ?.map((e) =>
-              Contacter01Relationship.fromJson(e as Map<String, dynamic>))
+          ?.map((e) => CommonListOption.fromJson(e as Map<String, dynamic>))
           .toList(),
       educationDegreeOptions:
           (json['education_degree_options'] as List<dynamic>?)
-              ?.map((e) =>
-                  Contacter01Relationship.fromJson(e as Map<String, dynamic>))
+              ?.map((e) => CommonListOption.fromJson(e as Map<String, dynamic>))
               .toList(),
       genderOptions: (json['gender_options'] as List<dynamic>?)
-          ?.map((e) =>
-              Contacter01Relationship.fromJson(e as Map<String, dynamic>))
+          ?.map((e) => CommonListOption.fromJson(e as Map<String, dynamic>))
           .toList(),
       idTypeOptions: (json['id_type_options'] as List<dynamic>?)
           ?.map((e) => IdTypeOption.fromJson(e as Map<String, dynamic>))
           .toList(),
       idType1Options: (json['id_type_1_options'] as List<dynamic>?)
-          ?.map((e) =>
-              Contacter01Relationship.fromJson(e as Map<String, dynamic>))
+          ?.map((e) => CommonListOption.fromJson(e as Map<String, dynamic>))
           .toList(),
       maritalStatusOptions: (json['marital_status_options'] as List<dynamic>?)
-          ?.map((e) =>
-              Contacter01Relationship.fromJson(e as Map<String, dynamic>))
+          ?.map((e) => CommonListOption.fromJson(e as Map<String, dynamic>))
           .toList(),
       quantityOfChildrenOptions:
           (json['quantity_of_children_options'] as List<dynamic>?)
-              ?.map((e) =>
-                  Contacter01Relationship.fromJson(e as Map<String, dynamic>))
+              ?.map((e) => CommonListOption.fromJson(e as Map<String, dynamic>))
               .toList(),
       currentWorkingYearOptions:
           (json['current_working_year_options'] as List<dynamic>?)
-              ?.map((e) =>
-                  Contacter01Relationship.fromJson(e as Map<String, dynamic>))
+              ?.map((e) => CommonListOption.fromJson(e as Map<String, dynamic>))
               .toList(),
       familyMonthlyIncomeOptions:
           (json['family_monthly_income_options'] as List<dynamic>?)
-              ?.map((e) =>
-                  Contacter01Relationship.fromJson(e as Map<String, dynamic>))
+              ?.map((e) => CommonListOption.fromJson(e as Map<String, dynamic>))
               .toList(),
       presentAddressTimeOptions:
           (json['present_address_time_options'] as List<dynamic>?)
-              ?.map((e) =>
-                  Contacter01Relationship.fromJson(e as Map<String, dynamic>))
+              ?.map((e) => CommonListOption.fromJson(e as Map<String, dynamic>))
               .toList(),
       houseStatusOptions: (json['house_status_options'] as List<dynamic>?)
-          ?.map((e) =>
-              Contacter01Relationship.fromJson(e as Map<String, dynamic>))
+          ?.map((e) => CommonListOption.fromJson(e as Map<String, dynamic>))
           .toList(),
       loanPurposeOptions: (json['loan_purpose_options'] as List<dynamic>?)
-          ?.map((e) =>
-              Contacter01Relationship.fromJson(e as Map<String, dynamic>))
+          ?.map((e) => CommonListOption.fromJson(e as Map<String, dynamic>))
           .toList(),
       isInPhilippines: (json['is_in_philippines'] as List<dynamic>?)
-          ?.map((e) =>
-              Contacter01Relationship.fromJson(e as Map<String, dynamic>))
+          ?.map((e) => CommonListOption.fromJson(e as Map<String, dynamic>))
           .toList(),
       latest3MonthsIncomeOptions:
           (json['latest_3_months_income_options'] as List<dynamic>?)
-              ?.map((e) =>
-                  Contacter01Relationship.fromJson(e as Map<String, dynamic>))
+              ?.map((e) => CommonListOption.fromJson(e as Map<String, dynamic>))
               .toList(),
       contacter01Relationship:
           (json['contacter_01_relationship'] as List<dynamic>?)
-              ?.map((e) =>
-                  Contacter01Relationship.fromJson(e as Map<String, dynamic>))
+              ?.map((e) => CommonListOption.fromJson(e as Map<String, dynamic>))
               .toList(),
       contacter02Relationship:
           (json['contacter_02_relationship'] as List<dynamic>?)
-              ?.map((e) =>
-                  Contacter01Relationship.fromJson(e as Map<String, dynamic>))
+              ?.map((e) => CommonListOption.fromJson(e as Map<String, dynamic>))
               .toList(),
       employmentStatusOptions:
           (json['employment_status_options'] as List<dynamic>?)
-              ?.map((e) =>
-                  Contacter01Relationship.fromJson(e as Map<String, dynamic>))
+              ?.map((e) => CommonListOption.fromJson(e as Map<String, dynamic>))
               .toList(),
       employeeJobTypeOptions:
           (json['employee_job_type_options'] as List<dynamic>?)
-              ?.map((e) =>
-                  Contacter01Relationship.fromJson(e as Map<String, dynamic>))
+              ?.map((e) => CommonListOption.fromJson(e as Map<String, dynamic>))
               .toList(),
       jobCategoryOptions01: (json['job_category_options_01'] as List<dynamic>?)
-          ?.map((e) =>
-              Contacter01Relationship.fromJson(e as Map<String, dynamic>))
+          ?.map((e) => CommonListOption.fromJson(e as Map<String, dynamic>))
           .toList(),
       jobCategoryOptions02: (json['job_category_options_02'] as List<dynamic>?)
-          ?.map((e) =>
-              Contacter01Relationship.fromJson(e as Map<String, dynamic>))
+          ?.map((e) => CommonListOption.fromJson(e as Map<String, dynamic>))
           .toList(),
       monthlyIncomeOptions: (json['monthly_income_options'] as List<dynamic>?)
-          ?.map((e) =>
-              Contacter01Relationship.fromJson(e as Map<String, dynamic>))
+          ?.map((e) => CommonListOption.fromJson(e as Map<String, dynamic>))
           .toList(),
       withdrawChannelOptions: (json['withdraw_channel_options']
               as List<dynamic>?)
@@ -338,15 +318,13 @@ Map<String, dynamic> _$OptionsToJson(Options instance) => <String, dynamic>{
       'withdraw_channel_options': instance.withdrawChannelOptions,
     };
 
-Contacter01Relationship _$Contacter01RelationshipFromJson(
-        Map<String, dynamic> json) =>
-    Contacter01Relationship(
+CommonListOption _$CommonListOptionFromJson(Map<String, dynamic> json) =>
+    CommonListOption(
       id: json['id'] as String?,
       value: json['value'] as String?,
     );
 
-Map<String, dynamic> _$Contacter01RelationshipToJson(
-        Contacter01Relationship instance) =>
+Map<String, dynamic> _$CommonListOptionToJson(CommonListOption instance) =>
     <String, dynamic>{
       'id': instance.id,
       'value': instance.value,

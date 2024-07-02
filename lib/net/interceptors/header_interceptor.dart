@@ -15,7 +15,8 @@ class HeaderInterceptor extends InterceptorsWrapper {
     }
     options.headers[Config.APP_NAME_KEY] = config.appName;
     options.headers[Config.API_VERSION_KEY] = config.apiVersion;
-    options.headers[Config.APP_VERSION_KEY] = config.clientVersion;
+    options.headers[Config.API_VERSION_KEY] = config.apiVersion;
+    options.headers[Config.APP_INSTALLMENT] = true;
 
     return super.onRequest(options, handler);
   }

@@ -19,9 +19,10 @@ class Config {
   static const APP_NAME_KEY = 'app-name';
   static const APP_VERSION_KEY = 'app-version';
   static const API_VERSION_KEY = 'api-version';
+  static const APP_INSTALLMENT = 'intallment';
 
 
-  
+
 
 
   String appName = "Prima Loan";

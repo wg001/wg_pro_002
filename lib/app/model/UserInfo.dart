@@ -295,47 +295,47 @@ class ContactList {
 @JsonSerializable()
 class Options {
     @JsonKey(name: "job_category_options")
-    List<Contacter01Relationship>? jobCategoryOptions;
+    List<CommonListOption>? jobCategoryOptions;
     @JsonKey(name: "education_degree_options")
-    List<Contacter01Relationship>? educationDegreeOptions;
+    List<CommonListOption>? educationDegreeOptions;
     @JsonKey(name: "gender_options")
-    List<Contacter01Relationship>? genderOptions;
+    List<CommonListOption>? genderOptions;
     @JsonKey(name: "id_type_options")
     List<IdTypeOption>? idTypeOptions;
     @JsonKey(name: "id_type_1_options")
-    List<Contacter01Relationship>? idType1Options;
+    List<CommonListOption>? idType1Options;
     @JsonKey(name: "marital_status_options")
-    List<Contacter01Relationship>? maritalStatusOptions;
+    List<CommonListOption>? maritalStatusOptions;
     @JsonKey(name: "quantity_of_children_options")
-    List<Contacter01Relationship>? quantityOfChildrenOptions;
+    List<CommonListOption>? quantityOfChildrenOptions;
     @JsonKey(name: "current_working_year_options")
-    List<Contacter01Relationship>? currentWorkingYearOptions;
+    List<CommonListOption>? currentWorkingYearOptions;
     @JsonKey(name: "family_monthly_income_options")
-    List<Contacter01Relationship>? familyMonthlyIncomeOptions;
+    List<CommonListOption>? familyMonthlyIncomeOptions;
     @JsonKey(name: "present_address_time_options")
-    List<Contacter01Relationship>? presentAddressTimeOptions;
+    List<CommonListOption>? presentAddressTimeOptions;
     @JsonKey(name: "house_status_options")
-    List<Contacter01Relationship>? houseStatusOptions;
+    List<CommonListOption>? houseStatusOptions;
     @JsonKey(name: "loan_purpose_options")
-    List<Contacter01Relationship>? loanPurposeOptions;
+    List<CommonListOption>? loanPurposeOptions;
     @JsonKey(name: "is_in_philippines")
-    List<Contacter01Relationship>? isInPhilippines;
+    List<CommonListOption>? isInPhilippines;
     @JsonKey(name: "latest_3_months_income_options")
-    List<Contacter01Relationship>? latest3MonthsIncomeOptions;
+    List<CommonListOption>? latest3MonthsIncomeOptions;
     @JsonKey(name: "contacter_01_relationship")
-    List<Contacter01Relationship>? contacter01Relationship;
+    List<CommonListOption>? contacter01Relationship;
     @JsonKey(name: "contacter_02_relationship")
-    List<Contacter01Relationship>? contacter02Relationship;
+    List<CommonListOption>? contacter02Relationship;
     @JsonKey(name: "employment_status_options")
-    List<Contacter01Relationship>? employmentStatusOptions;
+    List<CommonListOption>? employmentStatusOptions;
     @JsonKey(name: "employee_job_type_options")
-    List<Contacter01Relationship>? employeeJobTypeOptions;
+    List<CommonListOption>? employeeJobTypeOptions;
     @JsonKey(name: "job_category_options_01")
-    List<Contacter01Relationship>? jobCategoryOptions01;
+    List<CommonListOption>? jobCategoryOptions01;
     @JsonKey(name: "job_category_options_02")
-    List<Contacter01Relationship>? jobCategoryOptions02;
+    List<CommonListOption>? jobCategoryOptions02;
     @JsonKey(name: "monthly_income_options")
-    List<Contacter01Relationship>? monthlyIncomeOptions;
+    List<CommonListOption>? monthlyIncomeOptions;
     @JsonKey(name: "withdraw_channel_options")
     List<WithdrawChannelOption>? withdrawChannelOptions;
 
@@ -370,20 +370,20 @@ class Options {
 }
 
 @JsonSerializable()
-class Contacter01Relationship {
+class CommonListOption {
     @JsonKey(name: "id")
     String? id;
     @JsonKey(name: "value")
     String? value;
 
-    Contacter01Relationship({
+    CommonListOption({
         this.id,
         this.value,
     });
 
-    factory Contacter01Relationship.fromJson(Map<String, dynamic> json) => _$Contacter01RelationshipFromJson(json);
+    factory CommonListOption.fromJson(Map<String, dynamic> json) => _$CommonListOptionFromJson(json);
 
-    Map<String, dynamic> toJson() => _$Contacter01RelationshipToJson(this);
+    Map<String, dynamic> toJson() => _$CommonListOptionToJson(this);
 }
 
 @JsonSerializable()
