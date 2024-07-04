@@ -79,106 +79,57 @@ class _UserInfoPage1State extends State<UserInfoPage1>
     if (isLoading) {
       return Scaffold(
         appBar: AppBar(title: Text('Loading...')),
-        body: Center(child: CircularProgressIndicator()),
+        body: SafeArea(child: CircularProgressIndicator()),
       );
     }
 
     if (userInfo == null) {
       return Scaffold(
         appBar: AppBar(title: Text('Error')),
-        body: Center(child: Text("Failed to load user information")),
+        body: SafeArea(
+            child: Center(child: Text("Failed to load user information"))),
       );
     }
 
     return Scaffold(
-      appBar: AppBar(
-        title: Text('User Information Page1'),
-        backgroundColor: Colors.orange,
-      ),
-      body: isLoading
-          ? Center(child: CircularProgressIndicator())
-          : SingleChildScrollView(
-              child: Form(
-                key: _formKey,
-                child: Container(
-                  height: MathUtils.screenHeight,
-                  decoration: BoxDecoration(color: Colors.orange),
-                  child: Column(
-                    children: <Widget>[
-                      headLable(),
-                      Container(
-                        padding:
-                            const EdgeInsets.only(left: 8, right: 8, top: 5),
-                        decoration: BoxDecoration(
-                          color: Colors.white,
-                          borderRadius: BorderRadius.circular(20),
-                          boxShadow: [
-                            BoxShadow(
-                              color: Colors.black.withOpacity(0.2),
-                              blurRadius: 10,
-                              spreadRadius: 5,
-                            ),
-                          ],
-                        ),
-                        child: Column(
-                          children: <Widget>[
-                            buildTableRow("ID No.", idController,
-                                "Please enter your ID number"),
-                            Padding(
-                                padding: edgeInsets,
-                                child: GenericDropdown<CommonListOption>(
-                                  decoration: getDecoration('Gender'),
-                                  items: userInfo?.options?.genderOptions,
-                                  getDisplayValue: (CommonListOption item) =>
-                                      item.value ?? '',
-                                  getValue: (CommonListOption item) =>
-                                      item.id ?? '',
-                                  onChanged: (selectedId) {
-                                    setState(() {
-                                      genderId = selectedId;
-                                    });
-                                    print("Selected User ID: $selectedId");
-                                  },
-                                  selectedValue: getDropListItemByValue(
-                                      userInfo?.options?.genderOptions,
-                                      userInfo?.gender ??
-                                          ''), // Optional: initially select "Bob"
-                                )),
-                            buildTableRow("ID No.", idController,
-                                "Please enter your ID number"),
-                            buildTableRow("ID No.", idController,
-                                "Please enter your ID number"),
-                            buildTableRow("ID No.", idController,
-                                "Please enter your ID number"),
-                            ElevatedButton(
-                              onPressed: _submitForm,
-                              child: Text("Submit"),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
+      body: SafeArea(
+        child: isLoading
+            ? Center(child: CircularProgressIndicator())
+            : Column(
+                children: <Widget>[
+                  background_container(context),
+                ],
               ),
-            ),
+      ),
     );
   }
 
-  Widget headLable() {
-    return SizedBox(
-      height: 50, // 预留足够空间让Card重叠
-      child: Card(
-        color: Colors.orange,
-        margin: EdgeInsets.zero,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.zero,
-        ),
-        elevation: 0,
-        child: ListTile(
-          title: Text("Base info"),
-        ),
-      ),
+  Column background_container(BuildContext context) {
+    return Column(
+      children: [
+        Container(
+          decoration: BoxDecoration(
+              color: Colors.orange,
+              borderRadius: BorderRadius.only(
+                  bottomLeft: Radius.circular(20),
+                  bottomRight: Radius.circular(20))),
+          width: double.infinity,
+          child: Column(
+            children: [
+              Padding(
+                  padding: EdgeInsets.symmetric(horizontal: 15, vertical: 0),
+                  child: SizedBox(
+                    width: 300,
+                    height: 30,
+                    child: CustomPaint(
+                      // size: Size(500, 100), // 定义画布的大小
+                      painter: LineWithCirclesPainter(),
+                    ),
+                  )),
+            ],
+          ),
+        )
+      ],
     );
   }
 
@@ -277,5 +228,85 @@ class _UserInfoPage1State extends State<UserInfoPage1>
       ),
       labelText: label,
     );
+  }
+}
+
+class LineWithCirclesPainter extends CustomPainter {
+  @override
+  void paint(Canvas canvas, Size size) {
+    // 线条画笔
+    final linePaint = Paint()
+      ..color = Colors.grey
+      ..strokeWidth = 2
+      ..style = PaintingStyle.stroke;
+
+    // 圆的画笔
+    final circlePaintBig = Paint()
+      ..color = Colors.white
+      ..style = PaintingStyle.fill;
+
+    final circlePaintSmall = Paint()
+      ..color = Colors.grey
+      ..style = PaintingStyle.fill;
+
+    // 文字样式
+    // 文字样式
+    final textStyle = TextStyle(
+      color: Colors.white,
+      fontSize: 16,
+      fontWeight: FontWeight.bold,
+      fontStyle: FontStyle.italic,
+      decoration: TextDecoration.underline,
+      decorationColor: Colors.white,
+      decorationStyle: TextDecorationStyle.dotted,
+    );
+    final textStyleNormal = TextStyle(
+      color: Colors.grey,
+      fontSize: 12,
+      fontWeight: FontWeight.bold,
+      fontStyle: FontStyle.italic,
+      decoration: TextDecoration.underline,
+      decorationColor: Colors.grey,
+      decorationStyle: TextDecorationStyle.dotted,
+    );
+
+    // 计算位置
+    final double midY = size.height / 2;
+    final double thirdWidth = size.width / 2;
+
+    // 圆的位置
+    final Offset firstCirclePos = Offset(0, midY);
+    final Offset secondCirclePos = Offset(thirdWidth, midY);
+    final Offset thirdCirclePos = Offset(2 * thirdWidth, midY);
+    // 画线
+    canvas.drawLine(Offset(0, midY), Offset(size.width, midY), linePaint);
+    // 画圆
+    canvas.drawCircle(firstCirclePos, 11, circlePaintBig);
+    canvas.drawCircle(secondCirclePos, 10, circlePaintSmall);
+    canvas.drawCircle(thirdCirclePos, 10, circlePaintSmall);
+
+    // 连接圆的线
+
+    // 绘制文字
+    drawText(canvas, "First", firstCirclePos + Offset(-20, 20), textStyle);
+    drawText(
+        canvas, "Second", secondCirclePos + Offset(-20, 20), textStyleNormal);
+    drawText(
+        canvas, "Third", thirdCirclePos + Offset(-20, 20), textStyleNormal);
+  }
+
+  void drawText(Canvas canvas, String text, Offset position, TextStyle style) {
+    final textSpan = TextSpan(text: text, style: style);
+    final textPainter = TextPainter(
+      text: textSpan,
+      textDirection: TextDirection.ltr,
+    );
+    textPainter.layout();
+    textPainter.paint(canvas, position);
+  }
+
+  @override
+  bool shouldRepaint(covariant CustomPainter oldDelegate) {
+    return false;
   }
 }
