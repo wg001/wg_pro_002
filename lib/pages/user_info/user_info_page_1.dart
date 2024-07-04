@@ -1,6 +1,10 @@
+import 'dart:io';
+
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/widgets.dart';
 import 'package:fluttertoast/fluttertoast.dart';
+import 'package:image_picker/image_picker.dart';
 import 'package:wg_pro_002/app/model/UserInfo.dart';
 import 'package:wg_pro_002/app/model/UserInfoForm.dart';
 import 'package:wg_pro_002/common/response_conf.dart';
@@ -36,6 +40,11 @@ class _UserInfoPage1State extends State<UserInfoPage1>
 
   bool isLoading = true; // 添加一个加载状态标志
 
+  FocusNode idNo = FocusNode();
+
+  File? _image;
+  final ImagePicker _picker = ImagePicker();
+
   final _formKey = GlobalKey<
       FormState>(); // Keep using the form key for overall form validation
 
@@ -47,6 +56,16 @@ class _UserInfoPage1State extends State<UserInfoPage1>
     genderIdController = TextEditingController();
     idTypeController = TextEditingController();
     _loadUserData();
+  }
+
+  // Function to handle image picking
+  Future<void> _pickImage() async {
+    final pickedFile = await _picker.pickImage(source: ImageSource.camera);
+    if (pickedFile != null) {
+      setState(() {
+        _image = File(pickedFile.path);
+      });
+    }
   }
 
   Future<void> _loadUserData() async {
@@ -72,21 +91,21 @@ class _UserInfoPage1State extends State<UserInfoPage1>
     super.dispose();
   }
 
-  EdgeInsets edgeInsets = EdgeInsets.only(left: 8, right: 8, top: 5);
+  EdgeInsets edgeInsets = const EdgeInsets.only(left: 8, right: 8, top: 5);
 
   @override
   Widget build(BuildContext context) {
     if (isLoading) {
       return Scaffold(
-        appBar: AppBar(title: Text('Loading...')),
-        body: SafeArea(child: CircularProgressIndicator()),
+        appBar: AppBar(title: const Text('Loading...')),
+        body: const SafeArea(child: CircularProgressIndicator()),
       );
     }
 
     if (userInfo == null) {
       return Scaffold(
-        appBar: AppBar(title: Text('Error')),
-        body: SafeArea(
+        appBar: AppBar(title: const Text('Error')),
+        body: const SafeArea(
             child: Center(child: Text("Failed to load user information"))),
       );
     }
@@ -94,10 +113,22 @@ class _UserInfoPage1State extends State<UserInfoPage1>
     return Scaffold(
       body: SafeArea(
         child: isLoading
-            ? Center(child: CircularProgressIndicator())
-            : Column(
-                children: <Widget>[
-                  background_container(context),
+            ? const Center(child: CircularProgressIndicator())
+            : Stack(
+                children: [
+                  Positioned(
+                    top: 0,
+                    left: 0,
+                    right: 0,
+                    child: background_container(context),
+                  ),
+                  Positioned(
+                    top: 120, // Adjust this value as needed
+                    left: 0,
+                    right: 0,
+                    bottom: 0,
+                    child: main_container(),
+                  ),
                 ],
               ),
       ),
@@ -108,85 +139,80 @@ class _UserInfoPage1State extends State<UserInfoPage1>
     return Column(
       children: [
         Container(
-          decoration: BoxDecoration(
-              color: Colors.orange,
-              borderRadius: BorderRadius.only(
-                  bottomLeft: Radius.circular(20),
-                  bottomRight: Radius.circular(20))),
           width: double.infinity,
+          height: 240,
+          decoration: const BoxDecoration(
+            color: Colors.orange,
+            borderRadius: BorderRadius.only(
+              bottomLeft: Radius.circular(20),
+              bottomRight: Radius.circular(20),
+            ),
+          ),
           child: Column(
             children: [
+              const SizedBox(height: 20),
               Padding(
-                  padding: EdgeInsets.symmetric(horizontal: 15, vertical: 0),
-                  child: SizedBox(
-                    width: 300,
-                    height: 30,
-                    child: CustomPaint(
-                      // size: Size(500, 100), // 定义画布的大小
-                      painter: LineWithCirclesPainter(),
+                padding: const EdgeInsets.symmetric(horizontal: 15),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    GestureDetector(
+                      onTap: () {
+                        Navigator.of(context).pop();
+                      },
+                      child: const Icon(Icons.arrow_back, color: Colors.white),
                     ),
-                  )),
+                    const Text(
+                      'Personal Info',
+                      style: TextStyle(
+                          fontSize: 20,
+                          fontWeight: FontWeight.w600,
+                          color: Colors.white),
+                    ),
+                    const SizedBox()
+                  ],
+                ),
+              ),
+              Padding(
+                padding:
+                    const EdgeInsets.only(top: 0), // Remove vertical padding
+                child: SizedBox(
+                  width: 300,
+                  height: 60,
+                  child: CustomPaint(
+                    painter: LineWithCirclesPainter(),
+                  ),
+                ),
+              )
             ],
           ),
-        )
+        ),
       ],
     );
   }
 
-  Widget buildTableRow(
-      String label, TextEditingController controller, String emptyError) {
-    return Container(
-      height: 40,
-      margin: EdgeInsets.only(left: 8, top: 5, right: 8, bottom: 5),
-      padding: EdgeInsets.only(left: 8, top: 5, right: 8, bottom: 5),
-      decoration: BoxDecoration(
-        color: Color.fromARGB(255, 241, 241, 241),
-        borderRadius: BorderRadius.circular(5),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.2),
-            spreadRadius: 1,
-            blurRadius: 5,
-            offset: Offset(0, 3),
-          ),
-        ],
-      ),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.center,
-        mainAxisSize: MainAxisSize.min,
-        children: <Widget>[
-          Text(label),
-          Expanded(
-            child: Padding(
-              padding: EdgeInsets.only(left: 10),
-              child: TextFormField(
-                controller: controller,
-                style: TextStyle(
-                  fontSize: 16, // 控制字体大小
-                ),
-
-                textAlign: TextAlign.right, // 右对齐
-                cursorHeight: 20, // 设置光标的高度
-                decoration: InputDecoration(
-                  hintText: 'Please input',
-                  hintStyle: TextStyle(
-                    color: Colors.grey.withOpacity(0.3), // 设置提示文字的颜色和透明度
-                  ),
-                  errorStyle: TextStyle(height: 0),
-                  isDense: true, // 减少内部垂直填充
-                  contentPadding: EdgeInsets.symmetric(vertical: 1), // 垂直居中
-                  border: InputBorder.none,
-                ),
-                validator: (value) {
-                  if (value == null || value.isEmpty) {
-                    return '';
-                  }
-                  return null;
-                },
-              ),
+  Widget main_container() {
+    return SingleChildScrollView(
+      child: Container(
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(20),
+          color: Colors.white,
+        ),
+        width: MediaQuery.of(context).size.width * 0.95,
+        padding: const EdgeInsets.all(20), // Appropriate padding
+        child: Column(
+          children: [
+            const SizedBox(height: 10),
+            name(), // Ensure these widgets do not have a fixed height that could cause overflow
+            const SizedBox(height: 10),
+            amount(),
+            ElevatedButton(
+              onPressed: _pickImage,
+              child: const Text('Take Picture'),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }
@@ -197,7 +223,7 @@ class _UserInfoPage1State extends State<UserInfoPage1>
       Fluttertoast.showToast(msg: "Form is valid");
       // 使用Flutter标准的导航方法
       Navigator.of(context).push(MaterialPageRoute(
-        builder: (context) => UserInfoPage2(),
+        builder: (context) => const UserInfoPage2(),
       ));
     } else {
       // 如果表单验证不通过，也可以在这里处理
@@ -229,6 +255,52 @@ class _UserInfoPage1State extends State<UserInfoPage1>
       labelText: label,
     );
   }
+
+  Padding name() {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 10),
+      child: TextField(
+        keyboardType: TextInputType.number,
+        focusNode: idNo,
+        controller: idController,
+        decoration: InputDecoration(
+          contentPadding:
+              const EdgeInsets.symmetric(horizontal: 10, vertical: 10),
+          labelText: 'ID NO.',
+          labelStyle: TextStyle(fontSize: 17, color: Colors.grey.shade500),
+          enabledBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(10),
+              borderSide: const BorderSide(width: 2, color: Color(0xffC5C5C5))),
+          focusedBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(10),
+              borderSide: const BorderSide(width: 2, color: Color(0xff368983))),
+        ),
+      ),
+    );
+  }
+
+  Padding amount() {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 10),
+      child: TextField(
+        keyboardType: TextInputType.number,
+        focusNode: idNo,
+        controller: idController,
+        decoration: InputDecoration(
+          contentPadding:
+              const EdgeInsets.symmetric(horizontal: 10, vertical: 10),
+          labelText: 'ID NO.',
+          labelStyle: TextStyle(fontSize: 17, color: Colors.grey.shade500),
+          enabledBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(10),
+              borderSide: const BorderSide(width: 2, color: Color(0xffC5C5C5))),
+          focusedBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(10),
+              borderSide: const BorderSide(width: 2, color: Color(0xff368983))),
+        ),
+      ),
+    );
+  }
 }
 
 class LineWithCirclesPainter extends CustomPainter {
@@ -236,7 +308,7 @@ class LineWithCirclesPainter extends CustomPainter {
   void paint(Canvas canvas, Size size) {
     // 线条画笔
     final linePaint = Paint()
-      ..color = Colors.grey
+      ..color = const Color.fromARGB(255, 221, 221, 221)
       ..strokeWidth = 2
       ..style = PaintingStyle.stroke;
 
@@ -246,12 +318,12 @@ class LineWithCirclesPainter extends CustomPainter {
       ..style = PaintingStyle.fill;
 
     final circlePaintSmall = Paint()
-      ..color = Colors.grey
+      ..color = const Color.fromARGB(255, 221, 221, 221)
       ..style = PaintingStyle.fill;
 
     // 文字样式
     // 文字样式
-    final textStyle = TextStyle(
+    const textStyle = TextStyle(
       color: Colors.white,
       fontSize: 16,
       fontWeight: FontWeight.bold,
@@ -260,7 +332,7 @@ class LineWithCirclesPainter extends CustomPainter {
       decorationColor: Colors.white,
       decorationStyle: TextDecorationStyle.dotted,
     );
-    final textStyleNormal = TextStyle(
+    const textStyleNormal = TextStyle(
       color: Colors.grey,
       fontSize: 12,
       fontWeight: FontWeight.bold,
@@ -288,11 +360,12 @@ class LineWithCirclesPainter extends CustomPainter {
     // 连接圆的线
 
     // 绘制文字
-    drawText(canvas, "First", firstCirclePos + Offset(-20, 20), textStyle);
     drawText(
-        canvas, "Second", secondCirclePos + Offset(-20, 20), textStyleNormal);
-    drawText(
-        canvas, "Third", thirdCirclePos + Offset(-20, 20), textStyleNormal);
+        canvas, "First", firstCirclePos + const Offset(-20, 20), textStyle);
+    drawText(canvas, "Second", secondCirclePos + const Offset(-20, 20),
+        textStyleNormal);
+    drawText(canvas, "Third", thirdCirclePos + const Offset(-20, 20),
+        textStyleNormal);
   }
 
   void drawText(Canvas canvas, String text, Offset position, TextStyle style) {
