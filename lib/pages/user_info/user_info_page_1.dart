@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
+import 'package:flutter_html/flutter_html.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:wg_pro_002/app/model/UserInfo.dart';
@@ -11,10 +12,15 @@ import 'package:wg_pro_002/common/response_conf.dart';
 import 'package:wg_pro_002/dao/dao_result.dart';
 import 'package:wg_pro_002/dao/user_dao.dart';
 import 'package:wg_pro_002/pages/user_info/user_info_page_2.dart';
+import 'package:wg_pro_002/utils/common_utils.dart';
 import 'package:wg_pro_002/utils/navigator_utils.dart';
 import 'package:wg_pro_002/widget/custom_dropdown.dart';
 import 'package:wg_pro_002/widget/input_widget.dart';
+import 'dart:html' as html;
+import 'dart:typed_data';
+import 'dart:async';
 
+// 特别为Web导入html库
 class UserInfoPage1 extends StatefulWidget {
   const UserInfoPage1({super.key});
 
@@ -42,8 +48,11 @@ class _UserInfoPage1State extends State<UserInfoPage1>
 
   FocusNode idNo = FocusNode();
 
-  File? _image;
-  final ImagePicker _picker = ImagePicker();
+  File? _image1File;
+  File? _image2File;
+
+  Uint8List? _image1Data;
+  Uint8List? _image2Data;
 
   final _formKey = GlobalKey<
       FormState>(); // Keep using the form key for overall form validation
@@ -59,16 +68,66 @@ class _UserInfoPage1State extends State<UserInfoPage1>
   }
 
   // Function to handle image picking
-  Future<void> _pickImage() async {
-    final pickedFile = await _picker.pickImage(source: ImageSource.camera);
-    if (pickedFile != null) {
-      setState(() {
-        _image = File(pickedFile.path);
-      });
+  Future<void> getImage() async {
+    if (CommonUtils.isWeb) {
+      final pickedFile =
+          await ImagePicker().pickImage(source: ImageSource.gallery);
+      if (pickedFile != null) {
+        // 在 Web 上，使用 readAsBytes() 方法读取文件数据
+        Uint8List imageData = await pickedFile.readAsBytes();
+        setState(() {
+          _image1Data = imageData;
+        });
+        // html.FileReader reader = html.FileReader();
+        // reader.readAsArrayBuffer(pickedFile.file);
+        // reader.onLoadEnd.listen((event) {
+        //   setState(() {
+        //     _imageData = reader.result as Uint8List;
+        //   });
+        // });
+      }
+    } else {
+      final pickedFile =
+          await ImagePicker().pickImage(source: ImageSource.gallery);
+      if (pickedFile != null) {
+        setState(() {
+          _image1File = File(pickedFile.path);
+        });
+      }
+    }
+  }
+
+  Future<void> getImage2() async {
+    if (CommonUtils.isWeb) {
+      final pickedFile =
+          await ImagePicker().pickImage(source: ImageSource.gallery);
+      if (pickedFile != null) {
+        // 在 Web 上，使用 readAsBytes() 方法读取文件数据
+        Uint8List imageData = await pickedFile.readAsBytes();
+        setState(() {
+          _image2Data = imageData;
+        });
+        // html.FileReader reader = html.FileReader();
+        // reader.readAsArrayBuffer(pickedFile.file);
+        // reader.onLoadEnd.listen((event) {
+        //   setState(() {
+        //     _imageData = reader.result as Uint8List;
+        //   });
+        // });
+      }
+    } else {
+      final pickedFile =
+          await ImagePicker().pickImage(source: ImageSource.gallery);
+      if (pickedFile != null) {
+        setState(() {
+          _image2File = File(pickedFile.path);
+        });
+      }
     }
   }
 
   Future<void> _loadUserData() async {
+    await Future.delayed(const Duration(seconds: 10));
     DataResult res = await UserDao.getUserInfo();
     if (res.result && res.data is UserInfo) {
       setState(() {
@@ -98,7 +157,7 @@ class _UserInfoPage1State extends State<UserInfoPage1>
     if (isLoading) {
       return Scaffold(
         appBar: AppBar(title: const Text('Loading...')),
-        body: const SafeArea(child: CircularProgressIndicator()),
+        body: const SafeArea(child: Center(child: CircularProgressIndicator())),
       );
     }
 
@@ -112,25 +171,23 @@ class _UserInfoPage1State extends State<UserInfoPage1>
 
     return Scaffold(
       body: SafeArea(
-        child: isLoading
-            ? const Center(child: CircularProgressIndicator())
-            : Stack(
-                children: [
-                  Positioned(
-                    top: 0,
-                    left: 0,
-                    right: 0,
-                    child: background_container(context),
-                  ),
-                  Positioned(
-                    top: 120, // Adjust this value as needed
-                    left: 0,
-                    right: 0,
-                    bottom: 0,
-                    child: main_container(),
-                  ),
-                ],
-              ),
+        child: Stack(
+          children: [
+            Positioned(
+              top: 0,
+              left: 0,
+              right: 0,
+              child: background_container(context),
+            ),
+            Positioned(
+              top: 120, // Adjust this value as needed
+              left: 0,
+              right: 0,
+              bottom: 0,
+              child: main_container(),
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -207,14 +264,93 @@ class _UserInfoPage1State extends State<UserInfoPage1>
             name(), // Ensure these widgets do not have a fixed height that could cause overflow
             const SizedBox(height: 10),
             amount(),
-            ElevatedButton(
-              onPressed: _pickImage,
-              child: const Text('Take Picture'),
-            ),
+            const SizedBox(height: 10),
+            image_container()
           ],
         ),
       ),
     );
+  }
+
+  Padding image_container() {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 1),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          Expanded(
+            child: image1(),
+          ),
+          Expanded(
+            child: image2(),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget image1() {
+    return Center(
+        child: GestureDetector(
+      onTap: () => getImage(),
+      child: Container(
+        width: MediaQuery.of(context).size.width * 0.4,
+        height: 80,
+        decoration: BoxDecoration(
+          color: Colors.white.withOpacity(0.5),
+          image: _image1File != null
+              ? DecorationImage(
+                  image: FileImage(_image1File!),
+                  fit: BoxFit.cover,
+                )
+              : _image1Data != null
+                  ? DecorationImage(
+                      image: MemoryImage(_image1Data!),
+                      fit: BoxFit.cover,
+                    )
+                  : null,
+          border: Border.all(color: Colors.grey[300]!, width: 2),
+          borderRadius: BorderRadius.circular(12),
+        ),
+        child: _image1File == null && _image1Data == null
+            ? const Center(
+                child: Text("Tap to select image",
+                    style: TextStyle(color: Colors.black)))
+            : null,
+      ),
+    ));
+  }
+
+  Widget image2() {
+    return Center(
+        child: GestureDetector(
+      onTap: () => getImage2(),
+      child: Container(
+        width: MediaQuery.of(context).size.width * 0.4,
+        height: 80,
+        decoration: BoxDecoration(
+          color: Colors.white.withOpacity(0.5),
+          image: _image2File != null
+              ? DecorationImage(
+                  image: FileImage(_image2File!),
+                  fit: BoxFit.cover,
+                )
+              : _image2Data != null
+                  ? DecorationImage(
+                      image: MemoryImage(_image2Data!),
+                      fit: BoxFit.cover,
+                    )
+                  : null,
+          border: Border.all(color: Colors.grey[300]!, width: 2),
+          borderRadius: BorderRadius.circular(12),
+        ),
+        child: _image2File == null && _image2Data == null
+            ? const Center(
+                child: Text("Tap to select image",
+                    style: TextStyle(color: Colors.black)))
+            : null,
+      ),
+    ));
   }
 
   void _submitForm() {

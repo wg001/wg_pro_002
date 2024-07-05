@@ -29,6 +29,10 @@ class CommonUtils {
 
   static const double DAYS_LIMIT = 30 * HOURS_LIMIT;
 
+  static final bool isWeb = kIsWeb;
+  static final bool isIOS = !isWeb && Platform.isIOS;
+  static final bool isAndroid = !isWeb && Platform.isAndroid;
+
   static Locale? curLocale;
 
   static String getDateStr(DateTime? date) {
