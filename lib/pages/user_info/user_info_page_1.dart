@@ -3,6 +3,7 @@ import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:image_picker/image_picker.dart';
@@ -13,7 +14,7 @@ import 'package:wg_pro_002/common/response_conf.dart';
 import 'package:wg_pro_002/dao/dao_result.dart';
 import 'package:wg_pro_002/dao/user_dao.dart';
 import 'package:wg_pro_002/pages/user_info/user_info_page_2.dart';
-import 'package:camera/camera.dart';
+import 'package:app_settings/app_settings.dart';
 
 const double paddingNum = 10;
 
@@ -33,20 +34,15 @@ class _UserInfoPage1State extends State<UserInfoPage1>
   TextEditingController? genderIdController;
   TextEditingController? idTypeController;
 
-  List<CameraDescription> _cameras = [];
-
   UserInfo? userInfo;
   bool isLoading = true;
-
-  CameraController? _frontCameraController;
-  CameraController? _backCameraController;
 
   FocusNode idNo = FocusNode();
   FocusNode firstName = FocusNode();
   Uint8List? _image1Data;
   Uint8List? _image2Data;
 
-  final bool _isPickingImage = false;
+  bool _isPickingImage = false;
 
   final _formKey = GlobalKey<FormState>();
 
@@ -58,52 +54,19 @@ class _UserInfoPage1State extends State<UserInfoPage1>
     genderIdController = TextEditingController();
     idTypeController = TextEditingController();
     _loadUserData();
-    if (!kIsWeb) {
-      _initializeCameras();
+  }
+
+  Future<void> getImage(bool isFirstImage, ImageSource source) async {
+    if (_isPickingImage) {
+      return; // 如果当前正在进行另一个图片选择操作，则直接返回
     }
-  }
+    _isPickingImage = true; // 设置正在进行图片选择的标志
 
-  Future<void> _initializeCameras() async {
-    _cameras = await availableCameras();
-    _initCamera(
-        _cameras.firstWhere(
-            (camera) => camera.lensDirection == CameraLensDirection.front),
-        true);
-    _initCamera(
-        _cameras.firstWhere(
-            (camera) => camera.lensDirection == CameraLensDirection.back),
-        false);
-  }
-
-  void _initCamera(
-      CameraDescription cameraDescription, bool isFrontCamera) async {
+    final ImagePicker picker = ImagePicker();
     try {
-      CameraController controller = CameraController(
-          cameraDescription, ResolutionPreset.medium,
-          enableAudio: false);
-      await controller.initialize();
-      setState(() {
-        if (isFrontCamera) {
-          _frontCameraController = controller;
-        } else {
-          _backCameraController = controller;
-        }
-      });
-    } catch (e) {
-      if (e is CameraException) {
-        _handleCameraException(e);
-      } else {
-        print('Error initializing camera: $e');
-      }
-    }
-  }
-
-  Future<void> getImage(bool isFirstImage, bool useFrontCamera) async {
-    if (kIsWeb) {
-      final picker = ImagePicker();
-      final XFile? image = await picker.pickImage(source: ImageSource.gallery);
-      if (image != null) {
-        Uint8List imageData = await image.readAsBytes(); // 使用异步方法
+      final XFile? pickedFile = await picker.pickImage(source: source);
+      if (pickedFile != null) {
+        Uint8List imageData = await pickedFile.readAsBytes();
         setState(() {
           if (isFirstImage) {
             _image1Data = imageData;
@@ -112,50 +75,16 @@ class _UserInfoPage1State extends State<UserInfoPage1>
           }
         });
       }
-    } else {
-      CameraController? controller =
-          useFrontCamera ? _frontCameraController : _backCameraController;
-      if (controller != null &&
-          controller.value.isInitialized &&
-          !controller.value.isTakingPicture) {
-        try {
-          XFile file = await controller.takePicture();
-          Uint8List imageData = await file.readAsBytes(); // 使用异步方法
-          setState(() {
-            isFirstImage ? _image1Data = imageData : _image2Data = imageData;
-          });
-        } catch (e) {
-          if (e is CameraException) {
-            _handleCameraException(e);
-          } else {
-            print("Error taking picture: $e");
-          }
-        }
+    } catch (e) {
+      // 处理异常
+      if (e is PlatformException) {
+        _handleCameraPermissionDenied(e);
+      } else {
+        // 其他类型的错误处理
+        print('Error: ${e.toString()}');
       }
-    }
-  }
-
-  void _handleCameraException(CameraException e) {
-    print('Camera error: ${e.code}, ${e.description}');
-    if (e.code == 'CameraAccessDeniedWithoutPrompt') {
-      showDialog(
-        context: context,
-        builder: (context) => AlertDialog(
-          title: const Text('Camera Permission'),
-          content: const Text(
-              'Camera access was denied. Please enable camera access in your settings.'),
-          actions: <Widget>[
-            TextButton(
-              onPressed: () {
-                Navigator.of(context).pop(); // Close the dialog
-                // Optionally, guide the user to the settings menu
-                // openAppSettings();  // Using a package like 'app_settings'
-              },
-              child: const Text('OK'),
-            ),
-          ],
-        ),
-      );
+    } finally {
+      _isPickingImage = false;
     }
   }
 
@@ -177,8 +106,10 @@ class _UserInfoPage1State extends State<UserInfoPage1>
 
   @override
   void dispose() {
-    idController.dispose();
-    firstController.dispose();
+    idNo.dispose();
+    firstName.dispose();
+    genderIdController?.dispose();
+    idTypeController?.dispose();
     super.dispose();
   }
 
@@ -190,27 +121,32 @@ class _UserInfoPage1State extends State<UserInfoPage1>
             appBar: AppBar(title: const Text('Loading...')),
             body: const Center(child: CircularProgressIndicator()),
           )
-        : Scaffold(
-            body: SafeArea(
-              child: Stack(
-                children: [
-                  Positioned(
-                    top: 0,
-                    left: 0,
-                    right: 0,
-                    child: background_container(context),
-                  ),
-                  Positioned(
-                    top: 120, // Adjust this value as needed
-                    left: 0,
-                    right: 0,
-                    bottom: 0,
-                    child: main_container(),
-                  ),
-                ],
+        : GestureDetector(
+            onTap: () {
+              // 当点击非输入字段区域时，关闭键盘
+              FocusScope.of(context).unfocus();
+            },
+            child: Scaffold(
+              body: SafeArea(
+                child: Stack(
+                  children: [
+                    Positioned(
+                      top: 0,
+                      left: 0,
+                      right: 0,
+                      child: background_container(context),
+                    ),
+                    Positioned(
+                      top: 120, // Adjust this value as needed
+                      left: 0,
+                      right: 0,
+                      bottom: 0,
+                      child: main_container(),
+                    ),
+                  ],
+                ),
               ),
-            ),
-          );
+            ));
   }
 
   Widget main_container() {
@@ -308,7 +244,7 @@ class _UserInfoPage1State extends State<UserInfoPage1>
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: paddingNum),
       child: TextField(
-        keyboardType: TextInputType.number,
+        keyboardType: TextInputType.text,
         focusNode: focuseNode,
         controller: controller,
         decoration: InputDecoration(
@@ -333,9 +269,15 @@ class _UserInfoPage1State extends State<UserInfoPage1>
         child: Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            imageWidget(_image1Data, () => getImage(true, true),
+            imageWidget(
+                _image1Data,
+                () => getImage(
+                    true, kIsWeb ? ImageSource.gallery : ImageSource.camera),
                 "Tap to select image 1"),
-            imageWidget(_image2Data, () => getImage(false, false),
+            imageWidget(
+                _image2Data,
+                () => getImage(
+                    false, kIsWeb ? ImageSource.gallery : ImageSource.camera),
                 "Tap to select image 2"),
           ],
         ));
@@ -370,6 +312,43 @@ class _UserInfoPage1State extends State<UserInfoPage1>
       onPressed: _submitForm,
       child: const Text('Submit'),
     );
+  }
+
+  void _handleCameraPermissionDenied(PlatformException e) {
+    if (e.code == 'camera_access_denied') {
+      showDialog(
+        context: context,
+        builder: (BuildContext context) {
+          return AlertDialog(
+            title: const Text('Camera Permission'),
+            content: const Text(
+                'Camera permission was denied. Please enable camera access in your settings.'),
+            actions: <Widget>[
+              TextButton(
+                child: const Text('Cancel'),
+                onPressed: () {
+                  Navigator.of(context).pop();
+                },
+              ),
+              TextButton(
+                child: const Text('Open Settings'),
+                onPressed: () {
+                  // Open the app settings.
+                  openAppSettings();
+                },
+              ),
+            ],
+          );
+        },
+      );
+    } else {
+      // 处理其他类型的 PlatformException
+      print('Unhandled Platform Exception: ${e.code}');
+    }
+  }
+
+  void openAppSettings() {
+    AppSettings.openAppSettings();
   }
 
   void _submitForm() {
