@@ -1,26 +1,22 @@
+import 'dart:typed_data';
 import 'dart:io';
 
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/widgets.dart';
-import 'package:flutter_html/flutter_html.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:wg_pro_002/app/model/UserInfo.dart';
 import 'package:wg_pro_002/app/model/UserInfoForm.dart';
 import 'package:wg_pro_002/common/response_conf.dart';
 import 'package:wg_pro_002/dao/dao_result.dart';
 import 'package:wg_pro_002/dao/user_dao.dart';
 import 'package:wg_pro_002/pages/user_info/user_info_page_2.dart';
-import 'package:wg_pro_002/utils/common_utils.dart';
-import 'package:wg_pro_002/utils/navigator_utils.dart';
-import 'package:wg_pro_002/widget/custom_dropdown.dart';
-import 'package:wg_pro_002/widget/input_widget.dart';
-import 'dart:html' as html;
-import 'dart:typed_data';
-import 'dart:async';
+import 'package:camera/camera.dart';
 
-// 特别为Web导入html库
+const double paddingNum = 10;
+
 class UserInfoPage1 extends StatefulWidget {
   const UserInfoPage1({super.key});
 
@@ -37,25 +33,22 @@ class _UserInfoPage1State extends State<UserInfoPage1>
   TextEditingController? genderIdController;
   TextEditingController? idTypeController;
 
+  List<CameraDescription> _cameras = [];
+
   UserInfo? userInfo;
+  bool isLoading = true;
 
-  UserInfoForm userInfoForm = UserInfoForm();
-
-  String? genderId; //
-  String? idType; //
-
-  bool isLoading = true; // 添加一个加载状态标志
+  CameraController? _frontCameraController;
+  CameraController? _backCameraController;
 
   FocusNode idNo = FocusNode();
-
-  File? _image1File;
-  File? _image2File;
-
+  FocusNode firstName = FocusNode();
   Uint8List? _image1Data;
   Uint8List? _image2Data;
 
-  final _formKey = GlobalKey<
-      FormState>(); // Keep using the form key for overall form validation
+  final bool _isPickingImage = false;
+
+  final _formKey = GlobalKey<FormState>();
 
   @override
   void initState() {
@@ -65,80 +58,119 @@ class _UserInfoPage1State extends State<UserInfoPage1>
     genderIdController = TextEditingController();
     idTypeController = TextEditingController();
     _loadUserData();
+    if (!kIsWeb) {
+      _initializeCameras();
+    }
   }
 
-  // Function to handle image picking
-  Future<void> getImage() async {
-    if (CommonUtils.isWeb) {
-      final pickedFile =
-          await ImagePicker().pickImage(source: ImageSource.gallery);
-      if (pickedFile != null) {
-        // 在 Web 上，使用 readAsBytes() 方法读取文件数据
-        Uint8List imageData = await pickedFile.readAsBytes();
-        setState(() {
-          _image1Data = imageData;
-        });
-        // html.FileReader reader = html.FileReader();
-        // reader.readAsArrayBuffer(pickedFile.file);
-        // reader.onLoadEnd.listen((event) {
-        //   setState(() {
-        //     _imageData = reader.result as Uint8List;
-        //   });
-        // });
-      }
-    } else {
-      final pickedFile =
-          await ImagePicker().pickImage(source: ImageSource.gallery);
-      if (pickedFile != null) {
-        setState(() {
-          _image1File = File(pickedFile.path);
-        });
+  Future<void> _initializeCameras() async {
+    _cameras = await availableCameras();
+    _initCamera(
+        _cameras.firstWhere(
+            (camera) => camera.lensDirection == CameraLensDirection.front),
+        true);
+    _initCamera(
+        _cameras.firstWhere(
+            (camera) => camera.lensDirection == CameraLensDirection.back),
+        false);
+  }
+
+  void _initCamera(
+      CameraDescription cameraDescription, bool isFrontCamera) async {
+    try {
+      CameraController controller = CameraController(
+          cameraDescription, ResolutionPreset.medium,
+          enableAudio: false);
+      await controller.initialize();
+      setState(() {
+        if (isFrontCamera) {
+          _frontCameraController = controller;
+        } else {
+          _backCameraController = controller;
+        }
+      });
+    } catch (e) {
+      if (e is CameraException) {
+        _handleCameraException(e);
+      } else {
+        print('Error initializing camera: $e');
       }
     }
   }
 
-  Future<void> getImage2() async {
-    if (CommonUtils.isWeb) {
-      final pickedFile =
-          await ImagePicker().pickImage(source: ImageSource.gallery);
-      if (pickedFile != null) {
-        // 在 Web 上，使用 readAsBytes() 方法读取文件数据
-        Uint8List imageData = await pickedFile.readAsBytes();
+  Future<void> getImage(bool isFirstImage, bool useFrontCamera) async {
+    if (kIsWeb) {
+      final picker = ImagePicker();
+      final XFile? image = await picker.pickImage(source: ImageSource.gallery);
+      if (image != null) {
+        Uint8List imageData = await image.readAsBytes(); // 使用异步方法
         setState(() {
-          _image2Data = imageData;
+          if (isFirstImage) {
+            _image1Data = imageData;
+          } else {
+            _image2Data = imageData;
+          }
         });
-        // html.FileReader reader = html.FileReader();
-        // reader.readAsArrayBuffer(pickedFile.file);
-        // reader.onLoadEnd.listen((event) {
-        //   setState(() {
-        //     _imageData = reader.result as Uint8List;
-        //   });
-        // });
       }
     } else {
-      final pickedFile =
-          await ImagePicker().pickImage(source: ImageSource.gallery);
-      if (pickedFile != null) {
-        setState(() {
-          _image2File = File(pickedFile.path);
-        });
+      CameraController? controller =
+          useFrontCamera ? _frontCameraController : _backCameraController;
+      if (controller != null &&
+          controller.value.isInitialized &&
+          !controller.value.isTakingPicture) {
+        try {
+          XFile file = await controller.takePicture();
+          Uint8List imageData = await file.readAsBytes(); // 使用异步方法
+          setState(() {
+            isFirstImage ? _image1Data = imageData : _image2Data = imageData;
+          });
+        } catch (e) {
+          if (e is CameraException) {
+            _handleCameraException(e);
+          } else {
+            print("Error taking picture: $e");
+          }
+        }
       }
+    }
+  }
+
+  void _handleCameraException(CameraException e) {
+    print('Camera error: ${e.code}, ${e.description}');
+    if (e.code == 'CameraAccessDeniedWithoutPrompt') {
+      showDialog(
+        context: context,
+        builder: (context) => AlertDialog(
+          title: const Text('Camera Permission'),
+          content: const Text(
+              'Camera access was denied. Please enable camera access in your settings.'),
+          actions: <Widget>[
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop(); // Close the dialog
+                // Optionally, guide the user to the settings menu
+                // openAppSettings();  // Using a package like 'app_settings'
+              },
+              child: const Text('OK'),
+            ),
+          ],
+        ),
+      );
     }
   }
 
   Future<void> _loadUserData() async {
-    await Future.delayed(const Duration(seconds: 10));
+    await Future.delayed(const Duration(seconds: 2));
     DataResult res = await UserDao.getUserInfo();
     if (res.result && res.data is UserInfo) {
       setState(() {
-        userInfo = res.data as UserInfo; // 初始化 userInfo
+        userInfo = res.data as UserInfo;
         idController.text = userInfo?.idNo ?? '';
         firstController.text = userInfo?.firstName ?? '';
         idTypeController?.text = userInfo?.idType ?? '';
         isLoading = false;
       });
     } else {
-      // 处理加载失败的情况
       Fluttertoast.showToast(msg: "Failed to load user data");
     }
   }
@@ -150,42 +182,55 @@ class _UserInfoPage1State extends State<UserInfoPage1>
     super.dispose();
   }
 
-  EdgeInsets edgeInsets = const EdgeInsets.only(left: 8, right: 8, top: 5);
-
   @override
   Widget build(BuildContext context) {
-    if (isLoading) {
-      return Scaffold(
-        appBar: AppBar(title: const Text('Loading...')),
-        body: const SafeArea(child: Center(child: CircularProgressIndicator())),
-      );
-    }
+    super.build(context);
+    return isLoading
+        ? Scaffold(
+            appBar: AppBar(title: const Text('Loading...')),
+            body: const Center(child: CircularProgressIndicator()),
+          )
+        : Scaffold(
+            body: SafeArea(
+              child: Stack(
+                children: [
+                  Positioned(
+                    top: 0,
+                    left: 0,
+                    right: 0,
+                    child: background_container(context),
+                  ),
+                  Positioned(
+                    top: 120, // Adjust this value as needed
+                    left: 0,
+                    right: 0,
+                    bottom: 0,
+                    child: main_container(),
+                  ),
+                ],
+              ),
+            ),
+          );
+  }
 
-    if (userInfo == null) {
-      return Scaffold(
-        appBar: AppBar(title: const Text('Error')),
-        body: const SafeArea(
-            child: Center(child: Text("Failed to load user information"))),
-      );
-    }
-
-    return Scaffold(
-      body: SafeArea(
-        child: Stack(
+  Widget main_container() {
+    return SingleChildScrollView(
+      child: Container(
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(20),
+          color: Colors.white,
+        ),
+        width: MediaQuery.of(context).size.width * 0.95,
+        padding: const EdgeInsets.all(20), // Appropriate padding
+        child: Column(
           children: [
-            Positioned(
-              top: 0,
-              left: 0,
-              right: 0,
-              child: background_container(context),
-            ),
-            Positioned(
-              top: 120, // Adjust this value as needed
-              left: 0,
-              right: 0,
-              bottom: 0,
-              child: main_container(),
-            ),
+            const SizedBox(height: 10),
+            textField('ID NO.', idController,
+                idNo), // Ensure these widgets do not have a fixed height that could cause overflow
+            const SizedBox(height: 10),
+            textField('First Name', firstController, firstName),
+            const SizedBox(height: 10),
+            imageContainer()
           ],
         ),
       ),
@@ -249,193 +294,92 @@ class _UserInfoPage1State extends State<UserInfoPage1>
     );
   }
 
-  Widget main_container() {
-    return SingleChildScrollView(
-      child: Container(
-        decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(20),
-          color: Colors.white,
-        ),
-        width: MediaQuery.of(context).size.width * 0.95,
-        padding: const EdgeInsets.all(20), // Appropriate padding
-        child: Column(
-          children: [
-            const SizedBox(height: 10),
-            name(), // Ensure these widgets do not have a fixed height that could cause overflow
-            const SizedBox(height: 10),
-            amount(),
-            const SizedBox(height: 10),
-            image_container()
-          ],
-        ),
-      ),
-    );
-  }
+  // Widget userInfoDetails() {
+  //   return Column(
+  //     children: [
+  //       textField("ID NO.", idController),
+  //       textField("First Name", firstController),
+  //     ],
+  //   );
+  // }
 
-  Padding image_container() {
+  Widget textField(
+      String label, TextEditingController controller, FocusNode focuseNode) {
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 1),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [
-          Expanded(
-            child: image1(),
-          ),
-          Expanded(
-            child: image2(),
-          ),
-        ],
+      padding: const EdgeInsets.symmetric(horizontal: paddingNum),
+      child: TextField(
+        keyboardType: TextInputType.number,
+        focusNode: focuseNode,
+        controller: controller,
+        decoration: InputDecoration(
+          contentPadding:
+              const EdgeInsets.symmetric(horizontal: 10, vertical: 10),
+          labelText: label,
+          labelStyle: TextStyle(fontSize: 17, color: Colors.grey.shade500),
+          enabledBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(10),
+              borderSide: const BorderSide(width: 2, color: Color(0xffC5C5C5))),
+          focusedBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(10),
+              borderSide: const BorderSide(width: 2, color: Color(0xff368983))),
+        ),
       ),
     );
   }
 
-  Widget image1() {
+  Widget imageContainer() {
+    return Padding(
+        padding: const EdgeInsets.symmetric(horizontal: paddingNum),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            imageWidget(_image1Data, () => getImage(true, true),
+                "Tap to select image 1"),
+            imageWidget(_image2Data, () => getImage(false, false),
+                "Tap to select image 2"),
+          ],
+        ));
+  }
+
+  Widget imageWidget(
+      Uint8List? imageData, VoidCallback onTap, String placeholder) {
     return Center(
         child: GestureDetector(
-      onTap: () => getImage(),
+      onTap: onTap,
       child: Container(
         width: MediaQuery.of(context).size.width * 0.4,
         height: 80,
         decoration: BoxDecoration(
-          color: Colors.white.withOpacity(0.5),
-          image: _image1File != null
+          color: Colors.grey[300],
+          image: imageData != null
               ? DecorationImage(
-                  image: FileImage(_image1File!),
-                  fit: BoxFit.cover,
-                )
-              : _image1Data != null
-                  ? DecorationImage(
-                      image: MemoryImage(_image1Data!),
-                      fit: BoxFit.cover,
-                    )
-                  : null,
+                  image: MemoryImage(imageData), fit: BoxFit.cover)
+              : null,
           border: Border.all(color: Colors.grey[300]!, width: 2),
           borderRadius: BorderRadius.circular(12),
         ),
-        child: _image1File == null && _image1Data == null
-            ? const Center(
-                child: Text("Tap to select image",
-                    style: TextStyle(color: Colors.black)))
+        child: imageData == null
+            ? Icon(Icons.camera_alt, color: Colors.grey[700])
             : null,
       ),
     ));
   }
 
-  Widget image2() {
-    return Center(
-        child: GestureDetector(
-      onTap: () => getImage2(),
-      child: Container(
-        width: MediaQuery.of(context).size.width * 0.4,
-        height: 80,
-        decoration: BoxDecoration(
-          color: Colors.white.withOpacity(0.5),
-          image: _image2File != null
-              ? DecorationImage(
-                  image: FileImage(_image2File!),
-                  fit: BoxFit.cover,
-                )
-              : _image2Data != null
-                  ? DecorationImage(
-                      image: MemoryImage(_image2Data!),
-                      fit: BoxFit.cover,
-                    )
-                  : null,
-          border: Border.all(color: Colors.grey[300]!, width: 2),
-          borderRadius: BorderRadius.circular(12),
-        ),
-        child: _image2File == null && _image2Data == null
-            ? const Center(
-                child: Text("Tap to select image",
-                    style: TextStyle(color: Colors.black)))
-            : null,
-      ),
-    ));
+  Widget submitButton() {
+    return ElevatedButton(
+      onPressed: _submitForm,
+      child: const Text('Submit'),
+    );
   }
 
   void _submitForm() {
     if (_formKey.currentState?.validate() ?? false) {
-      // 如果表单验证通过
       Fluttertoast.showToast(msg: "Form is valid");
-      // 使用Flutter标准的导航方法
-      Navigator.of(context).push(MaterialPageRoute(
-        builder: (context) => const UserInfoPage2(),
-      ));
+      Navigator.of(context)
+          .push(MaterialPageRoute(builder: (context) => const UserInfoPage2()));
     } else {
-      // 如果表单验证不通过，也可以在这里处理
       Fluttertoast.showToast(msg: "Please correct the errors in the form.");
     }
-  }
-
-  dynamic getDropListItemByValue(List<dynamic>? list, String val) {
-    if (list == null) {
-      return null;
-    }
-    for (var item in list) {
-      if (item.value == val) {
-        return item;
-      }
-    }
-    return null;
-  }
-
-  InputDecoration getDecoration(String label) {
-    return InputDecoration(
-      focusedBorder: OutlineInputBorder(
-        borderSide:
-            BorderSide(color: Colors.orange.withOpacity(0.5), width: 2.0),
-      ),
-      enabledBorder: OutlineInputBorder(
-        borderSide: BorderSide(color: Colors.grey.withOpacity(0.5), width: 2.0),
-      ),
-      labelText: label,
-    );
-  }
-
-  Padding name() {
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 10),
-      child: TextField(
-        keyboardType: TextInputType.number,
-        focusNode: idNo,
-        controller: idController,
-        decoration: InputDecoration(
-          contentPadding:
-              const EdgeInsets.symmetric(horizontal: 10, vertical: 10),
-          labelText: 'ID NO.',
-          labelStyle: TextStyle(fontSize: 17, color: Colors.grey.shade500),
-          enabledBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(10),
-              borderSide: const BorderSide(width: 2, color: Color(0xffC5C5C5))),
-          focusedBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(10),
-              borderSide: const BorderSide(width: 2, color: Color(0xff368983))),
-        ),
-      ),
-    );
-  }
-
-  Padding amount() {
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 10),
-      child: TextField(
-        keyboardType: TextInputType.number,
-        focusNode: idNo,
-        controller: idController,
-        decoration: InputDecoration(
-          contentPadding:
-              const EdgeInsets.symmetric(horizontal: 10, vertical: 10),
-          labelText: 'ID NO.',
-          labelStyle: TextStyle(fontSize: 17, color: Colors.grey.shade500),
-          enabledBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(10),
-              borderSide: const BorderSide(width: 2, color: Color(0xffC5C5C5))),
-          focusedBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(10),
-              borderSide: const BorderSide(width: 2, color: Color(0xff368983))),
-        ),
-      ),
-    );
   }
 }
 
