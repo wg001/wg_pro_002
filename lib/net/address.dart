@@ -12,4 +12,8 @@ class Address {
   static getUserInfo() {
     return "${host}/philippines_loan/user/get_user_detail_info";
   }
+
+  static getRegionList() {
+    return "${host}/philippines_loan/user/get_region_list";
+  }
 }

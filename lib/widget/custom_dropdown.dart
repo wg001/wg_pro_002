@@ -7,6 +7,7 @@ class GenericDropdown<T> extends StatefulWidget {
   final String Function(T)? getValue;
   final void Function(String)? onChanged;
   final InputDecoration? decoration;
+  final Function? onTapFunc;
 
   const GenericDropdown(
       {Key? key,
@@ -15,7 +16,8 @@ class GenericDropdown<T> extends StatefulWidget {
       this.getValue,
       this.onChanged,
       this.selectedValue,
-      this.decoration})
+      this.decoration,
+      this.onTapFunc})
       : super(key: key);
 
   @override

@@ -5,16 +5,21 @@ import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
+import 'package:flutter_html/flutter_html.dart';
 import 'package:fluttertoast/fluttertoast.dart';
+import 'package:gap/gap.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:flutter/foundation.dart' show kIsWeb;
+import 'package:wg_pro_002/app/model/AddressSelect.dart';
 import 'package:wg_pro_002/app/model/UserInfo.dart';
 import 'package:wg_pro_002/app/model/UserInfoForm.dart';
 import 'package:wg_pro_002/common/response_conf.dart';
+import 'package:wg_pro_002/dao/address_dao.dart';
 import 'package:wg_pro_002/dao/dao_result.dart';
 import 'package:wg_pro_002/dao/user_dao.dart';
 import 'package:wg_pro_002/pages/user_info/user_info_page_2.dart';
 import 'package:app_settings/app_settings.dart';
+import 'package:wg_pro_002/widget/custom_dropdown.dart';
 
 const double paddingNum = 10;
 
@@ -37,10 +42,15 @@ class _UserInfoPage1State extends State<UserInfoPage1>
   UserInfo? userInfo;
   bool isLoading = true;
 
+  List<AddressSelect>? provinces;
+
   FocusNode idNo = FocusNode();
   FocusNode firstName = FocusNode();
   Uint8List? _image1Data;
   Uint8List? _image2Data;
+
+  String? genderId; //
+  String? province;
 
   bool _isPickingImage = false;
 
@@ -89,7 +99,6 @@ class _UserInfoPage1State extends State<UserInfoPage1>
   }
 
   Future<void> _loadUserData() async {
-    await Future.delayed(const Duration(seconds: 2));
     DataResult res = await UserDao.getUserInfo();
     if (res.result && res.data is UserInfo) {
       setState(() {
@@ -102,6 +111,13 @@ class _UserInfoPage1State extends State<UserInfoPage1>
     } else {
       Fluttertoast.showToast(msg: "Failed to load user data");
     }
+  }
+
+  Future<void> _loadProvice() async {
+    setState(() async {
+      provinces = await AddressDao.getAddressById();
+      ;
+    });
   }
 
   @override
@@ -166,11 +182,109 @@ class _UserInfoPage1State extends State<UserInfoPage1>
             const SizedBox(height: 10),
             textField('First Name', firstController, firstName),
             const SizedBox(height: 10),
-            imageContainer()
+            imageContainer(),
+            Gap(10),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                SizedBox(
+                  width: MathUtils.screenWidth * 0.45,
+                  child: genderSelect(),
+                ),
+                SizedBox(
+                  width: MathUtils.screenWidth * 0.45,
+                  child: genderSelect(),
+                ),
+              ],
+            ),
+            Gap(10),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                SizedBox(
+                  width: MathUtils.screenWidth * 0.45,
+                  child: genderSelect(),
+                ),
+                SizedBox(
+                  width: MathUtils.screenWidth * 0.45,
+                  child: genderSelect(),
+                ),
+              ],
+            ),
           ],
         ),
       ),
     );
+  }
+
+  Padding genderSelect() {
+    return Padding(
+      padding: EdgeInsets.symmetric(horizontal: paddingNum),
+      child: GenericDropdown<CommonListOption>(
+        decoration: getDecoration('Gender'),
+        items: userInfo?.options?.genderOptions,
+        getDisplayValue: (CommonListOption item) => item.value ?? '',
+        getValue: (CommonListOption item) => item.id ?? '',
+        onChanged: (selectedId) {
+          setState(() {
+            genderId = selectedId;
+          });
+          print("Selected User ID: $selectedId");
+        },
+        selectedValue: getDropListItemByValue(
+            userInfo?.options?.genderOptions, userInfo?.gender ?? ''),
+      ),
+    );
+  }
+
+  Padding _handleAddressSelect() {
+    return Padding(
+      padding: EdgeInsets.symmetric(horizontal: paddingNum),
+      child: GenericDropdown<AddressSelect>(
+        decoration: getDecoration('Gender'),
+        items: provinces,
+        getDisplayValue: (AddressSelect item) => item.Value ?? '',
+        getValue: (AddressSelect item) => item.Value ?? '',
+        onChanged: (selectedId) {
+          setState(() {
+            province = selectedId;
+          });
+          print("Selected User ID: $selectedId");
+        },
+        selectedValue:
+            AddressSelect(Id: '', Value: userInfo?.presentProvince ?? ''),
+      ),
+    );
+  }
+
+  InputDecoration getDecoration(String label) {
+    return InputDecoration(
+      contentPadding: const EdgeInsets.symmetric(horizontal: 10, vertical: 10),
+      focusedBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(10), // 设置圆角大小
+        borderSide:
+            BorderSide(color: Colors.orange.withOpacity(0.5), width: 2.0),
+      ),
+      enabledBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(10), // 设置圆角大小
+        borderSide: BorderSide(color: Colors.grey.withOpacity(0.5), width: 2.0),
+      ),
+      labelText: label,
+    );
+  }
+
+  dynamic getDropListItemByValue(List<dynamic>? list, String val) {
+    if (list == null) {
+      return null;
+    }
+    for (var item in list) {
+      if (item.value == val) {
+        return item;
+      }
+    }
+    return null;
   }
 
   Column background_container(BuildContext context) {
@@ -242,25 +356,27 @@ class _UserInfoPage1State extends State<UserInfoPage1>
   Widget textField(
       String label, TextEditingController controller, FocusNode focuseNode) {
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: paddingNum),
-      child: TextField(
-        keyboardType: TextInputType.text,
-        focusNode: focuseNode,
-        controller: controller,
-        decoration: InputDecoration(
-          contentPadding:
-              const EdgeInsets.symmetric(horizontal: 10, vertical: 10),
-          labelText: label,
-          labelStyle: TextStyle(fontSize: 17, color: Colors.grey.shade500),
-          enabledBorder: OutlineInputBorder(
+        padding: const EdgeInsets.symmetric(horizontal: paddingNum),
+        child: TextField(
+          keyboardType: TextInputType.text,
+          focusNode: focuseNode,
+          controller: controller,
+          decoration: InputDecoration(
+            contentPadding:
+                const EdgeInsets.symmetric(horizontal: 10, vertical: 10),
+            labelText: label,
+            labelStyle: TextStyle(fontSize: 17, color: Colors.grey.shade500),
+            enabledBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(10),
-              borderSide: const BorderSide(width: 2, color: Color(0xffC5C5C5))),
-          focusedBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(10),
-              borderSide: const BorderSide(width: 2, color: Color(0xff368983))),
-        ),
-      ),
-    );
+              borderSide:
+                  BorderSide(color: Colors.grey.withOpacity(0.5), width: 2.0),
+            ),
+            focusedBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(10),
+                borderSide: BorderSide(
+                    color: Colors.orange.withOpacity(0.5), width: 2.0)),
+          ),
+        ));
   }
 
   Widget imageContainer() {
