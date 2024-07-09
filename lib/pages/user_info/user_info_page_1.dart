@@ -49,6 +49,8 @@ class _UserInfoPage1State extends State<UserInfoPage1>
   Uint8List? _image1Data;
   Uint8List? _image2Data;
 
+  late FocusNode dropdownFocusNode;
+
   String? genderId; //
   String? province;
 
@@ -64,6 +66,8 @@ class _UserInfoPage1State extends State<UserInfoPage1>
     genderIdController = TextEditingController();
     idTypeController = TextEditingController();
     _loadUserData();
+    dropdownFocusNode = FocusNode();
+    dropdownFocusNode.addListener(_onFocusChange);
   }
 
   Future<void> getImage(bool isFirstImage, ImageSource source) async {
@@ -114,20 +118,41 @@ class _UserInfoPage1State extends State<UserInfoPage1>
   }
 
   Future<void> _loadProvice() async {
-    print("Loading provinces..."); // 测试输出
-    var provincesData = await AddressDao.getAddressById();
-    setState(() {
-      provinces = provincesData;
-    });
+    if (provinces == null) {
+      print("Loading provinces...");
+      DataResult provincesData = await AddressDao.getAddressById();
+      if (mounted) {
+        setState(() {
+          provinces = provincesData.data as List<AddressSelect>;
+          if (dropdownFocusNode.hasFocus) {
+            // 确保下拉菜单在数据加载后仍然聚焦
+            dropdownFocusNode.requestFocus();
+          }
+        });
+      } else {
+        // 可以在这里处理数据加载失败的情况
+        print("Failed to load provinces data");
+      }
+    }
   }
 
   @override
   void dispose() {
+    super.dispose();
     idNo.dispose();
     firstName.dispose();
     genderIdController?.dispose();
     idTypeController?.dispose();
-    super.dispose();
+    dropdownFocusNode.removeListener(_onFocusChange);
+    dropdownFocusNode.dispose();
+  }
+
+  void _onFocusChange() {
+    if (dropdownFocusNode.hasFocus) {
+      // 此处调用加载数据的方法，比如加载省份数据
+      print("Dropdown menu opened");
+      _loadProvice();
+    }
   }
 
   @override
@@ -217,7 +242,47 @@ class _UserInfoPage1State extends State<UserInfoPage1>
                 // ),
               ],
             ),
+            Gap(10),
+            maritalStatus()
           ],
+        ),
+      ),
+    );
+  }
+
+  Padding maritalStatus() {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 10),
+      child: TextField(
+        keyboardType: TextInputType.text,
+        decoration: InputDecoration(
+          contentPadding:
+              const EdgeInsets.symmetric(horizontal: 10, vertical: 10),
+          enabledBorder: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(10),
+            borderSide:
+                BorderSide(color: Colors.grey.withOpacity(0.5), width: 1.0),
+          ),
+          focusedBorder: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(10),
+            borderSide:
+                BorderSide(color: Colors.orange.withOpacity(0.5), width: 1.0),
+          ),
+          label: GestureDetector(
+            onTap: () => {print('aksdfasdf')},
+            child: Container(
+              padding: EdgeInsets.all(8),
+              decoration: BoxDecoration(
+                color: Colors.orange.withOpacity(0.5),
+                borderRadius: BorderRadius.circular(10),
+              ),
+              child: Text(
+                'asdf',
+                style:
+                    TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+              ),
+            ),
+          ),
         ),
       ),
     );
@@ -259,7 +324,7 @@ class _UserInfoPage1State extends State<UserInfoPage1>
         },
         selectedValue:
             AddressSelect(Id: '', Value: userInfo?.presentProvince ?? ''),
-        onTapFunc: _loadProvice, // 确保这里是正确引用 _loadProvice
+        focusNode: dropdownFocusNode, // 确保这里是正确引用 _loadProvice
       ),
     );
   }

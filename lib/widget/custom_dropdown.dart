@@ -7,7 +7,7 @@ class GenericDropdown<T> extends StatefulWidget {
   final String Function(T)? getValue;
   final void Function(String)? onChanged;
   final InputDecoration? decoration;
-  final Function? onTapFunc;
+  final FocusNode? focusNode;
 
   const GenericDropdown(
       {super.key,
@@ -17,14 +17,14 @@ class GenericDropdown<T> extends StatefulWidget {
       this.onChanged,
       this.selectedValue,
       this.decoration,
-      this.onTapFunc});
+      this.focusNode});
 
   @override
   _GenericDropdownState<T> createState() => _GenericDropdownState<T>();
 }
 
 class _GenericDropdownState<T> extends State<GenericDropdown<T>> {
-  late String? currentValue;
+  String? currentValue;
 
   @override
   void initState() {
@@ -37,6 +37,8 @@ class _GenericDropdownState<T> extends State<GenericDropdown<T>> {
       } else {
         currentValue = widget.getValue!(widget.items!.first);
       }
+    } else {
+      currentValue = null; // Ensure currentValue is null if items are empty
     }
   }
 
@@ -45,28 +47,31 @@ class _GenericDropdownState<T> extends State<GenericDropdown<T>> {
     if (widget.items == null || widget.items!.isEmpty) {
       // Return disabled DropdownButton with a placeholder if items are null or empty
       return DropdownButtonFormField<String>(
-        isExpanded: true,
-        decoration: widget.decoration ?? widget.decoration,
-        value: null,
-        items: const [
-          DropdownMenuItem<String>(
-            value: null,
-            child: Tooltip(
-              message: 'This is a very long text that might not fit',
-              child: Text(
-                'Long text...',
-                overflow: TextOverflow.ellipsis,
+          isExpanded: true,
+          decoration: widget.decoration ?? widget.decoration,
+          value: null,
+          items: const [
+            DropdownMenuItem<String>(
+              value: null,
+              child: Tooltip(
+                message: 'This is a very long text that might not fit',
+                child: Text(
+                  'Long text...',
+                  overflow: TextOverflow.ellipsis,
+                ),
               ),
             ),
-          ),
-        ],
-        onChanged: null,
-        onTap: () {
-          if (widget.onTapFunc != null) {
-            widget.onTapFunc!();
-          }
-        }, // Disable interaction
-      );
+          ],
+          onChanged: (newValue) {
+            setState(() {
+              currentValue = newValue;
+            });
+            if (widget.onChanged != null) {
+              widget.onChanged!(newValue!);
+            }
+          },
+          focusNode: widget.focusNode // Disable interaction
+          );
     } else {
       // Return a normal functioning DropdownButton
       return DropdownButtonFormField<String>(
@@ -81,11 +86,7 @@ class _GenericDropdownState<T> extends State<GenericDropdown<T>> {
             widget.onChanged!(newValue!);
           }
         },
-        onTap: () {
-          if (widget.onTapFunc != null) {
-            widget.onTapFunc!();
-          }
-        },
+        focusNode: widget.focusNode,
         items: widget.items!.map((T item) {
           return DropdownMenuItem<String>(
             value: widget.getValue!(item),
