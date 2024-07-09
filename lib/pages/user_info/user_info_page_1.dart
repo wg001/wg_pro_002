@@ -114,9 +114,10 @@ class _UserInfoPage1State extends State<UserInfoPage1>
   }
 
   Future<void> _loadProvice() async {
-    setState(() async {
-      provinces = await AddressDao.getAddressById();
-      ;
+    print("Loading provinces..."); // 测试输出
+    var provincesData = await AddressDao.getAddressById();
+    setState(() {
+      provinces = provincesData;
     });
   }
 
@@ -172,8 +173,8 @@ class _UserInfoPage1State extends State<UserInfoPage1>
           borderRadius: BorderRadius.circular(20),
           color: Colors.white,
         ),
-        width: MediaQuery.of(context).size.width * 0.95,
-        padding: const EdgeInsets.all(20), // Appropriate padding
+        width: MediaQuery.of(context).size.width * 1,
+        padding: const EdgeInsets.all(0), // Appropriate padding
         child: Column(
           children: [
             const SizedBox(height: 10),
@@ -183,34 +184,37 @@ class _UserInfoPage1State extends State<UserInfoPage1>
             textField('First Name', firstController, firstName),
             const SizedBox(height: 10),
             imageContainer(),
-            Gap(10),
+            const Gap(10),
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 SizedBox(
-                  width: MathUtils.screenWidth * 0.45,
-                  child: genderSelect(),
+                  width: (MediaQuery.of(context).size.width / 2),
+                  child: genderSelect(
+                      leftPadding: paddingNum, rightPadding: paddingNum / 2),
                 ),
                 SizedBox(
-                  width: MathUtils.screenWidth * 0.45,
-                  child: genderSelect(),
+                  width: (MediaQuery.of(context).size.width) * 0.5,
+                  child: genderSelect(
+                      rightPadding: paddingNum, leftPadding: paddingNum / 2),
                 ),
               ],
             ),
-            Gap(10),
+            const Gap(10),
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 SizedBox(
-                  width: MathUtils.screenWidth * 0.45,
-                  child: genderSelect(),
+                  width: (MediaQuery.of(context).size.width) / 2,
+                  child: _handleAddressSelect(
+                      leftPadding: paddingNum, rightPadding: 5),
                 ),
-                SizedBox(
-                  width: MathUtils.screenWidth * 0.45,
-                  child: genderSelect(),
-                ),
+                // SizedBox(
+                //   width: (MediaQuery.of(context).size.width * 0.95 - 25) / 3,
+                //   child: genderSelect(),
+                // ),
               ],
             ),
           ],
@@ -219,9 +223,9 @@ class _UserInfoPage1State extends State<UserInfoPage1>
     );
   }
 
-  Padding genderSelect() {
+  Padding genderSelect({double leftPadding = 0.0, double rightPadding = 0.0}) {
     return Padding(
-      padding: EdgeInsets.symmetric(horizontal: paddingNum),
+      padding: EdgeInsets.only(left: leftPadding, right: rightPadding),
       child: GenericDropdown<CommonListOption>(
         decoration: getDecoration('Gender'),
         items: userInfo?.options?.genderOptions,
@@ -239,11 +243,12 @@ class _UserInfoPage1State extends State<UserInfoPage1>
     );
   }
 
-  Padding _handleAddressSelect() {
+  Padding _handleAddressSelect(
+      {double leftPadding = 0.0, double rightPadding = 0.0}) {
     return Padding(
-      padding: EdgeInsets.symmetric(horizontal: paddingNum),
+      padding: EdgeInsets.only(left: leftPadding, right: rightPadding),
       child: GenericDropdown<AddressSelect>(
-        decoration: getDecoration('Gender'),
+        decoration: getDecoration('Province'),
         items: provinces,
         getDisplayValue: (AddressSelect item) => item.Value ?? '',
         getValue: (AddressSelect item) => item.Value ?? '',
@@ -251,25 +256,25 @@ class _UserInfoPage1State extends State<UserInfoPage1>
           setState(() {
             province = selectedId;
           });
-          print("Selected User ID: $selectedId");
         },
         selectedValue:
             AddressSelect(Id: '', Value: userInfo?.presentProvince ?? ''),
+        onTapFunc: _loadProvice, // 确保这里是正确引用 _loadProvice
       ),
     );
   }
 
   InputDecoration getDecoration(String label) {
     return InputDecoration(
-      contentPadding: const EdgeInsets.symmetric(horizontal: 10, vertical: 10),
+      contentPadding: const EdgeInsets.only(left: 2, top: 10, bottom: 10),
       focusedBorder: OutlineInputBorder(
         borderRadius: BorderRadius.circular(10), // 设置圆角大小
         borderSide:
-            BorderSide(color: Colors.orange.withOpacity(0.5), width: 2.0),
+            BorderSide(color: Colors.orange.withOpacity(0.5), width: 1.0),
       ),
       enabledBorder: OutlineInputBorder(
         borderRadius: BorderRadius.circular(10), // 设置圆角大小
-        borderSide: BorderSide(color: Colors.grey.withOpacity(0.5), width: 2.0),
+        borderSide: BorderSide(color: Colors.grey.withOpacity(0.5), width: 1.0),
       ),
       labelText: label,
     );
@@ -369,12 +374,12 @@ class _UserInfoPage1State extends State<UserInfoPage1>
             enabledBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(10),
               borderSide:
-                  BorderSide(color: Colors.grey.withOpacity(0.5), width: 2.0),
+                  BorderSide(color: Colors.grey.withOpacity(0.5), width: 1.0),
             ),
             focusedBorder: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(10),
                 borderSide: BorderSide(
-                    color: Colors.orange.withOpacity(0.5), width: 2.0)),
+                    color: Colors.orange.withOpacity(0.5), width: 1.0)),
           ),
         ));
   }
@@ -405,7 +410,7 @@ class _UserInfoPage1State extends State<UserInfoPage1>
         child: GestureDetector(
       onTap: onTap,
       child: Container(
-        width: MediaQuery.of(context).size.width * 0.4,
+        width: (MediaQuery.of(context).size.width - 30) / 2,
         height: 80,
         decoration: BoxDecoration(
           color: Colors.grey[300],
