@@ -1,3 +1,4 @@
+import 'dart:convert';
 import 'dart:typed_data';
 import 'dart:io';
 
@@ -38,6 +39,7 @@ class _UserInfoPage1State extends State<UserInfoPage1>
   late TextEditingController firstController;
   TextEditingController? genderIdController;
   TextEditingController? idTypeController;
+  TextEditingController? addressController;
 
   UserInfo? userInfo;
   bool isLoading = true;
@@ -53,6 +55,8 @@ class _UserInfoPage1State extends State<UserInfoPage1>
 
   String? genderId; //
   String? province;
+  String tmpCity = "";
+  String tmpArea = "";
 
   bool _isPickingImage = false;
 
@@ -65,6 +69,7 @@ class _UserInfoPage1State extends State<UserInfoPage1>
     firstController = TextEditingController();
     genderIdController = TextEditingController();
     idTypeController = TextEditingController();
+    addressController = TextEditingController();
     _loadUserData();
     dropdownFocusNode = FocusNode();
     dropdownFocusNode.addListener(_onFocusChange);
@@ -117,22 +122,12 @@ class _UserInfoPage1State extends State<UserInfoPage1>
     }
   }
 
-  Future<void> _loadProvice() async {
-    if (provinces == null) {
-      print("Loading provinces...");
-      DataResult provincesData = await AddressDao.getAddressById();
-      if (mounted) {
-        setState(() {
-          provinces = provincesData.data as List<AddressSelect>;
-          if (dropdownFocusNode.hasFocus) {
-            // 确保下拉菜单在数据加载后仍然聚焦
-            dropdownFocusNode.requestFocus();
-          }
-        });
-      } else {
-        // 可以在这里处理数据加载失败的情况
-        print("Failed to load provinces data");
-      }
+  Future<List<AddressSelect>> fetchProvince() async {
+    DataResult provincesData = await AddressDao.getAddressById();
+    if (provincesData.result) {
+      return provincesData.data as List<AddressSelect>;
+    } else {
+      throw Exception('Failed to load addresses');
     }
   }
 
@@ -151,7 +146,6 @@ class _UserInfoPage1State extends State<UserInfoPage1>
     if (dropdownFocusNode.hasFocus) {
       // 此处调用加载数据的方法，比如加载省份数据
       print("Dropdown menu opened");
-      _loadProvice();
     }
   }
 
@@ -243,7 +237,10 @@ class _UserInfoPage1State extends State<UserInfoPage1>
               ],
             ),
             Gap(10),
-            maritalStatus()
+            maritalStatus(),
+            Gap(10),
+            _handleAddressSelect01(),
+            Gap(10),
           ],
         ),
       ),
@@ -326,6 +323,133 @@ class _UserInfoPage1State extends State<UserInfoPage1>
             AddressSelect(Id: '', Value: userInfo?.presentProvince ?? ''),
         focusNode: dropdownFocusNode, // 确保这里是正确引用 _loadProvice
       ),
+    );
+  }
+
+  Container _handleAddressSelect01(
+      {double leftPadding = 0.0, double rightPadding = 0.0}) {
+    return Container(
+      width: double.infinity,
+      height: 350, // 增加高度以容纳显示选择地址的部分
+      child: Column(
+        children: <Widget>[
+          Padding(
+            padding: EdgeInsets.only(top: 10),
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: <Widget>[
+                TextFormField(
+                  controller: addressController,
+                  readOnly: true, // 设置输入框为只读
+                  decoration: InputDecoration(
+                    labelText: "Address",
+                    hintText: "Tap to select an address",
+                    border: OutlineInputBorder(),
+                  ),
+                  onTap: () => _showAddressBottomSheet(context), // 点击输入框时调用方法
+                ),
+                SizedBox(height: 20),
+                Text(province ?? ''),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  void _showAddressBottomSheet(BuildContext context) {
+    AddressSelect? tmpProvince;
+    showModalBottomSheet(
+      context: context,
+      builder: (BuildContext context) {
+        return StatefulBuilder(
+          builder: (BuildContext context, StateSetter setState) {
+            return Container(
+              width: double.infinity,
+              height: 350,
+              child: Column(
+                children: <Widget>[
+                  Padding(
+                    padding: const EdgeInsets.all(8.0),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        GestureDetector(
+                          onTap: () {
+                            // 在这里处理点击事件
+                            print("Text clicked");
+                            // 可以执行任何你需要的操作，例如弹出另一个对话框或显示消息
+                            Fluttertoast.showToast(msg: "Text clicked");
+                          },
+                          child: Text(
+                            "${tmpProvince?.Value ?? 'Select province'}",
+                            style: TextStyle(
+                              fontSize: 16,
+                              fontWeight: FontWeight.bold,
+                              color: Colors.blue, // 可选：增加颜色以表示它是可点击的
+                              decoration:
+                                  TextDecoration.underline, // 可选：增加下划线以表示它是可点击的
+                            ),
+                          ),
+                        ),
+                        ElevatedButton(
+                          onPressed: () {
+                            if (tmpProvince != null) {
+                              setState(() {
+                                addressController!.text =
+                                    tmpProvince!.Value ?? '';
+                              });
+                              Navigator.pop(context);
+                            } else {
+                              Fluttertoast.showToast(
+                                  msg: "No address selected or invalid state");
+                            }
+                          },
+                          child: Text('Confirm'),
+                          style: ElevatedButton.styleFrom(
+                            foregroundColor: Colors.white,
+                            backgroundColor: Colors.blue,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  Divider(),
+                  Expanded(
+                    child: FutureBuilder<List<AddressSelect>>(
+                      future: fetchProvince(),
+                      builder: (context, snapshot) {
+                        if (snapshot.connectionState ==
+                            ConnectionState.waiting) {
+                          return Center(child: CircularProgressIndicator());
+                        } else if (snapshot.hasError) {
+                          return Text('Error: ${snapshot.error}');
+                        }
+                        return ListView.builder(
+                          itemCount: snapshot.data!.length,
+                          itemBuilder: (context, index) {
+                            AddressSelect address = snapshot.data![index];
+                            return ListTile(
+                              title: Text(address.Value ?? ''),
+                              onTap: () {
+                                setState(() {
+                                  tmpProvince = address;
+                                  print("Selected: ${tmpProvince?.Value}");
+                                });
+                              },
+                            );
+                          },
+                        );
+                      },
+                    ),
+                  ),
+                ],
+              ),
+            );
+          },
+        );
+      },
     );
   }
 
