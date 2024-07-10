@@ -4,6 +4,7 @@ import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
+import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_html/flutter_html.dart';
@@ -55,8 +56,6 @@ class _UserInfoPage1State extends State<UserInfoPage1>
 
   String? genderId; //
   String? province;
-  String tmpCity = "";
-  String tmpArea = "";
 
   bool _isPickingImage = false;
 
@@ -122,8 +121,8 @@ class _UserInfoPage1State extends State<UserInfoPage1>
     }
   }
 
-  Future<List<AddressSelect>> fetchProvince() async {
-    DataResult provincesData = await AddressDao.getAddressById();
+  Future<List<AddressSelect>> fetchProvince(String? id) async {
+    DataResult provincesData = await AddressDao.getAddressById(id: id);
     if (provincesData.result) {
       return provincesData.data as List<AddressSelect>;
     } else {
@@ -236,11 +235,11 @@ class _UserInfoPage1State extends State<UserInfoPage1>
                 // ),
               ],
             ),
-            Gap(10),
+            const Gap(10),
             maritalStatus(),
-            Gap(10),
+            const Gap(10),
             _handleAddressSelect01(),
-            Gap(10),
+            const Gap(10),
           ],
         ),
       ),
@@ -268,12 +267,12 @@ class _UserInfoPage1State extends State<UserInfoPage1>
           label: GestureDetector(
             onTap: () => {print('aksdfasdf')},
             child: Container(
-              padding: EdgeInsets.all(8),
+              padding: const EdgeInsets.all(8),
               decoration: BoxDecoration(
                 color: Colors.orange.withOpacity(0.5),
                 borderRadius: BorderRadius.circular(10),
               ),
-              child: Text(
+              child: const Text(
                 'asdf',
                 style:
                     TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
@@ -326,29 +325,27 @@ class _UserInfoPage1State extends State<UserInfoPage1>
     );
   }
 
-  Container _handleAddressSelect01(
+  SizedBox _handleAddressSelect01(
       {double leftPadding = 0.0, double rightPadding = 0.0}) {
-    return Container(
+    return SizedBox(
       width: double.infinity,
-      height: 350, // 增加高度以容纳显示选择地址的部分
       child: Column(
         children: <Widget>[
           Padding(
-            padding: EdgeInsets.only(top: 10),
+            padding: const EdgeInsets.only(top: 10),
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: <Widget>[
                 TextFormField(
                   controller: addressController,
                   readOnly: true, // 设置输入框为只读
-                  decoration: InputDecoration(
+                  decoration: const InputDecoration(
                     labelText: "Address",
                     hintText: "Tap to select an address",
                     border: OutlineInputBorder(),
                   ),
                   onTap: () => _showAddressBottomSheet(context), // 点击输入框时调用方法
                 ),
-                SizedBox(height: 20),
                 Text(province ?? ''),
               ],
             ),
@@ -360,38 +357,90 @@ class _UserInfoPage1State extends State<UserInfoPage1>
 
   void _showAddressBottomSheet(BuildContext context) {
     AddressSelect? tmpProvince;
+    AddressSelect? tmpCity;
+    AddressSelect? tmpArea;
+    String? id;
+    double heightVal = MediaQuery.of(context).size.height;
     showModalBottomSheet(
+      isScrollControlled: true,
       context: context,
       builder: (BuildContext context) {
         return StatefulBuilder(
           builder: (BuildContext context, StateSetter setState) {
-            return Container(
+            return SizedBox(
+              height: heightVal * 0.8,
               width: double.infinity,
-              height: 350,
               child: Column(
                 children: <Widget>[
                   Padding(
-                    padding: const EdgeInsets.all(8.0),
+                    padding: const EdgeInsets.all(10),
                     child: Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        GestureDetector(
-                          onTap: () {
-                            // 在这里处理点击事件
-                            print("Text clicked");
-                            // 可以执行任何你需要的操作，例如弹出另一个对话框或显示消息
-                            Fluttertoast.showToast(msg: "Text clicked");
-                          },
-                          child: Text(
-                            "${tmpProvince?.Value ?? 'Select province'}",
-                            style: TextStyle(
-                              fontSize: 16,
-                              fontWeight: FontWeight.bold,
-                              color: Colors.blue, // 可选：增加颜色以表示它是可点击的
-                              decoration:
-                                  TextDecoration.underline, // 可选：增加下划线以表示它是可点击的
+                        Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: <Widget>[
+                            GestureDetector(
+                              onTap: () {
+                                setState(() {
+                                  id = tmpProvince?.Id;
+                                  tmpCity = null;
+                                  tmpArea = null;
+                                });
+                                // 在这里处理点击事件
+                                print("Text clicked");
+                                // 可以执行任何你需要的操作，例如弹出另一个对话框或显示消息
+                                Fluttertoast.showToast(msg: "Text clicked");
+                              },
+                              child: Text(
+                                tmpProvince?.Value ?? 'Select province',
+                                style: const TextStyle(
+                                  fontSize: 12,
+                                ),
+                              ),
                             ),
-                          ),
+                            GestureDetector(
+                              //city
+                              onTap: () {
+                                setState(() {
+                                  id = tmpCity?.Id;
+                                  tmpCity = null;
+                                  tmpArea = null;
+                                });
+                                // 在这里处理点击事件
+                                print("Text clicked");
+                                // 可以执行任何你需要的操作，例如弹出另一个对话框或显示消息
+                                Fluttertoast.showToast(msg: "Text clicked");
+                              },
+                              child: Visibility(
+                                visible: tmpProvince != null,
+                                child: Text(
+                                  tmpCity?.Value ?? 'Select city',
+                                  style: const TextStyle(
+                                    fontSize: 12,
+                                  ),
+                                ),
+                              ),
+                            ),
+                            GestureDetector(
+                              //area
+                              onTap: () {
+                                // 在这里处理点击事件
+                                print("Text clicked");
+                                // 可以执行任何你需要的操作，例如弹出另一个对话框或显示消息
+                                Fluttertoast.showToast(msg: "Text clicked");
+                              },
+                              child: Visibility(
+                                visible: tmpCity != null,
+                                child: Text(
+                                  tmpArea?.Value ?? 'Select area',
+                                  style: const TextStyle(
+                                    fontSize: 12,
+                                  ),
+                                ),
+                              ),
+                            ),
+                          ],
                         ),
                         ElevatedButton(
                           onPressed: () {
@@ -406,23 +455,26 @@ class _UserInfoPage1State extends State<UserInfoPage1>
                                   msg: "No address selected or invalid state");
                             }
                           },
-                          child: Text('Confirm'),
                           style: ElevatedButton.styleFrom(
                             foregroundColor: Colors.white,
                             backgroundColor: Colors.blue,
                           ),
+                          child: const Text('Confirm'),
                         ),
                       ],
                     ),
                   ),
-                  Divider(),
+                  const Divider(
+                    height: 0.1,
+                  ),
                   Expanded(
                     child: FutureBuilder<List<AddressSelect>>(
-                      future: fetchProvince(),
+                      future: fetchProvince(id),
                       builder: (context, snapshot) {
                         if (snapshot.connectionState ==
                             ConnectionState.waiting) {
-                          return Center(child: CircularProgressIndicator());
+                          return const Center(
+                              child: CircularProgressIndicator());
                         } else if (snapshot.hasError) {
                           return Text('Error: ${snapshot.error}');
                         }
@@ -430,14 +482,33 @@ class _UserInfoPage1State extends State<UserInfoPage1>
                           itemCount: snapshot.data!.length,
                           itemBuilder: (context, index) {
                             AddressSelect address = snapshot.data![index];
-                            return ListTile(
-                              title: Text(address.Value ?? ''),
-                              onTap: () {
-                                setState(() {
-                                  tmpProvince = address;
-                                  print("Selected: ${tmpProvince?.Value}");
-                                });
-                              },
+                            return SizedBox(
+                              height: 30, // 设置固定高度
+                              child: ListTile(
+                                title: Align(
+                                  alignment: Alignment.centerLeft,
+                                  child: Text(address.Value ?? ''),
+                                ),
+                                onTap: () {
+                                  setState(() {
+                                    if (tmpProvince == null) {
+                                      tmpProvince = address;
+                                      tmpArea = null;
+                                      tmpCity = null;
+                                      id = address.Id;
+                                    } else if (tmpCity == null) {
+                                      tmpCity = address;
+                                      id = address.Id;
+                                      tmpArea = null;
+                                    } else {
+                                      tmpArea = address;
+                                    }
+
+                                    print('iiiiii$id');
+                                    print("Selected: ${tmpProvince?.Value}");
+                                  });
+                                },
+                              ),
                             );
                           },
                         );

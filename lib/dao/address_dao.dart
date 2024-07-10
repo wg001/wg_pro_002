@@ -14,7 +14,8 @@ class AddressDao {
       reqParams['id'] = id;
     }
     try {
-      var res = await httpManager.netFetch(Address.getRegionList());
+      var res = await httpManager.netFetch(Address.getRegionList(),
+          params: jsonEncode(reqParams));
       if (res != null && res.data != null) {
         Map<String, dynamic> resMap =
             res.data is Map ? res.data : json.decode(res.data.toString());
