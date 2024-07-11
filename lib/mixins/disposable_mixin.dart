@@ -7,7 +7,7 @@ mixin Disposable {
     _disposers.add(disposer);
   }
 
-  void dispose() {
+  void disposeResources() {
     for (var disposer in _disposers) {
       disposer();
     }

@@ -46,8 +46,8 @@ class _UserInfoPage1State extends State<UserInfoPage1>
   TextEditingController? idTypeController;
   TextEditingController? addressController;
 
- Future<List<CommonListOption>>? genderOptionsFuture;
- Future<List<CommonListOption>>? maritalStatusOptionsFuture;
+  Future<List<CommonListOption>>? genderOptionsFuture;
+  Future<List<CommonListOption>>? maritalStatusOptionsFuture;
 
   UserInfo? userInfo;
   bool isLoading = true;
@@ -56,8 +56,6 @@ class _UserInfoPage1State extends State<UserInfoPage1>
 
   Uint8List? _image1Data;
   Uint8List? _image2Data;
-
-  late FocusNode dropdownFocusNode;
 
   String? genderId; //
   String? province;
@@ -126,8 +124,11 @@ class _UserInfoPage1State extends State<UserInfoPage1>
         idController.text = userInfo?.idNo ?? '';
         firstController.text = userInfo?.firstName ?? '';
         idTypeController?.text = userInfo?.idType ?? '';
-        genderOptionsFuture = (userInfo?.options?.genderOptions??Future.value([])) as Future<List<CommonListOption>>?;
-        maritalStatusOptionsFuture = (userInfo?.options?.maritalStatusOptions??Future.value([])) as Future<List<CommonListOption>>?;
+        genderOptionsFuture =
+            Future.value(userInfo?.options?.genderOptions ?? []);
+
+        maritalStatusOptionsFuture =
+            Future.value(userInfo?.options?.maritalStatusOptions ?? []);
         isLoading = false;
       });
     } else {
@@ -146,18 +147,8 @@ class _UserInfoPage1State extends State<UserInfoPage1>
 
   @override
   void dispose() {
-    super.dispose();
-    genderIdController?.dispose();
-    idTypeController?.dispose();
-    dropdownFocusNode.removeListener(_onFocusChange);
-    dropdownFocusNode.dispose();
-  }
-
-  void _onFocusChange() {
-    if (dropdownFocusNode.hasFocus) {
-      // 此处调用加载数据的方法，比如加载省份数据
-      print("Dropdown menu opened");
-    }
+    disposeResources(); // 调用 mixin 的 disposeResources 方法清理资源
+    super.dispose(); // 确保父类的 dispose 方法被调用
   }
 
   @override
@@ -236,7 +227,10 @@ class _UserInfoPage1State extends State<UserInfoPage1>
                       'Marital Status',
                       maritalStatusController!,
                       () => _showCommonListOptionBottomSheet(
-                          context, maritalStatusOptionsFuture),
+                          context,
+                          maritalStatusOptionsFuture!,
+                          MathUtils.screenHeight * 0.5,
+                          align: Alignment.center),
                       leftPadding: paddingNum,
                       rightPadding: paddingNum / 2),
                 ),
@@ -390,7 +384,7 @@ class _UserInfoPage1State extends State<UserInfoPage1>
                               },
                               child: Container(
                                 width: widthVal / 3, // 设置宽度
-                                padding: EdgeInsets.all(5),
+                                padding: const EdgeInsets.all(5),
                                 decoration: BoxDecoration(
                                   color: const Color.fromARGB(
                                       255, 231, 227, 227), // 设置背景色
@@ -406,7 +400,7 @@ class _UserInfoPage1State extends State<UserInfoPage1>
                                 ),
                               ),
                             ),
-                            SizedBox(
+                            const SizedBox(
                               width: 5,
                             ),
                             GestureDetector(
@@ -427,7 +421,7 @@ class _UserInfoPage1State extends State<UserInfoPage1>
                                   visible: tmpProvince != null,
                                   child: Container(
                                     width: widthVal / 3, // 设置宽度
-                                    padding: EdgeInsets.all(5),
+                                    padding: const EdgeInsets.all(5),
                                     decoration: BoxDecoration(
                                       color: const Color.fromARGB(
                                           255, 231, 227, 227), // 设置背景色
@@ -443,7 +437,7 @@ class _UserInfoPage1State extends State<UserInfoPage1>
                                     ),
                                   ),
                                 )),
-                            SizedBox(
+                            const SizedBox(
                               width: 5,
                             ),
                             GestureDetector(
@@ -459,7 +453,7 @@ class _UserInfoPage1State extends State<UserInfoPage1>
                                   visible: tmpCity != null,
                                   child: Container(
                                     width: widthVal / 3, // 设置宽度
-                                    padding: EdgeInsets.all(5),
+                                    padding: const EdgeInsets.all(5),
                                     decoration: BoxDecoration(
                                       color: const Color.fromARGB(
                                           255, 231, 227, 227), // 设置背景色
@@ -489,7 +483,7 @@ class _UserInfoPage1State extends State<UserInfoPage1>
                                   province = tmpProvince?.Value;
                                   city = tmpCity?.Value;
                                   area = tmpArea?.Value;
-                                  String addr = '${province},${city},${area}';
+                                  String addr = '$province,$city,$area';
                                   addressController!.text = addr;
                                 });
                                 Navigator.pop(context);
@@ -574,14 +568,12 @@ class _UserInfoPage1State extends State<UserInfoPage1>
     );
   }
 
-  void _showCommonListOptionBottomSheet(
-      BuildContext context, Future<List<CommonListOption>> listData) {
-    double heightVal = MediaQuery.of(context).size.height;
-    double widthVal = MediaQuery.of(context).size.width - 150; // 修正获取屏幕宽度的方法
-
+  void _showCommonListOptionBottomSheet(BuildContext context,
+      Future<List<CommonListOption>> listData, double height,
+      {Alignment align = Alignment.centerLeft}) {
     // 将 List<CommonListOption>? 转换为 Future<List<CommonListOption>>?
     if (kDebugMode) {
-      print('_showCommonListOptionBottomSheet:${listData}');
+      print('_showCommonListOptionBottomSheet:$listData');
     }
     showModalBottomSheet(
       isScrollControlled: true,
@@ -590,47 +582,52 @@ class _UserInfoPage1State extends State<UserInfoPage1>
         return StatefulBuilder(
           builder: (BuildContext context, StateSetter setState) {
             return SizedBox(
-              height: heightVal * 0.8,
+              height: height,
               width: double.infinity,
               child: Column(
+                crossAxisAlignment: CrossAxisAlignment.center,
                 children: <Widget>[
-                  Expanded(
-                    child: FutureBuilder<List<CommonListOption>>(
-                      future: listData,
-                      builder: (context, snapshot) {
-                        if (snapshot.connectionState ==
-                            ConnectionState.waiting) {
-                          return const Center(
-                            child: CircularProgressIndicator(),
-                          );
-                        } else if (snapshot.hasError) {
-                          return Text('Error: ${snapshot.error}');
-                        } else if (!snapshot.hasData ||
-                            snapshot.data!.isEmpty) {
-                          return const Center(
-                            child: Text('No Data Available'),
-                          );
-                        }
-                        return ListView.builder(
-                          itemCount: snapshot.data!.length,
-                          itemBuilder: (context, index) {
-                            CommonListOption option = snapshot.data![index];
-                            return SizedBox(
-                              height: 30, // 设置固定高度
-                              child: ListTile(
-                                title: Align(
-                                  alignment: Alignment.centerLeft,
-                                  child: Text(option.value ?? ''),
-                                ),
-                                onTap: () {
-                                  setState(() {});
-                                },
-                              ),
-                            );
-                          },
+                  FutureBuilder<List<CommonListOption>>(
+                    future: listData,
+                    builder: (context, snapshot) {
+                      if (snapshot.connectionState == ConnectionState.waiting) {
+                        return const Center(
+                          child: CircularProgressIndicator(),
                         );
-                      },
-                    ),
+                      } else if (snapshot.hasError) {
+                        return Text('Error: ${snapshot.error}');
+                      } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
+                        return const Center(
+                          child: Text('No Data Available'),
+                        );
+                      }
+                      return ListView.builder(
+                        shrinkWrap: true, // 强制ListView占用最小空间
+                        itemCount: snapshot.data!.length,
+                        itemBuilder: (context, index) {
+                          CommonListOption option = snapshot.data![index];
+                          return SizedBox(
+                            height: 50, // 设置固定高度
+
+                            child: ListTile(
+                              leading: const Align(
+                                  widthFactor: 1.0,
+                                  alignment: Alignment.center,
+                                  child: Icon(Icons.circle)),
+                              contentPadding:
+                                  EdgeInsets.zero, // 设置内边距为0 // 设置垂直内边距为0
+                              title: Align(
+                                alignment: align,
+                                child: Text(option.value ?? ''),
+                              ),
+                              onTap: () {
+                                setState(() {});
+                              },
+                            ),
+                          );
+                        },
+                      );
+                    },
                   ),
                 ],
               ),
