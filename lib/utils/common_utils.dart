@@ -13,8 +13,6 @@ import 'package:wg_pro_002/utils/navigator_utils.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
 
 /// 通用逻辑
-/// Created by guoshuyu
-/// Date: 2018-07-16
 
 typedef StringList = List<String>;
 
@@ -44,42 +42,30 @@ class CommonUtils {
     return date.toString().substring(0, 10);
   }
 
-  ///日期格式转换
-  static String getNewsTimeStr(DateTime date) {
-    int subTimes =
-        DateTime.now().millisecondsSinceEpoch - date.millisecondsSinceEpoch;
-    return switch (subTimes) {
-      < MILLIS_LIMIT => (curLocale != null)
-          ? (curLocale!.languageCode != "zh")
-              ? "right now"
-              : "刚刚"
-          : "刚刚",
-      < SECONDS_LIMIT => (subTimes / MILLIS_LIMIT).round().toString() +
-          ((curLocale != null)
-              ? (curLocale!.languageCode != "zh")
-                  ? " seconds ago"
-                  : " 秒前"
-              : " 秒前"),
-      < MINUTES_LIMIT => (subTimes / SECONDS_LIMIT).round().toString() +
-          ((curLocale != null)
-              ? (curLocale!.languageCode != "zh")
-                  ? " min ago"
-                  : " 分钟前"
-              : " 分钟前"),
-      < HOURS_LIMIT => (subTimes / MINUTES_LIMIT).round().toString() +
-          ((curLocale != null)
-              ? (curLocale!.languageCode != "zh")
-                  ? " hours ago"
-                  : " 小时前"
-              : " 小时前"),
-      < DAYS_LIMIT => (subTimes / HOURS_LIMIT).round().toString() +
-          ((curLocale != null)
-              ? (curLocale!.languageCode != "zh")
-                  ? " days ago"
-                  : " 天前"
-              : " 天前"),
-      _ => getDateStr(date)
-    };
+  static InputDecoration getInputDecoration({
+    required String label,
+    String? hintText,
+    TextStyle? labelStyle,
+  }) {
+    return InputDecoration(
+      labelText: label,
+      hintText: hintText,
+      labelStyle:
+          labelStyle ?? const TextStyle(fontSize: 17, color: Colors.grey),
+      contentPadding: const EdgeInsets.symmetric(horizontal: 10, vertical: 10),
+      border: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(10),
+      ),
+      enabledBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(10),
+        borderSide: BorderSide(color: Colors.grey.withOpacity(0.5), width: 1.0),
+      ),
+      focusedBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(10),
+        borderSide:
+            BorderSide(color: Colors.orange.withOpacity(0.5), width: 1.0),
+      ),
+    );
   }
 
   static getApplicationDocumentsPath() async {

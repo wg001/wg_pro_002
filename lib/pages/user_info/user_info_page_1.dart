@@ -11,7 +11,7 @@ import 'package:flutter_html/flutter_html.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:gap/gap.dart';
 import 'package:image_picker/image_picker.dart';
-import 'package:flutter/foundation.dart' show kIsWeb;
+import 'package:flutter/foundation.dart' show kDebugMode, kIsWeb;
 import 'package:wg_pro_002/app/model/AddressSelect.dart';
 import 'package:wg_pro_002/app/model/UserInfo.dart';
 import 'package:wg_pro_002/app/model/UserInfoForm.dart';
@@ -19,9 +19,12 @@ import 'package:wg_pro_002/common/response_conf.dart';
 import 'package:wg_pro_002/dao/address_dao.dart';
 import 'package:wg_pro_002/dao/dao_result.dart';
 import 'package:wg_pro_002/dao/user_dao.dart';
+import 'package:wg_pro_002/mixins/disposable_mixin.dart';
 import 'package:wg_pro_002/pages/user_info/user_info_page_2.dart';
 import 'package:app_settings/app_settings.dart';
+import 'package:wg_pro_002/utils/common_utils.dart';
 import 'package:wg_pro_002/widget/custom_dropdown.dart';
+import 'package:wg_pro_002/widget/input_widget.dart';
 
 const double paddingNum = 10;
 
@@ -33,22 +36,24 @@ class UserInfoPage1 extends StatefulWidget {
 }
 
 class _UserInfoPage1State extends State<UserInfoPage1>
-    with AutomaticKeepAliveClientMixin<UserInfoPage1> {
+    with AutomaticKeepAliveClientMixin<UserInfoPage1>, Disposable {
   @override
   bool get wantKeepAlive => true;
   late TextEditingController idController;
   late TextEditingController firstController;
   TextEditingController? genderIdController;
+  TextEditingController? maritalStatusController;
   TextEditingController? idTypeController;
   TextEditingController? addressController;
+
+ Future<List<CommonListOption>>? genderOptionsFuture;
+ Future<List<CommonListOption>>? maritalStatusOptionsFuture;
 
   UserInfo? userInfo;
   bool isLoading = true;
 
   List<AddressSelect>? provinces;
 
-  FocusNode idNo = FocusNode();
-  FocusNode firstName = FocusNode();
   Uint8List? _image1Data;
   Uint8List? _image2Data;
 
@@ -56,6 +61,8 @@ class _UserInfoPage1State extends State<UserInfoPage1>
 
   String? genderId; //
   String? province;
+  String? city;
+  String? area;
 
   bool _isPickingImage = false;
 
@@ -69,9 +76,14 @@ class _UserInfoPage1State extends State<UserInfoPage1>
     genderIdController = TextEditingController();
     idTypeController = TextEditingController();
     addressController = TextEditingController();
+    maritalStatusController = TextEditingController();
     _loadUserData();
-    dropdownFocusNode = FocusNode();
-    dropdownFocusNode.addListener(_onFocusChange);
+
+    addDisposer(() => idController.dispose());
+    addDisposer(() => firstController.dispose());
+    addDisposer(() => idTypeController?.dispose());
+    addDisposer(() => addressController?.dispose());
+    addDisposer(() => maritalStatusController?.dispose());
   }
 
   Future<void> getImage(bool isFirstImage, ImageSource source) async {
@@ -114,6 +126,8 @@ class _UserInfoPage1State extends State<UserInfoPage1>
         idController.text = userInfo?.idNo ?? '';
         firstController.text = userInfo?.firstName ?? '';
         idTypeController?.text = userInfo?.idType ?? '';
+        genderOptionsFuture = (userInfo?.options?.genderOptions??Future.value([])) as Future<List<CommonListOption>>?;
+        maritalStatusOptionsFuture = (userInfo?.options?.maritalStatusOptions??Future.value([])) as Future<List<CommonListOption>>?;
         isLoading = false;
       });
     } else {
@@ -133,8 +147,6 @@ class _UserInfoPage1State extends State<UserInfoPage1>
   @override
   void dispose() {
     super.dispose();
-    idNo.dispose();
-    firstName.dispose();
     genderIdController?.dispose();
     idTypeController?.dispose();
     dropdownFocusNode.removeListener(_onFocusChange);
@@ -196,10 +208,10 @@ class _UserInfoPage1State extends State<UserInfoPage1>
         child: Column(
           children: [
             const SizedBox(height: 10),
-            textField('ID NO.', idController,
-                idNo), // Ensure these widgets do not have a fixed height that could cause overflow
+            InputWidget('ID NO.',
+                idController), // Ensure these widgets do not have a fixed height that could cause overflow
             const SizedBox(height: 10),
-            textField('First Name', firstController, firstName),
+            InputWidget('First Name', firstController),
             const SizedBox(height: 10),
             imageContainer(),
             const Gap(10),
@@ -209,30 +221,25 @@ class _UserInfoPage1State extends State<UserInfoPage1>
               children: [
                 SizedBox(
                   width: (MediaQuery.of(context).size.width / 2),
-                  child: genderSelect(
-                      leftPadding: paddingNum, rightPadding: paddingNum / 2),
+                  child: selectInputWithBottom(
+                      'Gender',
+                      genderIdController!,
+                      // () => _showCommonListOptionBottomSheet(
+                      //     context, genderOptionsFuture),
+                      () => {print('oooooooooooooook')},
+                      leftPadding: paddingNum,
+                      rightPadding: paddingNum / 2),
                 ),
                 SizedBox(
-                  width: (MediaQuery.of(context).size.width) * 0.5,
-                  child: genderSelect(
-                      rightPadding: paddingNum, leftPadding: paddingNum / 2),
+                  width: (MediaQuery.of(context).size.width / 2),
+                  child: selectInputWithBottom(
+                      'Marital Status',
+                      maritalStatusController!,
+                      () => _showCommonListOptionBottomSheet(
+                          context, maritalStatusOptionsFuture),
+                      leftPadding: paddingNum,
+                      rightPadding: paddingNum / 2),
                 ),
-              ],
-            ),
-            const Gap(10),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                SizedBox(
-                  width: (MediaQuery.of(context).size.width) / 2,
-                  child: _handleAddressSelect(
-                      leftPadding: paddingNum, rightPadding: 5),
-                ),
-                // SizedBox(
-                //   width: (MediaQuery.of(context).size.width * 0.95 - 25) / 3,
-                //   child: genderSelect(),
-                // ),
               ],
             ),
             const Gap(10),
@@ -251,76 +258,46 @@ class _UserInfoPage1State extends State<UserInfoPage1>
       padding: const EdgeInsets.symmetric(horizontal: 10),
       child: TextField(
         keyboardType: TextInputType.text,
-        decoration: InputDecoration(
-          contentPadding:
-              const EdgeInsets.symmetric(horizontal: 10, vertical: 10),
-          enabledBorder: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(10),
-            borderSide:
-                BorderSide(color: Colors.grey.withOpacity(0.5), width: 1.0),
-          ),
-          focusedBorder: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(10),
-            borderSide:
-                BorderSide(color: Colors.orange.withOpacity(0.5), width: 1.0),
-          ),
-          label: GestureDetector(
-            onTap: () => {print('aksdfasdf')},
-            child: Container(
-              padding: const EdgeInsets.all(8),
-              decoration: BoxDecoration(
-                color: Colors.orange.withOpacity(0.5),
-                borderRadius: BorderRadius.circular(10),
-              ),
-              child: const Text(
-                'asdf',
-                style:
-                    TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
-              ),
-            ),
-          ),
+        decoration: CommonUtils.getInputDecoration(
+          label: 'Marital Status',
         ),
       ),
     );
   }
 
-  Padding genderSelect({double leftPadding = 0.0, double rightPadding = 0.0}) {
-    return Padding(
-      padding: EdgeInsets.only(left: leftPadding, right: rightPadding),
-      child: GenericDropdown<CommonListOption>(
-        decoration: getDecoration('Gender'),
-        items: userInfo?.options?.genderOptions,
-        getDisplayValue: (CommonListOption item) => item.value ?? '',
-        getValue: (CommonListOption item) => item.id ?? '',
-        onChanged: (selectedId) {
-          setState(() {
-            genderId = selectedId;
-          });
-          print("Selected User ID: $selectedId");
-        },
-        selectedValue: getDropListItemByValue(
-            userInfo?.options?.genderOptions, userInfo?.gender ?? ''),
-      ),
-    );
-  }
-
-  Padding _handleAddressSelect(
+  Padding selectInputWithBottom(
+      String labelText, TextEditingController controller, Function func,
       {double leftPadding = 0.0, double rightPadding = 0.0}) {
     return Padding(
-      padding: EdgeInsets.only(left: leftPadding, right: rightPadding),
-      child: GenericDropdown<AddressSelect>(
-        decoration: getDecoration('Province'),
-        items: provinces,
-        getDisplayValue: (AddressSelect item) => item.Value ?? '',
-        getValue: (AddressSelect item) => item.Value ?? '',
-        onChanged: (selectedId) {
-          setState(() {
-            province = selectedId;
-          });
-        },
-        selectedValue:
-            AddressSelect(Id: '', Value: userInfo?.presentProvince ?? ''),
-        focusNode: dropdownFocusNode, // 确保这里是正确引用 _loadProvice
+      padding: const EdgeInsets.symmetric(horizontal: paddingNum),
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: <Widget>[
+          TextFormField(
+            controller: controller,
+            readOnly: true, // 设置输入框为只读
+            decoration: InputDecoration(
+              labelText: labelText,
+              hintText: "please select",
+              border: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(10),
+              ),
+              contentPadding:
+                  const EdgeInsets.symmetric(horizontal: 10, vertical: 10),
+              enabledBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(10),
+                borderSide:
+                    BorderSide(color: Colors.grey.withOpacity(0.5), width: 1.0),
+              ),
+              focusedBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(10),
+                borderSide: BorderSide(
+                    color: Colors.orange.withOpacity(0.5), width: 1.0),
+              ),
+            ),
+            onTap: () => func(), // 点击输入框时调用方法
+          ),
+        ],
       ),
     );
   }
@@ -332,21 +309,34 @@ class _UserInfoPage1State extends State<UserInfoPage1>
       child: Column(
         children: <Widget>[
           Padding(
-            padding: const EdgeInsets.only(top: 10),
+            padding: const EdgeInsets.symmetric(horizontal: paddingNum),
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: <Widget>[
                 TextFormField(
                   controller: addressController,
                   readOnly: true, // 设置输入框为只读
-                  decoration: const InputDecoration(
+                  decoration: InputDecoration(
                     labelText: "Address",
                     hintText: "Tap to select an address",
-                    border: OutlineInputBorder(),
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                    contentPadding: const EdgeInsets.symmetric(
+                        horizontal: 10, vertical: 10),
+                    enabledBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(10),
+                      borderSide: BorderSide(
+                          color: Colors.grey.withOpacity(0.5), width: 1.0),
+                    ),
+                    focusedBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(10),
+                      borderSide: BorderSide(
+                          color: Colors.orange.withOpacity(0.5), width: 1.0),
+                    ),
                   ),
                   onTap: () => _showAddressBottomSheet(context), // 点击输入框时调用方法
                 ),
-                Text(province ?? ''),
               ],
             ),
           ),
@@ -359,8 +349,10 @@ class _UserInfoPage1State extends State<UserInfoPage1>
     AddressSelect? tmpProvince;
     AddressSelect? tmpCity;
     AddressSelect? tmpArea;
+    int curIndex = 0;
     String? id;
     double heightVal = MediaQuery.of(context).size.height;
+    double widthVal = MathUtils.screenWidth - 150;
     showModalBottomSheet(
       isScrollControlled: true,
       context: context,
@@ -377,89 +369,145 @@ class _UserInfoPage1State extends State<UserInfoPage1>
                     child: Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        Column(
+                        Row(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: <Widget>[
                             GestureDetector(
+                              //Province
                               onTap: () {
-                                setState(() {
-                                  id = tmpProvince?.Id;
-                                  tmpCity = null;
-                                  tmpArea = null;
-                                });
+                                if (curIndex > 0) {
+                                  setState(() {
+                                    id = null;
+                                    // tmpCity = null;
+                                    // tmpArea = null;
+                                    curIndex = 0;
+                                  });
+                                }
                                 // 在这里处理点击事件
                                 print("Text clicked");
                                 // 可以执行任何你需要的操作，例如弹出另一个对话框或显示消息
                                 Fluttertoast.showToast(msg: "Text clicked");
                               },
-                              child: Text(
-                                tmpProvince?.Value ?? 'Select province',
-                                style: const TextStyle(
-                                  fontSize: 12,
+                              child: Container(
+                                width: widthVal / 3, // 设置宽度
+                                padding: EdgeInsets.all(5),
+                                decoration: BoxDecoration(
+                                  color: const Color.fromARGB(
+                                      255, 231, 227, 227), // 设置背景色
+                                  borderRadius:
+                                      BorderRadius.circular(5), // 设置圆角
+                                ),
+                                child: Text(
+                                  tmpProvince?.Value ?? 'Select province',
+                                  style: const TextStyle(
+                                    fontSize: 16,
+                                  ),
+                                  overflow: TextOverflow.ellipsis, // 文本截断
                                 ),
                               ),
+                            ),
+                            SizedBox(
+                              width: 5,
                             ),
                             GestureDetector(
-                              //city
-                              onTap: () {
-                                setState(() {
-                                  id = tmpCity?.Id;
-                                  tmpCity = null;
-                                  tmpArea = null;
-                                });
-                                // 在这里处理点击事件
-                                print("Text clicked");
-                                // 可以执行任何你需要的操作，例如弹出另一个对话框或显示消息
-                                Fluttertoast.showToast(msg: "Text clicked");
-                              },
-                              child: Visibility(
-                                visible: tmpProvince != null,
-                                child: Text(
-                                  tmpCity?.Value ?? 'Select city',
-                                  style: const TextStyle(
-                                    fontSize: 12,
+                                //city
+                                onTap: () {
+                                  if (curIndex != 1) {
+                                    setState(() {
+                                      id = tmpProvince?.Id;
+                                      curIndex = 1;
+                                    });
+                                  }
+                                  // 在这里处理点击事件
+                                  print("Text clicked");
+                                  // 可以执行任何你需要的操作，例如弹出另一个对话框或显示消息
+                                  Fluttertoast.showToast(msg: "Text clicked");
+                                },
+                                child: Visibility(
+                                  visible: tmpProvince != null,
+                                  child: Container(
+                                    width: widthVal / 3, // 设置宽度
+                                    padding: EdgeInsets.all(5),
+                                    decoration: BoxDecoration(
+                                      color: const Color.fromARGB(
+                                          255, 231, 227, 227), // 设置背景色
+                                      borderRadius:
+                                          BorderRadius.circular(5), // 设置圆角
+                                    ),
+                                    child: Text(
+                                      tmpCity?.Value ?? 'Select city',
+                                      style: const TextStyle(
+                                        fontSize: 16,
+                                      ),
+                                      overflow: TextOverflow.ellipsis, // 文本截断
+                                    ),
                                   ),
-                                ),
-                              ),
+                                )),
+                            SizedBox(
+                              width: 5,
                             ),
                             GestureDetector(
-                              //area
-                              onTap: () {
-                                // 在这里处理点击事件
-                                print("Text clicked");
-                                // 可以执行任何你需要的操作，例如弹出另一个对话框或显示消息
-                                Fluttertoast.showToast(msg: "Text clicked");
-                              },
-                              child: Visibility(
-                                visible: tmpCity != null,
-                                child: Text(
-                                  tmpArea?.Value ?? 'Select area',
-                                  style: const TextStyle(
-                                    fontSize: 12,
+                                //area
+                                onTap: () {
+                                  curIndex = 2;
+                                  // 在这里处理点击事件
+                                  print("Text clicked");
+                                  // 可以执行任何你需要的操作，例如弹出另一个对话框或显示消息
+                                  Fluttertoast.showToast(msg: "Text clicked");
+                                },
+                                child: Visibility(
+                                  visible: tmpCity != null,
+                                  child: Container(
+                                    width: widthVal / 3, // 设置宽度
+                                    padding: EdgeInsets.all(5),
+                                    decoration: BoxDecoration(
+                                      color: const Color.fromARGB(
+                                          255, 231, 227, 227), // 设置背景色
+                                      borderRadius:
+                                          BorderRadius.circular(5), // 设置圆角
+                                    ),
+                                    child: Text(
+                                      tmpArea?.Value ?? 'Select area',
+                                      style: const TextStyle(
+                                        fontSize: 16,
+                                      ),
+                                      overflow: TextOverflow.ellipsis, // 文本截断
+                                    ),
                                   ),
-                                ),
-                              ),
-                            ),
+                                )),
                           ],
                         ),
-                        ElevatedButton(
-                          onPressed: () {
-                            if (tmpProvince != null) {
-                              setState(() {
-                                addressController!.text =
-                                    tmpProvince!.Value ?? '';
-                              });
-                              Navigator.pop(context);
-                            } else {
-                              Fluttertoast.showToast(
-                                  msg: "No address selected or invalid state");
-                            }
-                          },
-                          style: ElevatedButton.styleFrom(
-                            foregroundColor: Colors.white,
-                            backgroundColor: Colors.blue,
+                        SizedBox(
+                          width: 100,
+                          height: 30,
+                          child: ElevatedButton(
+                            onPressed: () {
+                              if (tmpProvince != null &&
+                                  tmpCity != null &&
+                                  tmpArea != null) {
+                                setState(() {
+                                  province = tmpProvince?.Value;
+                                  city = tmpCity?.Value;
+                                  area = tmpArea?.Value;
+                                  String addr = '${province},${city},${area}';
+                                  addressController!.text = addr;
+                                });
+                                Navigator.pop(context);
+                              } else {
+                                Fluttertoast.showToast(
+                                    msg:
+                                        "No address selected or invalid state");
+                              }
+                            },
+                            style: ElevatedButton.styleFrom(
+                              shape: RoundedRectangleBorder(
+                                  borderRadius:
+                                      BorderRadius.circular(5)), // 设置圆角),
+                              foregroundColor: Colors.white,
+                              backgroundColor: Colors.orange,
+                            ),
+                            child: const Text('Confirm'),
                           ),
-                          child: const Text('Confirm'),
                         ),
                       ],
                     ),
@@ -491,22 +539,91 @@ class _UserInfoPage1State extends State<UserInfoPage1>
                                 ),
                                 onTap: () {
                                   setState(() {
-                                    if (tmpProvince == null) {
+                                    if (curIndex == 0) {
                                       tmpProvince = address;
                                       tmpArea = null;
                                       tmpCity = null;
                                       id = address.Id;
-                                    } else if (tmpCity == null) {
+                                      curIndex = 1;
+                                    } else if (curIndex == 1) {
                                       tmpCity = address;
                                       id = address.Id;
                                       tmpArea = null;
+                                      curIndex = 2;
                                     } else {
                                       tmpArea = address;
                                     }
 
-                                    print('iiiiii$id');
+                                    print('index:$curIndex');
                                     print("Selected: ${tmpProvince?.Value}");
                                   });
+                                },
+                              ),
+                            );
+                          },
+                        );
+                      },
+                    ),
+                  ),
+                ],
+              ),
+            );
+          },
+        );
+      },
+    );
+  }
+
+  void _showCommonListOptionBottomSheet(
+      BuildContext context, Future<List<CommonListOption>> listData) {
+    double heightVal = MediaQuery.of(context).size.height;
+    double widthVal = MediaQuery.of(context).size.width - 150; // 修正获取屏幕宽度的方法
+
+    // 将 List<CommonListOption>? 转换为 Future<List<CommonListOption>>?
+    if (kDebugMode) {
+      print('_showCommonListOptionBottomSheet:${listData}');
+    }
+    showModalBottomSheet(
+      isScrollControlled: true,
+      context: context,
+      builder: (BuildContext context) {
+        return StatefulBuilder(
+          builder: (BuildContext context, StateSetter setState) {
+            return SizedBox(
+              height: heightVal * 0.8,
+              width: double.infinity,
+              child: Column(
+                children: <Widget>[
+                  Expanded(
+                    child: FutureBuilder<List<CommonListOption>>(
+                      future: listData,
+                      builder: (context, snapshot) {
+                        if (snapshot.connectionState ==
+                            ConnectionState.waiting) {
+                          return const Center(
+                            child: CircularProgressIndicator(),
+                          );
+                        } else if (snapshot.hasError) {
+                          return Text('Error: ${snapshot.error}');
+                        } else if (!snapshot.hasData ||
+                            snapshot.data!.isEmpty) {
+                          return const Center(
+                            child: Text('No Data Available'),
+                          );
+                        }
+                        return ListView.builder(
+                          itemCount: snapshot.data!.length,
+                          itemBuilder: (context, index) {
+                            CommonListOption option = snapshot.data![index];
+                            return SizedBox(
+                              height: 30, // 设置固定高度
+                              child: ListTile(
+                                title: Align(
+                                  alignment: Alignment.centerLeft,
+                                  child: Text(option.value ?? ''),
+                                ),
+                                onTap: () {
+                                  setState(() {});
                                 },
                               ),
                             );
@@ -618,30 +735,20 @@ class _UserInfoPage1State extends State<UserInfoPage1>
   //   );
   // }
 
-  Widget textField(
-      String label, TextEditingController controller, FocusNode focuseNode) {
+  Padding InputWidget(
+    String label,
+    TextEditingController controller,
+  ) {
     return Padding(
-        padding: const EdgeInsets.symmetric(horizontal: paddingNum),
-        child: TextField(
-          keyboardType: TextInputType.text,
-          focusNode: focuseNode,
-          controller: controller,
-          decoration: InputDecoration(
-            contentPadding:
-                const EdgeInsets.symmetric(horizontal: 10, vertical: 10),
-            labelText: label,
-            labelStyle: TextStyle(fontSize: 17, color: Colors.grey.shade500),
-            enabledBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(10),
-              borderSide:
-                  BorderSide(color: Colors.grey.withOpacity(0.5), width: 1.0),
-            ),
-            focusedBorder: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(10),
-                borderSide: BorderSide(
-                    color: Colors.orange.withOpacity(0.5), width: 1.0)),
-          ),
-        ));
+      padding: const EdgeInsets.symmetric(horizontal: 10),
+      child: TextField(
+        keyboardType: TextInputType.text,
+        controller: controller,
+        decoration: CommonUtils.getInputDecoration(
+          label: label,
+        ),
+      ),
+    );
   }
 
   Widget imageContainer() {
