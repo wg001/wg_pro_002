@@ -23,6 +23,7 @@ import 'package:wg_pro_002/mixins/disposable_mixin.dart';
 import 'package:wg_pro_002/pages/user_info/user_info_page_2.dart';
 import 'package:app_settings/app_settings.dart';
 import 'package:wg_pro_002/utils/common_utils.dart';
+import 'package:wg_pro_002/widget/address_selector.dart';
 import 'package:wg_pro_002/widget/custom_dropdown.dart';
 import 'package:wg_pro_002/widget/input_widget.dart';
 
@@ -61,6 +62,7 @@ class _UserInfoPage1State extends State<UserInfoPage1>
   String? province;
   String? city;
   String? area;
+  String? maritalStatusId;
 
   bool _isPickingImage = false;
 
@@ -215,9 +217,12 @@ class _UserInfoPage1State extends State<UserInfoPage1>
                   child: selectInputWithBottom(
                       'Gender',
                       genderIdController!,
-                      // () => _showCommonListOptionBottomSheet(
-                      //     context, genderOptionsFuture),
-                      () => {print('oooooooooooooook')},
+                      () => _showCommonListOptionBottomSheet(
+                              context, genderOptionsFuture!,
+                              (String id, String value) {
+                            genderId = id;
+                            genderIdController?.text = value;
+                          }, align: Alignment.center),
                       leftPadding: paddingNum,
                       rightPadding: paddingNum / 2),
                 ),
@@ -227,10 +232,11 @@ class _UserInfoPage1State extends State<UserInfoPage1>
                       'Marital Status',
                       maritalStatusController!,
                       () => _showCommonListOptionBottomSheet(
-                          context,
-                          maritalStatusOptionsFuture!,
-                          MathUtils.screenHeight * 0.5,
-                          align: Alignment.center),
+                              context, maritalStatusOptionsFuture!,
+                              (String id, String value) {
+                            maritalStatusId = id;
+                            maritalStatusController?.text = value;
+                          }, align: Alignment.center),
                       leftPadding: paddingNum,
                       rightPadding: paddingNum / 2),
                 ),
@@ -296,8 +302,7 @@ class _UserInfoPage1State extends State<UserInfoPage1>
     );
   }
 
-  SizedBox _handleAddressSelect01(
-      {double leftPadding = 0.0, double rightPadding = 0.0}) {
+  SizedBox _handleAddressSelect01() {
     return SizedBox(
       width: double.infinity,
       child: Column(
@@ -340,238 +345,30 @@ class _UserInfoPage1State extends State<UserInfoPage1>
   }
 
   void _showAddressBottomSheet(BuildContext context) {
-    AddressSelect? tmpProvince;
-    AddressSelect? tmpCity;
-    AddressSelect? tmpArea;
-    int curIndex = 0;
-    String? id;
-    double heightVal = MediaQuery.of(context).size.height;
-    double widthVal = MathUtils.screenWidth - 150;
     showModalBottomSheet(
       isScrollControlled: true,
       context: context,
       builder: (BuildContext context) {
-        return StatefulBuilder(
-          builder: (BuildContext context, StateSetter setState) {
-            return SizedBox(
-              height: heightVal * 0.8,
-              width: double.infinity,
-              child: Column(
-                children: <Widget>[
-                  Padding(
-                    padding: const EdgeInsets.all(10),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Row(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: <Widget>[
-                            GestureDetector(
-                              //Province
-                              onTap: () {
-                                if (curIndex > 0) {
-                                  setState(() {
-                                    id = null;
-                                    // tmpCity = null;
-                                    // tmpArea = null;
-                                    curIndex = 0;
-                                  });
-                                }
-                                // 在这里处理点击事件
-                                print("Text clicked");
-                                // 可以执行任何你需要的操作，例如弹出另一个对话框或显示消息
-                                Fluttertoast.showToast(msg: "Text clicked");
-                              },
-                              child: Container(
-                                width: widthVal / 3, // 设置宽度
-                                padding: const EdgeInsets.all(5),
-                                decoration: BoxDecoration(
-                                  color: const Color.fromARGB(
-                                      255, 231, 227, 227), // 设置背景色
-                                  borderRadius:
-                                      BorderRadius.circular(5), // 设置圆角
-                                ),
-                                child: Text(
-                                  tmpProvince?.Value ?? 'Select province',
-                                  style: const TextStyle(
-                                    fontSize: 16,
-                                  ),
-                                  overflow: TextOverflow.ellipsis, // 文本截断
-                                ),
-                              ),
-                            ),
-                            const SizedBox(
-                              width: 5,
-                            ),
-                            GestureDetector(
-                                //city
-                                onTap: () {
-                                  if (curIndex != 1) {
-                                    setState(() {
-                                      id = tmpProvince?.Id;
-                                      curIndex = 1;
-                                    });
-                                  }
-                                  // 在这里处理点击事件
-                                  print("Text clicked");
-                                  // 可以执行任何你需要的操作，例如弹出另一个对话框或显示消息
-                                  Fluttertoast.showToast(msg: "Text clicked");
-                                },
-                                child: Visibility(
-                                  visible: tmpProvince != null,
-                                  child: Container(
-                                    width: widthVal / 3, // 设置宽度
-                                    padding: const EdgeInsets.all(5),
-                                    decoration: BoxDecoration(
-                                      color: const Color.fromARGB(
-                                          255, 231, 227, 227), // 设置背景色
-                                      borderRadius:
-                                          BorderRadius.circular(5), // 设置圆角
-                                    ),
-                                    child: Text(
-                                      tmpCity?.Value ?? 'Select city',
-                                      style: const TextStyle(
-                                        fontSize: 16,
-                                      ),
-                                      overflow: TextOverflow.ellipsis, // 文本截断
-                                    ),
-                                  ),
-                                )),
-                            const SizedBox(
-                              width: 5,
-                            ),
-                            GestureDetector(
-                                //area
-                                onTap: () {
-                                  curIndex = 2;
-                                  // 在这里处理点击事件
-                                  print("Text clicked");
-                                  // 可以执行任何你需要的操作，例如弹出另一个对话框或显示消息
-                                  Fluttertoast.showToast(msg: "Text clicked");
-                                },
-                                child: Visibility(
-                                  visible: tmpCity != null,
-                                  child: Container(
-                                    width: widthVal / 3, // 设置宽度
-                                    padding: const EdgeInsets.all(5),
-                                    decoration: BoxDecoration(
-                                      color: const Color.fromARGB(
-                                          255, 231, 227, 227), // 设置背景色
-                                      borderRadius:
-                                          BorderRadius.circular(5), // 设置圆角
-                                    ),
-                                    child: Text(
-                                      tmpArea?.Value ?? 'Select area',
-                                      style: const TextStyle(
-                                        fontSize: 16,
-                                      ),
-                                      overflow: TextOverflow.ellipsis, // 文本截断
-                                    ),
-                                  ),
-                                )),
-                          ],
-                        ),
-                        SizedBox(
-                          width: 100,
-                          height: 30,
-                          child: ElevatedButton(
-                            onPressed: () {
-                              if (tmpProvince != null &&
-                                  tmpCity != null &&
-                                  tmpArea != null) {
-                                setState(() {
-                                  province = tmpProvince?.Value;
-                                  city = tmpCity?.Value;
-                                  area = tmpArea?.Value;
-                                  String addr = '$province,$city,$area';
-                                  addressController!.text = addr;
-                                });
-                                Navigator.pop(context);
-                              } else {
-                                Fluttertoast.showToast(
-                                    msg:
-                                        "No address selected or invalid state");
-                              }
-                            },
-                            style: ElevatedButton.styleFrom(
-                              shape: RoundedRectangleBorder(
-                                  borderRadius:
-                                      BorderRadius.circular(5)), // 设置圆角),
-                              foregroundColor: Colors.white,
-                              backgroundColor: Colors.orange,
-                            ),
-                            child: const Text('Confirm'),
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                  const Divider(
-                    height: 0.1,
-                  ),
-                  Expanded(
-                    child: FutureBuilder<List<AddressSelect>>(
-                      future: fetchProvince(id),
-                      builder: (context, snapshot) {
-                        if (snapshot.connectionState ==
-                            ConnectionState.waiting) {
-                          return const Center(
-                              child: CircularProgressIndicator());
-                        } else if (snapshot.hasError) {
-                          return Text('Error: ${snapshot.error}');
-                        }
-                        return ListView.builder(
-                          itemCount: snapshot.data!.length,
-                          itemBuilder: (context, index) {
-                            AddressSelect address = snapshot.data![index];
-                            return SizedBox(
-                              height: 30, // 设置固定高度
-                              child: ListTile(
-                                title: Align(
-                                  alignment: Alignment.centerLeft,
-                                  child: Text(address.Value ?? ''),
-                                ),
-                                onTap: () {
-                                  setState(() {
-                                    if (curIndex == 0) {
-                                      tmpProvince = address;
-                                      tmpArea = null;
-                                      tmpCity = null;
-                                      id = address.Id;
-                                      curIndex = 1;
-                                    } else if (curIndex == 1) {
-                                      tmpCity = address;
-                                      id = address.Id;
-                                      tmpArea = null;
-                                      curIndex = 2;
-                                    } else {
-                                      tmpArea = address;
-                                    }
-
-                                    print('index:$curIndex');
-                                    print("Selected: ${tmpProvince?.Value}");
-                                  });
-                                },
-                              ),
-                            );
-                          },
-                        );
-                      },
-                    ),
-                  ),
-                ],
-              ),
-            );
+        return AddressSelector(
+          fetchAddress: fetchProvince, // 传入函数，返回Future<List<AddressSelect>>
+          onComplete: (province, city, area) {
+            setState(() {
+              String addr = '$province,$city,$area';
+              addressController!.text = addr;
+              print("Selected address: $addr");
+            });
+            Navigator.pop(context);
           },
         );
       },
     );
   }
 
-  void _showCommonListOptionBottomSheet(BuildContext context,
-      Future<List<CommonListOption>> listData, double height,
+  void _showCommonListOptionBottomSheet(
+      BuildContext context,
+      Future<List<CommonListOption>> listData,
+      Function(String, String) onUpdateSelectedValue,
       {Alignment align = Alignment.centerLeft}) {
-    // 将 List<CommonListOption>? 转换为 Future<List<CommonListOption>>?
     if (kDebugMode) {
       print('_showCommonListOptionBottomSheet:$listData');
     }
@@ -581,11 +378,11 @@ class _UserInfoPage1State extends State<UserInfoPage1>
       builder: (BuildContext context) {
         return StatefulBuilder(
           builder: (BuildContext context, StateSetter setState) {
-            return SizedBox(
-              height: height,
-              width: double.infinity,
+            return Container(
+              padding: EdgeInsets.only(
+                  bottom: MediaQuery.of(context).viewInsets.bottom),
               child: Column(
-                crossAxisAlignment: CrossAxisAlignment.center,
+                mainAxisSize: MainAxisSize.min,
                 children: <Widget>[
                   FutureBuilder<List<CommonListOption>>(
                     future: listData,
@@ -601,31 +398,30 @@ class _UserInfoPage1State extends State<UserInfoPage1>
                           child: Text('No Data Available'),
                         );
                       }
-                      return ListView.builder(
-                        shrinkWrap: true, // 强制ListView占用最小空间
-                        itemCount: snapshot.data!.length,
-                        itemBuilder: (context, index) {
-                          CommonListOption option = snapshot.data![index];
-                          return SizedBox(
-                            height: 50, // 设置固定高度
-
-                            child: ListTile(
-                              leading: const Align(
-                                  widthFactor: 1.0,
-                                  alignment: Alignment.center,
-                                  child: Icon(Icons.circle)),
-                              contentPadding:
-                                  EdgeInsets.zero, // 设置内边距为0 // 设置垂直内边距为0
-                              title: Align(
-                                alignment: align,
-                                child: Text(option.value ?? ''),
-                              ),
+                      return Flexible(
+                        child: ListView.builder(
+                          shrinkWrap: true,
+                          itemCount: snapshot.data!.length,
+                          itemBuilder: (context, index) {
+                            CommonListOption option = snapshot.data![index];
+                            return InkWell(
                               onTap: () {
-                                setState(() {});
+                                // setState(() {});
+                                onUpdateSelectedValue(
+                                    option.id ?? '', option.value ?? '');
+                                Navigator.pop(context); // 可选: 关闭底部表单
                               },
-                            ),
-                          );
-                        },
+                              child: Container(
+                                height: 30,
+                                alignment: align,
+                                padding:
+                                    const EdgeInsets.symmetric(horizontal: 16),
+                                child: Text(option.value ?? '',
+                                    style: const TextStyle(height: 1.2)),
+                              ),
+                            );
+                          },
+                        ),
                       );
                     },
                   ),
