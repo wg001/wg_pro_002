@@ -13,11 +13,9 @@ import 'package:wg_pro_002/net/result_data.dart';
 import 'package:wg_pro_002/utils/logger_util.dart';
 
 class UserDao {
-  static login(phone, password, store) async {
-    String type = phone + ":" + password;
-    dynamic? resultData;
-    print('$phone,$password');
-    Map params = {"phone": phone, "valid_code": password};
+  static login(String phone, validCode) async {
+    print('$phone,$validCode');
+    Map params = {"phone": phone, "valid_code": validCode};
     try {
       var res = await httpManager.netFetch(Address.getLogin(),
           params: json.encode(params));
@@ -34,7 +32,7 @@ class UserDao {
           await LocalStorage.save(Config.TOKEN_KEY, resMap['ret']['token']);
         }
 
-        return DataResult(resultData, true);
+        return DataResult(resMap["ret"], true);
       }
     } catch (e) {
       if (kDebugMode) {
@@ -43,14 +41,14 @@ class UserDao {
       return DataResult(e.toString(), false);
     }
 
-    return DataResult(resultData, true);
+    return DataResult(null, false);
   }
 
   static getUserInfo() async {
     dynamic resultData;
     try {
       var res = await httpManager.netFetch(Address.getUserInfo(),
-          params: json.encode({"part_info":99}));
+          params: json.encode({"part_info": 99}));
 
       if (res != null && res.data != null) {
         Map<String, dynamic> resMap =
