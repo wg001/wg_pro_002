@@ -1,11 +1,7 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
-import 'package:flutter_redux/flutter_redux.dart';
 import 'package:fluttertoast/fluttertoast.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 import 'package:wg_pro_002/provider/user_auth_provider.dart';
-import 'package:wg_pro_002/redux/login_redux.dart';
-import 'package:wg_pro_002/redux/wg_state.dart';
 import 'package:provider/provider.dart';
 
 class LoginPage extends StatelessWidget {
@@ -94,7 +90,8 @@ class LoginPage extends StatelessWidget {
                                             color: Colors.orange),
                                         backgroundColor: Colors.orange,
                                       ),
-                                      onPressed: () => userAuthModel.login,
+                                      onPressed: () =>
+                                          userAuthModel.login(context),
                                       child: const Text(
                                         "登陆",
                                         style: TextStyle(

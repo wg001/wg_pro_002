@@ -17,10 +17,10 @@ class WgGoApp extends StatelessWidget {
         // home: NavigatorUtils.pageContainer(WelcomePage(), context),
         routes: {
           WelcomePage.sName: (context) {
-            return const WelcomePage();
+            return WelcomePage();
           },
           MainPage.sName: (context) {
-            return const MainPage();
+            return MainPage();
           },
           LoginPage.sName: (context) {
             return NavigatorUtils.pageContainer(LoginPage(), context);

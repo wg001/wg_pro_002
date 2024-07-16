@@ -16,7 +16,6 @@ class LoanDao {
   static getLoanInfo() async {}
 
   static getPageIndex() async {
-    dynamic? resultData;
     try {
       var res = await httpManager.netFetch(Address.getPageIndex());
 
@@ -31,19 +30,17 @@ class LoanDao {
         if (resMap["ret"] is Map && resMap['ret'].containsKey('token')) {
           await LocalStorage.save(Config.TOKEN_KEY, resMap['ret']['token']);
         }
-        resultData = resMap["ret"];
         HomeRet homeRet = HomeRet.fromJson(resMap["ret"]);
         print('-------------');
         print(homeRet.productCharacteristics);
         return DataResult(homeRet, true);
       }
+      return DataResult(null, false);
     } catch (e) {
       if (kDebugMode) {
         print("pageIndex error: $e");
       }
       return DataResult(e.toString(), false);
     }
-
-    return DataResult(resultData, true);
   }
 }

@@ -12,11 +12,11 @@ import 'package:wg_pro_002/utils/navigator_utils.dart';
 class UserAuthNotifier extends ChangeNotifier {
   bool _isLoggedIn = false;
   String? _token;
-  
+
   Future<bool> checkLoginStatus() async {
     if (!_isLoggedIn) {
       String? token = await LocalStorage.get(Config.TOKEN_KEY);
-      _isLoggedIn = token == null;
+      _isLoggedIn = token != null;
     }
 
     return _isLoggedIn;
@@ -50,7 +50,7 @@ class UserAuthNotifier extends ChangeNotifier {
 
   void startTimer() {
     _isButtonDisabled = true;
-    _timer = Timer.periodic(Duration(seconds: 1), (timer) {
+    _timer = Timer.periodic(const Duration(seconds: 1), (timer) {
       if (_countdown > 0) {
         _countdown--;
       } else {
@@ -63,8 +63,11 @@ class UserAuthNotifier extends ChangeNotifier {
   }
 
   Future<void> login(BuildContext context) async {
-    // Here you can add your login logic
-    if (_phone == null || _validCode == null) {
+    // Validate input fields
+    if (_phone == null ||
+        _validCode == null ||
+        _phone!.isEmpty ||
+        _validCode!.isEmpty) {
       Fluttertoast.showToast(
         msg: 'Please enter all fields',
         toastLength: Toast.LENGTH_SHORT,
@@ -72,31 +75,37 @@ class UserAuthNotifier extends ChangeNotifier {
       );
       return;
     }
-    DataResult loginRet = UserDao.login(_phone!, _validCode);
-    if (loginRet.result) {
-      _isLoggedIn = true;
-      var data = loginRet.data as Map;
-      _token = data["token"];
-    } else {
-      _lastLoginError = "login failed, plz try again later";
+
+    // Perform the login operation
+    try {
+      DataResult loginRet = await UserDao.login(
+          _phone!, _validCode!); // Assuming UserDao.login is asynchronous
+      if (loginRet.result) {
+        _isLoggedIn = true;
+        var data = loginRet.data as Map<String, dynamic>;
+        _token = data["token"];
+        // Save login state and credentials
+        SharedPreferences prefs = await SharedPreferences.getInstance();
+        await prefs.setString("phone", _phone!);
+        await prefs.setString("validcode", _validCode!);
+        Fluttertoast.showToast(
+          msg: 'Login Successful',
+          toastLength: Toast.LENGTH_SHORT,
+          gravity: ToastGravity.CENTER,
+        );
+        NavigatorUtils.goMainPage(context);
+      } else {
+        throw Exception('Login failed');
+      }
+    } catch (e) {
       _isLoggedIn = false;
       _token = null;
+      Fluttertoast.showToast(
+        msg: 'Login failed: ${e.toString()}',
+        toastLength: Toast.LENGTH_LONG,
+        gravity: ToastGravity.CENTER,
+      );
     }
-
-    SharedPreferences prefs = await SharedPreferences.getInstance();
-    await prefs.setString("phone", _phone!);
-    await prefs.setString("validcode", _validCode!);
-    // Simulate login success
-    Fluttertoast.showToast(
-      msg: _isLoggedIn ? 'Login Successful' : _lastLoginError ?? 'login failed',
-      toastLength: Toast.LENGTH_SHORT,
-      gravity: ToastGravity.CENTER,
-    );
-    if (_isLoggedIn) {
-      // ignore: use_build_context_synchronously
-      NavigatorUtils.goMainPage(context);
-    }
-    // Example action after login
   }
 
   @override
