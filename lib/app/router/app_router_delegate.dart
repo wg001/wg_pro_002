@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
-import 'package:wg_pro_002/pages/home_page.dart';
 import 'package:wg_pro_002/pages/details_page.dart';
 import 'package:wg_pro_002/pages/main_page.dart';
 import 'package:wg_pro_002/pages/settings_page.dart';
 
 class AppRouterDelegate extends RouterDelegate<RouteSettings>
     with ChangeNotifier, PopNavigatorRouterDelegateMixin<RouteSettings> {
+  @override
   final GlobalKey<NavigatorState> navigatorKey;
 
   RouteSettings? _currentRoute;

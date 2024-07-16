@@ -3,9 +3,11 @@ import 'dart:async';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_redux/flutter_redux.dart';
+import 'package:provider/provider.dart';
 
 import 'package:redux/redux.dart';
 import 'package:rive/rive.dart';
+import 'package:wg_pro_002/provider/user_auth_provider.dart';
 import 'package:wg_pro_002/redux/wg_state.dart';
 import 'package:wg_pro_002/style/gsy_style.dart';
 import 'package:wg_pro_002/utils/navigator_utils.dart';
@@ -37,8 +39,6 @@ class _WelcomePageState extends State<WelcomePage> {
     }
     hadInit = true;
 
-    ///防止多次进入
-    Store<WGState> store = StoreProvider.of(context);
     Future.delayed(const Duration(milliseconds: 500), () {
       setState(() {
         text = "Welcome";
@@ -52,15 +52,8 @@ class _WelcomePageState extends State<WelcomePage> {
       });
     });
     Future.delayed(const Duration(seconds: 3, milliseconds: 500), () {
-      // UserDao.initUserInfo(store).then((res) {
-      //   if (res != null && res.result) {
-      //     NavigatorUtils.goHome(context);
-      //   } else {
-      //     NavigatorUtils.goLogin(context);
-      //   }
-      //   return true;
-      // });
-      NavigatorUtils.goMainPage(context);
+
+    NavigatorUtils.goMainPage(context);
     });
   }
 

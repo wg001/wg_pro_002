@@ -3,14 +3,25 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:wg_pro_002/config/config.dart';
 import 'package:wg_pro_002/dao/dao_result.dart';
 import 'package:wg_pro_002/dao/user_dao.dart';
+import 'package:wg_pro_002/local/local_storage.dart';
 import 'package:wg_pro_002/utils/navigator_utils.dart';
 
 class UserAuthNotifier extends ChangeNotifier {
   bool _isLoggedIn = false;
   String? _token;
-  bool get isLoggedIn => _isLoggedIn;
+  
+  Future<bool> checkLoginStatus() async {
+    if (!_isLoggedIn) {
+      String? token = await LocalStorage.get(Config.TOKEN_KEY);
+      _isLoggedIn = token == null;
+    }
+
+    return _isLoggedIn;
+  }
+
   String? get apiToken => _token;
 
   String? _phone;
