@@ -12,6 +12,7 @@ import 'package:fluttertoast/fluttertoast.dart';
 import 'package:gap/gap.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:flutter/foundation.dart' show kDebugMode, kIsWeb;
+import 'package:provider/provider.dart';
 import 'package:wg_pro_002/app/model/AddressSelect.dart';
 import 'package:wg_pro_002/app/model/UserInfo.dart';
 import 'package:wg_pro_002/app/model/UserInfoForm.dart';
@@ -22,6 +23,7 @@ import 'package:wg_pro_002/dao/user_dao.dart';
 import 'package:wg_pro_002/mixins/disposable_mixin.dart';
 import 'package:wg_pro_002/pages/user_info/user_info_page_2.dart';
 import 'package:app_settings/app_settings.dart';
+import 'package:wg_pro_002/provider/user_info_provider.dart';
 import 'package:wg_pro_002/utils/common_utils.dart';
 import 'package:wg_pro_002/widget/address_selector.dart';
 import 'package:wg_pro_002/widget/custom_dropdown.dart';
@@ -135,15 +137,6 @@ class _UserInfoPage1State extends State<UserInfoPage1>
       });
     } else {
       Fluttertoast.showToast(msg: "Failed to load user data");
-    }
-  }
-
-  Future<List<AddressSelect>> fetchProvince(String? id) async {
-    DataResult provincesData = await AddressDao.getAddressById(id: id);
-    if (provincesData.result) {
-      return provincesData.data as List<AddressSelect>;
-    } else {
-      throw Exception('Failed to load addresses');
     }
   }
 
@@ -345,12 +338,16 @@ class _UserInfoPage1State extends State<UserInfoPage1>
   }
 
   void _showAddressBottomSheet(BuildContext context) {
+    UserInfoProvider userInfoProvider =
+        Provider.of<UserInfoProvider>(context, listen: false);
+
     showModalBottomSheet(
       isScrollControlled: true,
       context: context,
       builder: (BuildContext context) {
         return AddressSelector(
-          fetchAddress: fetchProvince, // 传入函数，返回Future<List<AddressSelect>>
+          fetchAddress: userInfoProvider
+              .fetchProvince, // 传入函数，返回Future<List<AddressSelect>>
           onComplete: (province, city, area) {
             setState(() {
               String addr = '$province,$city,$area';

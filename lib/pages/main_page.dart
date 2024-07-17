@@ -21,13 +21,15 @@ class MainPage extends StatelessWidget {
     const ForgetPasswordPage(),
     const ProfilPage(),
   ];
-  int _currentIndex = 0;
+  // int _currentIndex = 0;
   @override
   Widget build(BuildContext context) {
-    final currentIndex = Provider.of<NavigationProvider>(context).currentIndex;
+    final navigationProvider = Provider.of<NavigationProvider>(context);
+
+    // final currentIndex = Provider.of<NavigationProvider>(context).currentIndex;
     MathUtils.init(context);
     return Scaffold(
-      body: _pages.elementAt(_currentIndex),
+      body: _pages.elementAt(navigationProvider.currentIndex),
       bottomNavigationBar: Container(
         decoration: const ShapeDecoration(
           color: Colors.white,
@@ -47,8 +49,10 @@ class MainPage extends StatelessWidget {
           ],
         ),
         child: BottomNavigationBar(
-          currentIndex: currentIndex,
+          currentIndex: navigationProvider.currentIndex,
           type: BottomNavigationBarType.fixed,
+          onTap: (index) => navigationProvider.setCurrentIndex(index),
+
           showUnselectedLabels: false,
           iconSize: getSize(24),
           selectedItemColor: Pallete.orangePrimary, //Pallete.orangePrimary,

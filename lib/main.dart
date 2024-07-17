@@ -10,6 +10,7 @@ import 'package:wg_pro_002/env/env_config.dart';
 import 'package:wg_pro_002/provider/home_page_provider.dart';
 import 'package:wg_pro_002/provider/navigation_provider.dart';
 import 'package:wg_pro_002/provider/user_auth_provider.dart';
+import 'package:wg_pro_002/provider/user_info_provider.dart';
 
 void main() {
   runApp(
@@ -18,6 +19,7 @@ void main() {
         ChangeNotifierProvider(create: (context) => UserAuthNotifier()),
         ChangeNotifierProvider(create: (context) => HomePageProvider()),
         ChangeNotifierProvider(create: (context) => NavigationProvider()),
+        ChangeNotifierProvider(create: (context) => UserInfoProvider()),
       ],
       child: WgGoApp(),
     ),
