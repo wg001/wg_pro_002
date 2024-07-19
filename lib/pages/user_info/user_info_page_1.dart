@@ -47,7 +47,6 @@ class _UserInfoPage1State extends State<UserInfoPage1>
   TextEditingController? genderIdController;
   TextEditingController? maritalStatusController;
   TextEditingController? idTypeController;
-  TextEditingController? addressController;
 
   Future<List<CommonListOption>>? genderOptionsFuture;
   Future<List<CommonListOption>>? maritalStatusOptionsFuture;
@@ -61,9 +60,6 @@ class _UserInfoPage1State extends State<UserInfoPage1>
   Uint8List? _image2Data;
 
   String? genderId; //
-  String? province;
-  String? city;
-  String? area;
   String? maritalStatusId;
 
   bool _isPickingImage = false;
@@ -77,14 +73,12 @@ class _UserInfoPage1State extends State<UserInfoPage1>
     firstController = TextEditingController();
     genderIdController = TextEditingController();
     idTypeController = TextEditingController();
-    addressController = TextEditingController();
     maritalStatusController = TextEditingController();
     _loadUserData();
 
     addDisposer(() => idController.dispose());
     addDisposer(() => firstController.dispose());
     addDisposer(() => idTypeController?.dispose());
-    addDisposer(() => addressController?.dispose());
     addDisposer(() => maritalStatusController?.dispose());
   }
 
@@ -305,29 +299,32 @@ class _UserInfoPage1State extends State<UserInfoPage1>
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: <Widget>[
-                TextFormField(
-                  controller: addressController,
-                  readOnly: true, // 设置输入框为只读
-                  decoration: InputDecoration(
-                    labelText: "Address",
-                    hintText: "Tap to select an address",
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(10),
+                Selector<UserInfoProvider, String>(
+                  builder: (_, fullAddress, __) => TextFormField(
+                    readOnly: true, // 设置输入框为只读
+                    controller: TextEditingController(text: fullAddress),
+                    decoration: InputDecoration(
+                      labelText: "Address",
+                      hintText: "Tap to select an address",
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(10),
+                      ),
+                      contentPadding: const EdgeInsets.symmetric(
+                          horizontal: 10, vertical: 10),
+                      enabledBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(10),
+                        borderSide: BorderSide(
+                            color: Colors.grey.withOpacity(0.5), width: 1.0),
+                      ),
+                      focusedBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(10),
+                        borderSide: BorderSide(
+                            color: Colors.orange.withOpacity(0.5), width: 1.0),
+                      ),
                     ),
-                    contentPadding: const EdgeInsets.symmetric(
-                        horizontal: 10, vertical: 10),
-                    enabledBorder: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(10),
-                      borderSide: BorderSide(
-                          color: Colors.grey.withOpacity(0.5), width: 1.0),
-                    ),
-                    focusedBorder: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(10),
-                      borderSide: BorderSide(
-                          color: Colors.orange.withOpacity(0.5), width: 1.0),
-                    ),
+                    onTap: () => _showAddressBottomSheet(context), // 点击输入框时调用方法
                   ),
-                  onTap: () => _showAddressBottomSheet(context), // 点击输入框时调用方法
+                  selector: (_, provider) => provider.fullAddress ?? '',
                 ),
               ],
             ),
@@ -338,7 +335,9 @@ class _UserInfoPage1State extends State<UserInfoPage1>
   }
 
   void _showAddressBottomSheet(BuildContext context) {
-    UserInfoProvider userInfoProvider =
+    // 直接使用 Provider.of 来获取 UserInfoProvider 的实例
+    // 我们这里不使用 Selector，因为我们不需要响应任何数据的变化，仅需要调用方法
+    var userInfoProvider =
         Provider.of<UserInfoProvider>(context, listen: false);
 
     showModalBottomSheet(
@@ -346,14 +345,9 @@ class _UserInfoPage1State extends State<UserInfoPage1>
       context: context,
       builder: (BuildContext context) {
         return AddressSelector(
-          fetchAddress: userInfoProvider
-              .fetchProvince, // 传入函数，返回Future<List<AddressSelect>>
+          fetchAddress: userInfoProvider.fetchProvince,
           onComplete: (province, city, area) {
-            setState(() {
-              String addr = '$province,$city,$area';
-              addressController!.text = addr;
-              print("Selected address: $addr");
-            });
+            userInfoProvider.updateAddress(province, city, area);
             Navigator.pop(context);
           },
         );
