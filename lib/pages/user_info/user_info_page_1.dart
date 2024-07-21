@@ -1,13 +1,5 @@
-import 'dart:convert';
-import 'dart:typed_data';
-import 'dart:io';
-
 import 'package:flutter/material.dart';
-import 'package:flutter/cupertino.dart';
-import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter/widgets.dart';
-import 'package:flutter_html/flutter_html.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:gap/gap.dart';
 import 'package:image_picker/image_picker.dart';
@@ -15,9 +7,6 @@ import 'package:flutter/foundation.dart' show kDebugMode, kIsWeb;
 import 'package:provider/provider.dart';
 import 'package:wg_pro_002/app/model/AddressSelect.dart';
 import 'package:wg_pro_002/app/model/UserInfo.dart';
-import 'package:wg_pro_002/app/model/UserInfoForm.dart';
-import 'package:wg_pro_002/common/response_conf.dart';
-import 'package:wg_pro_002/dao/address_dao.dart';
 import 'package:wg_pro_002/dao/dao_result.dart';
 import 'package:wg_pro_002/dao/user_dao.dart';
 import 'package:wg_pro_002/mixins/disposable_mixin.dart';
@@ -26,7 +15,6 @@ import 'package:app_settings/app_settings.dart';
 import 'package:wg_pro_002/provider/user_info_provider.dart';
 import 'package:wg_pro_002/utils/common_utils.dart';
 import 'package:wg_pro_002/widget/address_selector.dart';
-import 'package:wg_pro_002/widget/custom_dropdown.dart';
 import 'package:wg_pro_002/widget/input_widget.dart';
 
 const double paddingNum = 10;
@@ -44,15 +32,12 @@ class _UserInfoPage1State extends State<UserInfoPage1>
   bool get wantKeepAlive => true;
   late TextEditingController idController;
   late TextEditingController firstController;
-  TextEditingController? genderIdController;
-  TextEditingController? maritalStatusController;
   TextEditingController? idTypeController;
 
   Future<List<CommonListOption>>? genderOptionsFuture;
   Future<List<CommonListOption>>? maritalStatusOptionsFuture;
 
   UserInfo? userInfo;
-  bool isLoading = true;
 
   List<AddressSelect>? provinces;
 
@@ -69,17 +54,9 @@ class _UserInfoPage1State extends State<UserInfoPage1>
   @override
   void initState() {
     super.initState();
-    idController = TextEditingController();
-    firstController = TextEditingController();
-    genderIdController = TextEditingController();
-    idTypeController = TextEditingController();
-    maritalStatusController = TextEditingController();
-    _loadUserData();
-
-    addDisposer(() => idController.dispose());
-    addDisposer(() => firstController.dispose());
-    addDisposer(() => idTypeController?.dispose());
-    addDisposer(() => maritalStatusController?.dispose());
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      Provider.of<UserInfoProvider>(context, listen: false).loadUserData();
+    });
   }
 
   Future<void> getImage(bool isFirstImage, ImageSource source) async {
@@ -114,26 +91,6 @@ class _UserInfoPage1State extends State<UserInfoPage1>
     }
   }
 
-  Future<void> _loadUserData() async {
-    DataResult res = await UserDao.getUserInfo();
-    if (res.result && res.data is UserInfo) {
-      setState(() {
-        userInfo = res.data as UserInfo;
-        idController.text = userInfo?.idNo ?? '';
-        firstController.text = userInfo?.firstName ?? '';
-        idTypeController?.text = userInfo?.idType ?? '';
-        genderOptionsFuture =
-            Future.value(userInfo?.options?.genderOptions ?? []);
-
-        maritalStatusOptionsFuture =
-            Future.value(userInfo?.options?.maritalStatusOptions ?? []);
-        isLoading = false;
-      });
-    } else {
-      Fluttertoast.showToast(msg: "Failed to load user data");
-    }
-  }
-
   @override
   void dispose() {
     disposeResources(); // 调用 mixin 的 disposeResources 方法清理资源
@@ -143,37 +100,40 @@ class _UserInfoPage1State extends State<UserInfoPage1>
   @override
   Widget build(BuildContext context) {
     super.build(context);
-    return isLoading
-        ? Scaffold(
-            appBar: AppBar(title: const Text('Loading...')),
-            body: const Center(child: CircularProgressIndicator()),
-          )
-        : GestureDetector(
-            onTap: () {
-              // 当点击非输入字段区域时，关闭键盘
-              FocusScope.of(context).unfocus();
-            },
-            child: Scaffold(
-              body: SafeArea(
-                child: Stack(
-                  children: [
-                    Positioned(
-                      top: 0,
-                      left: 0,
-                      right: 0,
-                      child: background_container(context),
-                    ),
-                    Positioned(
-                      top: 120, // Adjust this value as needed
-                      left: 0,
-                      right: 0,
-                      bottom: 0,
-                      child: main_container(),
-                    ),
-                  ],
+    return Consumer<UserInfoProvider>(
+        builder: (BuildContext context, userInfoProvider, Widget? child) {
+      return userInfoProvider.isLoading
+          ? Scaffold(
+              appBar: AppBar(title: const Text('Loading...')),
+              body: const Center(child: CircularProgressIndicator()),
+            )
+          : GestureDetector(
+              onTap: () {
+                // 当点击非输入字段区域时，关闭键盘
+                FocusScope.of(context).unfocus();
+              },
+              child: Scaffold(
+                body: SafeArea(
+                  child: Stack(
+                    children: [
+                      Positioned(
+                        top: 0,
+                        left: 0,
+                        right: 0,
+                        child: background_container(context),
+                      ),
+                      Positioned(
+                        top: 120, // Adjust this value as needed
+                        left: 0,
+                        right: 0,
+                        bottom: 0,
+                        child: main_container(),
+                      ),
+                    ],
+                  ),
                 ),
-              ),
-            ));
+              ));
+    });
   }
 
   Widget main_container() {
@@ -185,13 +145,25 @@ class _UserInfoPage1State extends State<UserInfoPage1>
         ),
         width: MediaQuery.of(context).size.width * 1,
         padding: const EdgeInsets.all(0), // Appropriate padding
-        child: Column(
-          children: [
+        child: Consumer<UserInfoProvider>(
+            builder: (BuildContext context, userInfoProvider, Widget? child) {
+          return Column(children: [
             const SizedBox(height: 10),
-            InputWidget('ID NO.',
-                idController), // Ensure these widgets do not have a fixed height that could cause overflow
+
+            InputWidget(
+              label: "ID NO",
+              initialValue: userInfoProvider.idNo,
+              onChanged: (value) => userInfoProvider.setIdNo(value),
+              context: context,
+            ), // Ensure these widgets do not have a fixed height that could cause overflow
             const SizedBox(height: 10),
-            InputWidget('First Name', firstController),
+
+            InputWidget(
+              label: "First Name1",
+              initialValue: userInfoProvider.firstName,
+              onChanged: (value) => userInfoProvider.setFirstName(value),
+              context: context,
+            ),
             const SizedBox(height: 10),
             imageContainer(),
             const Gap(10),
@@ -201,31 +173,31 @@ class _UserInfoPage1State extends State<UserInfoPage1>
               children: [
                 SizedBox(
                   width: (MediaQuery.of(context).size.width / 2),
-                  child: selectInputWithBottom(
-                      'Gender',
-                      genderIdController!,
-                      () => _showCommonListOptionBottomSheet(
-                              context, genderOptionsFuture!,
-                              (String id, String value) {
-                            genderId = id;
-                            genderIdController?.text = value;
-                          }, align: Alignment.center),
-                      leftPadding: paddingNum,
-                      rightPadding: paddingNum / 2),
+                  child: SelectInputWithBottom(
+                    labelText: 'Gender',
+                    currentValue: userInfoProvider.gender,
+                    onTap: () => _showCommonListOptionBottomSheet(
+                        context, userInfoProvider.genderOptionsFuture!,
+                        (String id, String value) {
+                      userInfoProvider.setGender(id, value);
+                    }, align: Alignment.center),
+                    leftPadding: paddingNum,
+                    rightPadding: paddingNum / 2,
+                  ),
                 ),
                 SizedBox(
                   width: (MediaQuery.of(context).size.width / 2),
-                  child: selectInputWithBottom(
-                      'Marital Status',
-                      maritalStatusController!,
-                      () => _showCommonListOptionBottomSheet(
-                              context, maritalStatusOptionsFuture!,
-                              (String id, String value) {
-                            maritalStatusId = id;
-                            maritalStatusController?.text = value;
-                          }, align: Alignment.center),
-                      leftPadding: paddingNum,
-                      rightPadding: paddingNum / 2),
+                  child: SelectInputWithBottom(
+                    labelText: 'Marital Status',
+                    currentValue: userInfoProvider.maritalStatus,
+                    onTap: () => _showCommonListOptionBottomSheet(
+                        context, userInfoProvider.maritalStatusOptionsFuture!,
+                        (String id, String value) {
+                      userInfoProvider.setMaritalStatus(id, value);
+                    }, align: Alignment.center),
+                    leftPadding: paddingNum,
+                    rightPadding: paddingNum / 2,
+                  ),
                 ),
               ],
             ),
@@ -234,8 +206,8 @@ class _UserInfoPage1State extends State<UserInfoPage1>
             const Gap(10),
             _handleAddressSelect01(),
             const Gap(10),
-          ],
-        ),
+          ]);
+        }),
       ),
     );
   }
@@ -519,15 +491,19 @@ class _UserInfoPage1State extends State<UserInfoPage1>
   //   );
   // }
 
-  Padding InputWidget(
-    String label,
-    TextEditingController controller,
-  ) {
+  Padding InputWidget({
+    required String label,
+    required String initialValue,
+    required void Function(String) onChanged,
+    required BuildContext context,
+  }) {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 10),
       child: TextField(
+        onChanged: onChanged,
+        controller: TextEditingController(text: initialValue)
+          ..selection = TextSelection.collapsed(offset: initialValue.length),
         keyboardType: TextInputType.text,
-        controller: controller,
         decoration: CommonUtils.getInputDecoration(
           label: label,
         ),

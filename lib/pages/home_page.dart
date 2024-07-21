@@ -11,26 +11,30 @@ class HomePage extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text("Home Page"),
+        title: const Text("Home Page"),
         backgroundColor: Colors.orange,
       ),
       floatingActionButton: FloatingActionButton(
-        key: ValueKey('add todo'),
-        child: Icon(Icons.add, color: Colors.white),
+        heroTag: "init home page",
+        key: const ValueKey('add todo'),
         backgroundColor: Colors.orange,
         onPressed: () => _showDialog(context),
+        child: const Icon(Icons.add, color: Colors.white),
       ),
       body: FutureBuilder<bool>(
-        future: Provider.of<UserAuthNotifier>(context, listen: false).checkLoginStatus(),
+        future: Provider.of<UserAuthNotifier>(context, listen: false)
+            .checkLoginStatus(),
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
-            return Center(child: CircularProgressIndicator());
+            return const Center(child: CircularProgressIndicator());
           }
 
           bool isLoggedIn = snapshot.data ?? false;
           return Container(
             child: Center(
-              child: isLoggedIn ? HomePageLoggedIn() : HomePageLoggedOut(),
+              child: isLoggedIn
+                  ? const HomePageLoggedIn()
+                  : const HomePageLoggedOut(),
             ),
           );
         },
@@ -43,12 +47,12 @@ class HomePage extends StatelessWidget {
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
-          title: Text('Dialog Title'),
-          content: Text('This is a dialog message.'),
+          title: const Text('Dialog Title'),
+          content: const Text('This is a dialog message.'),
           actions: [
             TextButton(
               onPressed: () => Navigator.of(context).pop(),
-              child: Text('OK'),
+              child: const Text('OK'),
             ),
           ],
         );

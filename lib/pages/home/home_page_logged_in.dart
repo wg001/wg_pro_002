@@ -33,6 +33,7 @@ class _HomePageLoggedInState extends State<HomePageLoggedIn> {
     final provider = Provider.of<HomePageProvider>(context);
     return Scaffold(
       floatingActionButton: FloatingActionButton(
+        heroTag: "log_in", //
         key: const ValueKey('add todo'),
         backgroundColor: Colors.orange,
         onPressed: () {
