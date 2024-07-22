@@ -17,6 +17,9 @@ class UserInfoProvider extends ChangeNotifier {
   Future<List<CommonListOption>>? _maritalStatusOptionsFuture;
   Future<List<CommonListOption>>? get maritalStatusOptionsFuture =>
       _maritalStatusOptionsFuture;
+  Future<List<CommonListOption>>? _edutionDegreeOptionsFuture;
+  Future<List<CommonListOption>>? get edutionDegreeOptionsFuture =>
+      _edutionDegreeOptionsFuture;
 
   bool _isLoading = true;
   bool get isLoading => _isLoading;
@@ -24,7 +27,6 @@ class UserInfoProvider extends ChangeNotifier {
 
   List<AddressSelect>? provinces;
   String? _fullAddress;
-
   String? get fullAddress => _fullAddress;
 
   String _idNo = "";
@@ -43,6 +45,12 @@ class UserInfoProvider extends ChangeNotifier {
   String get gender => _gender;
   String _genderId = "";
   String get genderId => _genderId;
+
+  String _educationDegreeId = "";
+  String get educationDegreeId => _educationDegreeId;
+
+  String _educationDegree = "";
+  String get educationDegree => _educationDegree;
 
   String _maritalStatus = "";
   String get maritalStatus => _maritalStatus;
@@ -124,6 +132,14 @@ class UserInfoProvider extends ChangeNotifier {
     }
   }
 
+  void setEducationDegree(String newEducationId, newValue) {
+    if (_educationDegree != newValue) {
+      _educationDegree = newValue;
+      _educationDegreeId = newEducationId;
+      notifyListeners(); // 通知所有监听者，状态已改变
+    }
+  }
+
   void setMaritalStatus(String newMaritalStatusId, newValue) {
     if (_maritalStatus != newValue) {
       _maritalStatus = newValue;
@@ -145,8 +161,11 @@ class UserInfoProvider extends ChangeNotifier {
           Future.value(_userInfo?.options?.genderOptions ?? []);
       _maritalStatusOptionsFuture =
           Future.value(userInfo?.options?.maritalStatusOptions ?? []);
+      _edutionDegreeOptionsFuture =
+          Future.value(userInfo?.options?.educationDegreeOptions ?? []);
       _gender = userInfo?.gender ?? '';
       _maritalStatus = userInfo?.maritalStatus ?? '';
+      
       _isLoading = false;
 
       notifyListeners(); // 数据加载成功，通知更新

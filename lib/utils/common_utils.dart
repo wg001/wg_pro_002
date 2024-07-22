@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -9,6 +10,7 @@ import 'package:flutter_redux/flutter_redux.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:redux/redux.dart';
+import 'package:wg_pro_002/app/model/UserInfo.dart';
 import 'package:wg_pro_002/utils/navigator_utils.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
 
@@ -226,5 +228,114 @@ class CommonUtils {
                 ),
               ));
         });
+  }
+
+  static showCommonListOptionBottomSheet(
+      BuildContext context,
+      String remindTip,
+      Future<List<CommonListOption>> listData,
+      Function(String, String) onUpdateSelectedValue,
+      {Alignment align = Alignment.centerLeft}) {
+    if (kDebugMode) {
+      print('_showCommonListOptionBottomSheet:$listData');
+    }
+
+    // Temporarily store the selected option
+    CommonListOption? tempSelectedOption;
+
+    showModalBottomSheet(
+      isScrollControlled: true,
+      context: context,
+      builder: (BuildContext context) {
+        return StatefulBuilder(
+          builder: (BuildContext context, StateSetter setState) {
+            return Container(
+              height: 320, // Adjusted height for the title bar
+              padding: EdgeInsets.only(
+                  bottom: MediaQuery.of(context).viewInsets.bottom),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: <Widget>[
+                  // Title bar with Cancel, Title, and Confirm buttons
+                  Container(
+                    decoration: BoxDecoration(color: Colors.white, boxShadow: [
+                      BoxShadow(
+                        blurRadius: 5,
+                        color: Colors.black26,
+                        spreadRadius: 5,
+                      )
+                    ]),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        CupertinoButton(
+                          child: Text('Cancel'),
+                          onPressed: () => Navigator.pop(context),
+                        ),
+                        Expanded(
+                          child: Text(remindTip,
+                              textAlign: TextAlign.center,
+                              style: TextStyle(fontSize: 16)),
+                        ),
+                        CupertinoButton(
+                          child: Text('Confirm'),
+                          onPressed: () {
+                            if (tempSelectedOption != null) {
+                              onUpdateSelectedValue(
+                                  tempSelectedOption!.id ?? '',
+                                  tempSelectedOption!.value ?? '');
+                            }
+                            Navigator.pop(context);
+                          },
+                        ),
+                      ],
+                    ),
+                  ),
+                  Expanded(
+                    child: FutureBuilder<List<CommonListOption>>(
+                      future: listData,
+                      builder: (context, snapshot) {
+                        if (snapshot.connectionState ==
+                            ConnectionState.waiting) {
+                          return Center(child: CupertinoActivityIndicator());
+                        }
+                        if (snapshot.hasError) {
+                          return Text('Error: ${snapshot.error}');
+                        }
+                        if (!snapshot.hasData || snapshot.data!.isEmpty) {
+                          return const Center(child: Text('No Data Available'));
+                        }
+
+                        return CupertinoPicker(
+                          itemExtent: 36.0,
+                          onSelectedItemChanged: (int index) {
+                            tempSelectedOption = snapshot.data![index];
+                          },
+                          magnification: 1.2,
+                          useMagnifier: true,
+                          backgroundColor: Colors.white,
+                          children: snapshot.data!
+                              .map((option) => Center(
+                                    child: Padding(
+                                      padding: const EdgeInsets.symmetric(
+                                          vertical: 8.0), // 增加垂直内边距进行调整
+                                      child: Text(option.value ?? "",
+                                          style: const TextStyle(
+                                              fontSize: 16) // 根据需要调整字体大小
+                                          ),
+                                    ),
+                                  ))
+                              .toList(),
+                        );
+                      },
+                    ),
+                  ),
+                ],
+              ),
+            );
+          },
+        );
+      },
+    );
   }
 }

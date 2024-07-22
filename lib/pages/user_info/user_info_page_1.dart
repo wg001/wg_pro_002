@@ -1,3 +1,4 @@
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:fluttertoast/fluttertoast.dart';
@@ -39,8 +40,6 @@ class _UserInfoPage1State extends State<UserInfoPage1>
 
   UserInfo? userInfo;
 
-  List<AddressSelect>? provinces;
-
   Uint8List? _image1Data;
   Uint8List? _image2Data;
 
@@ -48,8 +47,6 @@ class _UserInfoPage1State extends State<UserInfoPage1>
   String? maritalStatusId;
 
   bool _isPickingImage = false;
-
-  final _formKey = GlobalKey<FormState>();
 
   @override
   void initState() {
@@ -176,8 +173,10 @@ class _UserInfoPage1State extends State<UserInfoPage1>
                   child: SelectInputWithBottom(
                     labelText: 'Gender',
                     currentValue: userInfoProvider.gender,
-                    onTap: () => _showCommonListOptionBottomSheet(
-                        context, userInfoProvider.genderOptionsFuture!,
+                    onTap: () => CommonUtils.showCommonListOptionBottomSheet(
+                        context,
+                        'Please Choose Gender',
+                        userInfoProvider.genderOptionsFuture!,
                         (String id, String value) {
                       userInfoProvider.setGender(id, value);
                     }, align: Alignment.center),
@@ -190,8 +189,10 @@ class _UserInfoPage1State extends State<UserInfoPage1>
                   child: SelectInputWithBottom(
                     labelText: 'Marital Status',
                     currentValue: userInfoProvider.maritalStatus,
-                    onTap: () => _showCommonListOptionBottomSheet(
-                        context, userInfoProvider.maritalStatusOptionsFuture!,
+                    onTap: () => CommonUtils.showCommonListOptionBottomSheet(
+                        context,
+                        'Please Choose Marital Status',
+                        userInfoProvider.maritalStatusOptionsFuture!,
                         (String id, String value) {
                       userInfoProvider.setMaritalStatus(id, value);
                     }, align: Alignment.center),
@@ -200,6 +201,23 @@ class _UserInfoPage1State extends State<UserInfoPage1>
                   ),
                 ),
               ],
+            ),
+            const Gap(10),
+            SizedBox(
+              width: MediaQuery.of(context).size.width,
+              child: SelectInputWithBottom(
+                labelText: 'Educational Degress',
+                currentValue: userInfoProvider.educationDegree,
+                onTap: () => CommonUtils.showCommonListOptionBottomSheet(
+                    context,
+                    'Please Education Degress',
+                    userInfoProvider.edutionDegreeOptionsFuture!,
+                    (String id, String value) {
+                  userInfoProvider.setEducationDegree(id, value);
+                }, align: Alignment.center),
+                leftPadding: paddingNum,
+                rightPadding: paddingNum / 2,
+              ),
             ),
             const Gap(10),
             maritalStatus(),
@@ -321,76 +339,6 @@ class _UserInfoPage1State extends State<UserInfoPage1>
           onComplete: (province, city, area) {
             userInfoProvider.updateAddress(province, city, area);
             Navigator.pop(context);
-          },
-        );
-      },
-    );
-  }
-
-  void _showCommonListOptionBottomSheet(
-      BuildContext context,
-      Future<List<CommonListOption>> listData,
-      Function(String, String) onUpdateSelectedValue,
-      {Alignment align = Alignment.centerLeft}) {
-    if (kDebugMode) {
-      print('_showCommonListOptionBottomSheet:$listData');
-    }
-    showModalBottomSheet(
-      isScrollControlled: true,
-      context: context,
-      builder: (BuildContext context) {
-        return StatefulBuilder(
-          builder: (BuildContext context, StateSetter setState) {
-            return Container(
-              padding: EdgeInsets.only(
-                  bottom: MediaQuery.of(context).viewInsets.bottom),
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: <Widget>[
-                  FutureBuilder<List<CommonListOption>>(
-                    future: listData,
-                    builder: (context, snapshot) {
-                      if (snapshot.connectionState == ConnectionState.waiting) {
-                        return const Center(
-                          child: CircularProgressIndicator(),
-                        );
-                      } else if (snapshot.hasError) {
-                        return Text('Error: ${snapshot.error}');
-                      } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
-                        return const Center(
-                          child: Text('No Data Available'),
-                        );
-                      }
-                      return Flexible(
-                        child: ListView.builder(
-                          shrinkWrap: true,
-                          itemCount: snapshot.data!.length,
-                          itemBuilder: (context, index) {
-                            CommonListOption option = snapshot.data![index];
-                            return InkWell(
-                              onTap: () {
-                                // setState(() {});
-                                onUpdateSelectedValue(
-                                    option.id ?? '', option.value ?? '');
-                                Navigator.pop(context); // 可选: 关闭底部表单
-                              },
-                              child: Container(
-                                height: 30,
-                                alignment: align,
-                                padding:
-                                    const EdgeInsets.symmetric(horizontal: 16),
-                                child: Text(option.value ?? '',
-                                    style: const TextStyle(height: 1.2)),
-                              ),
-                            );
-                          },
-                        ),
-                      );
-                    },
-                  ),
-                ],
-              ),
-            );
           },
         );
       },
@@ -600,13 +548,9 @@ class _UserInfoPage1State extends State<UserInfoPage1>
   }
 
   void _submitForm() {
-    if (_formKey.currentState?.validate() ?? false) {
-      Fluttertoast.showToast(msg: "Form is valid");
-      Navigator.of(context)
-          .push(MaterialPageRoute(builder: (context) => const UserInfoPage2()));
-    } else {
-      Fluttertoast.showToast(msg: "Please correct the errors in the form.");
-    }
+    Fluttertoast.showToast(msg: "Form is valid");
+    Navigator.of(context)
+        .push(MaterialPageRoute(builder: (context) => const UserInfoPage2()));
   }
 }
 
