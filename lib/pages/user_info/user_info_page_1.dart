@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -13,6 +15,7 @@ import 'package:wg_pro_002/dao/user_dao.dart';
 import 'package:wg_pro_002/mixins/disposable_mixin.dart';
 import 'package:wg_pro_002/pages/user_info/user_info_page_2.dart';
 import 'package:app_settings/app_settings.dart';
+import 'package:wg_pro_002/provider/user_auth_provider.dart';
 import 'package:wg_pro_002/provider/user_info_provider.dart';
 import 'package:wg_pro_002/utils/common_utils.dart';
 import 'package:wg_pro_002/widget/address_selector.dart';
@@ -56,6 +59,7 @@ class _UserInfoPage1State extends State<UserInfoPage1>
     });
   }
 
+  /// 选择相册
   Future<void> getImage(bool isFirstImage, ImageSource source) async {
     if (_isPickingImage) {
       return; // 如果当前正在进行另一个图片选择操作，则直接返回
@@ -75,6 +79,27 @@ class _UserInfoPage1State extends State<UserInfoPage1>
           }
         });
       }
+    } catch (e) {
+      // 处理异常
+      if (e is PlatformException) {
+        _handleCameraPermissionDenied(e);
+      } else {
+        // 其他类型的错误处理
+        print('Error: ${e.toString()}');
+      }
+    } finally {
+      _isPickingImage = false;
+    }
+  }
+
+  Future<void> _takePicture(int imageIndex) async {
+    _isPickingImage = true; // 设置正在进行图片选择的标志
+
+    try {
+      var provider = Provider.of<UserInfoProvider>(context, listen: false);
+      await provider
+          .ensureCameraInitialized(true); // Initialize camera when needed
+      await provider.takeAndUploadPicture(imageIndex: imageIndex);
     } catch (e) {
       // 处理异常
       if (e is PlatformException) {
@@ -465,21 +490,25 @@ class _UserInfoPage1State extends State<UserInfoPage1>
         child: Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            imageWidget(
-                _image1Data,
-                () => getImage(
-                    true, kIsWeb ? ImageSource.gallery : ImageSource.camera),
-                "Tap to select image 1"),
-            imageWidget(
-                _image2Data,
-                () => getImage(
-                    false, kIsWeb ? ImageSource.gallery : ImageSource.camera),
-                "Tap to select image 2"),
+            kIsWeb
+                ? imageChooseWidget(
+                    _image1Data,
+                    () => getImage(true, ImageSource.gallery),
+                    "Tap to select image 1")
+                : pictureTakeWidget(
+                    0, () => _takePicture(0), "Tap to select image 1"),
+            kIsWeb
+                ? imageChooseWidget(
+                    _image2Data,
+                    () => getImage(false, ImageSource.gallery),
+                    "Tap to select image 2")
+                : pictureTakeWidget(
+                    1, () => _takePicture(1), "Tap to select image 1"),
           ],
         ));
   }
 
-  Widget imageWidget(
+  Widget imageChooseWidget(
       Uint8List? imageData, VoidCallback onTap, String placeholder) {
     return Center(
         child: GestureDetector(
@@ -501,6 +530,48 @@ class _UserInfoPage1State extends State<UserInfoPage1>
             : null,
       ),
     ));
+  }
+
+  Widget pictureTakeWidget(
+      int imageIndex, VoidCallback onTap, String placeholder) {
+    return Center(
+      child: GestureDetector(
+        onTap: onTap,
+        child: Consumer<UserInfoProvider>(
+          builder: (context, provider, child) {
+            var imagePath =
+                imageIndex == 0 ? provider.imagePath01 : provider.imagePath02;
+            var isUploading = imageIndex == 0
+                ? provider.isUploading01
+                : provider.isUploading02;
+
+            return Stack(
+              alignment: Alignment.center,
+              children: [
+                Container(
+                  width: (MediaQuery.of(context).size.width - 30) / 2,
+                  height: 80,
+                  decoration: BoxDecoration(
+                    color: Colors.grey[300],
+                    image: imagePath != null
+                        ? DecorationImage(
+                            image: FileImage(File(imagePath)),
+                            fit: BoxFit.cover)
+                        : null,
+                    border: Border.all(color: Colors.grey[300]!, width: 2),
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: imagePath == null
+                      ? Icon(Icons.camera_alt, color: Colors.grey[700])
+                      : null,
+                ),
+                if (isUploading) CircularProgressIndicator(),
+              ],
+            );
+          },
+        ),
+      ),
+    );
   }
 
   Widget submitButton() {

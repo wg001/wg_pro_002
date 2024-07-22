@@ -7,6 +7,7 @@ import 'package:wg_pro_002/app/model/UserInfo.dart';
 import 'package:wg_pro_002/dao/address_dao.dart';
 import 'package:wg_pro_002/dao/dao_result.dart';
 import 'package:wg_pro_002/dao/user_dao.dart';
+import 'package:wg_pro_002/utils/camera_utils.dart';
 
 class UserInfoProvider extends ChangeNotifier {
   UserInfo? _userInfo;
@@ -60,6 +61,13 @@ class UserInfoProvider extends ChangeNotifier {
   String? selectedProvince;
   String? selectedCity;
   String? selectedArea;
+
+  final CameraUtils _cameraUtil = CameraUtils();
+  bool isUploading = false;
+  String? imagePath01;
+  String? imagePath02;
+  bool isUploading01 = false;
+  bool isUploading02 = false;
 
   Future<List<AddressSelect>> fetchProvince(String? id) async {
     DataResult provincesData = await AddressDao.getAddressById(id: id);
@@ -165,12 +173,55 @@ class UserInfoProvider extends ChangeNotifier {
           Future.value(userInfo?.options?.educationDegreeOptions ?? []);
       _gender = userInfo?.gender ?? '';
       _maritalStatus = userInfo?.maritalStatus ?? '';
-      
+
       _isLoading = false;
 
       notifyListeners(); // 数据加载成功，通知更新
     } else {
       _isLoading = false;
     }
+  }
+
+  Future<void> ensureCameraInitialized(bool useFrontCamera) async {
+    if (_cameraUtil.controller == null ||
+        !_cameraUtil.controller!.value.isInitialized) {
+      await _cameraUtil.initCamera(useFrontCamera);
+      notifyListeners(); // Notify to rebuild any widgets that depend on the camera
+    }
+  }
+
+  Future<void> takeAndUploadPicture({int imageIndex = 0}) async {
+    String? imagePath = await _cameraUtil.takePicture();
+
+    if (imagePath != null) {
+      if (imageIndex == 0) {
+        imagePath01 = imagePath;
+        isUploading01 = true;
+      } else if (imageIndex == 1) {
+        imagePath02 = imagePath;
+        isUploading02 = true;
+      } else {
+        throw Exception('image index exception');
+      }
+
+      isUploading = true;
+      notifyListeners();
+
+      // Simulate an upload process
+      await Future.delayed(const Duration(seconds: 2));
+
+      if (imageIndex == 0) {
+        isUploading01 = false;
+      } else if (imageIndex == 1) {
+        isUploading02 = false;
+      }
+      notifyListeners();
+    }
+  }
+
+  @override
+  void dispose() {
+    _cameraUtil.dispose();
+    super.dispose();
   }
 }
