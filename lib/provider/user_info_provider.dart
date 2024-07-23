@@ -1,4 +1,4 @@
-import 'dart:math';
+import 'dart:convert';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
@@ -8,8 +8,11 @@ import 'package:wg_pro_002/dao/address_dao.dart';
 import 'package:wg_pro_002/dao/dao_result.dart';
 import 'package:wg_pro_002/dao/user_dao.dart';
 import 'package:wg_pro_002/utils/camera_utils.dart';
+import 'package:wg_pro_002/utils/image_utils.dart';
 
 class UserInfoProvider extends ChangeNotifier {
+  final String idCardPicType = "1";
+  final String handIdCardPicType = "2";
   UserInfo? _userInfo;
   UserInfo? get userInfo => _userInfo;
   Future<List<CommonListOption>>? _genderOptionsFuture;
@@ -65,7 +68,9 @@ class UserInfoProvider extends ChangeNotifier {
   final CameraUtils _cameraUtil = CameraUtils();
   bool isUploading = false;
   String? imagePath01;
+  Uint8List? imageWeb01;
   String? imagePath02;
+  Uint8List? imageWeb02;
   bool isUploading01 = false;
   bool isUploading02 = false;
 
@@ -90,6 +95,19 @@ class UserInfoProvider extends ChangeNotifier {
 
   void selectArea(String area) {
     selectedArea = area;
+    notifyListeners();
+  }
+
+  void setIdCardWebImage(Uint8List img, String extension) {
+    uploadImage(idCardPicType, img, extension);
+    imageWeb01 = img;
+
+    notifyListeners();
+  }
+
+  void setHandIdCardWebImage(Uint8List img, String extension) {
+    uploadImage(handIdCardPicType, img, extension);
+    imageWeb02 = img;
     notifyListeners();
   }
 
@@ -191,8 +209,12 @@ class UserInfoProvider extends ChangeNotifier {
   }
 
   Future<void> takeAndUploadPicture({int imageIndex = 0}) async {
-    String? imagePath = await _cameraUtil.takePicture();
-
+    String? imagePath;
+    if (kIsWeb) {
+      imagePath = await ImageUtils.pickImageWeb();
+    } else {
+      imagePath = (await _cameraUtil.takePicture());
+    }
     if (imagePath != null) {
       if (imageIndex == 0) {
         imagePath01 = imagePath;
@@ -217,6 +239,20 @@ class UserInfoProvider extends ChangeNotifier {
       }
       notifyListeners();
     }
+  }
+
+  Future<void> uploadImage(
+      String pictureType, Uint8List imageData, String extension) async {
+    try {
+      // 转换图片数据为Base64字符串
+      String base64Image = base64Encode(imageData);
+      Map picture = {"extension": extension, "content": base64Image};
+      // 创建请求体，包括图片数据
+      DataResult ret = await UserDao.uploadImage(pictureType, picture);
+      if (!ret.result) {}
+    } catch (e) {
+      print("Error uploading image failed: $e");
+    } finally {}
   }
 
   @override

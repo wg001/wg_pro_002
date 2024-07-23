@@ -1,16 +1,12 @@
 import 'dart:convert';
 
-import 'package:dio/dio.dart';
 import 'package:flutter/foundation.dart';
-import 'package:logger/logger.dart';
 import 'package:wg_pro_002/app/model/UserInfo.dart';
 import 'package:wg_pro_002/config/config.dart';
 import 'package:wg_pro_002/dao/dao_result.dart';
 import 'package:wg_pro_002/local/local_storage.dart';
 import 'package:wg_pro_002/net/address.dart';
 import 'package:wg_pro_002/net/api.dart';
-import 'package:wg_pro_002/net/result_data.dart';
-import 'package:wg_pro_002/utils/logger_util.dart';
 
 class UserDao {
   static login(String phone, validCode) async {
@@ -70,5 +66,29 @@ class UserDao {
     }
 
     return DataResult(resultData, true);
+  }
+
+  static uploadImage(String pictureType, Map picture) async {
+    Map params = {"picture_type": pictureType, 'picture': picture};
+    dynamic resultData;
+    try {
+      var res =
+          await httpManager.netFetch(Address.getUserInfo(), params: params);
+      bool retSuccess = false;
+      if (res != null && res.data != null) {
+        Map<String, dynamic> resMap =
+            res.data is Map ? res.data : json.decode(res.data.toString());
+
+        // Log the returned data
+
+        retSuccess = resMap.containsKey('success');
+      }
+      return DataResult(null,retSuccess);
+    } catch (e) {
+      if (kDebugMode) {
+        print("pageIndex error: $e");
+      }
+      return DataResult(e.toString(), false);
+    }
   }
 }

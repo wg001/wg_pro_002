@@ -1,6 +1,5 @@
 import 'dart:io';
 
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:fluttertoast/fluttertoast.dart';
@@ -8,16 +7,13 @@ import 'package:gap/gap.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:flutter/foundation.dart' show kDebugMode, kIsWeb;
 import 'package:provider/provider.dart';
-import 'package:wg_pro_002/app/model/AddressSelect.dart';
 import 'package:wg_pro_002/app/model/UserInfo.dart';
-import 'package:wg_pro_002/dao/dao_result.dart';
-import 'package:wg_pro_002/dao/user_dao.dart';
 import 'package:wg_pro_002/mixins/disposable_mixin.dart';
 import 'package:wg_pro_002/pages/user_info/user_info_page_2.dart';
 import 'package:app_settings/app_settings.dart';
-import 'package:wg_pro_002/provider/user_auth_provider.dart';
 import 'package:wg_pro_002/provider/user_info_provider.dart';
 import 'package:wg_pro_002/utils/common_utils.dart';
+import 'package:wg_pro_002/utils/image_utils.dart';
 import 'package:wg_pro_002/widget/address_selector.dart';
 import 'package:wg_pro_002/widget/input_widget.dart';
 
@@ -50,34 +46,30 @@ class _UserInfoPage1State extends State<UserInfoPage1>
   String? maritalStatusId;
 
   bool _isPickingImage = false;
+  late UserInfoProvider userProvider;
 
   @override
   void initState() {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      Provider.of<UserInfoProvider>(context, listen: false).loadUserData();
+      userProvider = Provider.of<UserInfoProvider>(context, listen: false);
+      userProvider.loadUserData();
+      // Provider.of<UserInfoProvider>(context, listen: false).loadUserData();
     });
   }
 
-  /// 选择相册
+  // 选择相册
   Future<void> getImage(bool isFirstImage, ImageSource source) async {
-    if (_isPickingImage) {
-      return; // 如果当前正在进行另一个图片选择操作，则直接返回
-    }
-    _isPickingImage = true; // 设置正在进行图片选择的标志
-
     final ImagePicker picker = ImagePicker();
     try {
       final XFile? pickedFile = await picker.pickImage(source: source);
       if (pickedFile != null) {
         Uint8List imageData = await pickedFile.readAsBytes();
-        setState(() {
-          if (isFirstImage) {
-            _image1Data = imageData;
-          } else {
-            _image2Data = imageData;
-          }
-        });
+        final extension = ImageUtils.getExtensionFromPath(pickedFile.path);
+
+        isFirstImage
+            ? userProvider.setIdCardWebImage(imageData, extension)
+            : userProvider.setHandIdCardWebImage(imageData, extension);
       }
     } catch (e) {
       // 处理异常
@@ -87,19 +79,14 @@ class _UserInfoPage1State extends State<UserInfoPage1>
         // 其他类型的错误处理
         print('Error: ${e.toString()}');
       }
-    } finally {
-      _isPickingImage = false;
     }
   }
 
   Future<void> _takePicture(int imageIndex) async {
-    _isPickingImage = true; // 设置正在进行图片选择的标志
-
     try {
-      var provider = Provider.of<UserInfoProvider>(context, listen: false);
-      await provider
+      await userProvider
           .ensureCameraInitialized(true); // Initialize camera when needed
-      await provider.takeAndUploadPicture(imageIndex: imageIndex);
+      await userProvider.takeAndUploadPicture(imageIndex: imageIndex);
     } catch (e) {
       // 处理异常
       if (e is PlatformException) {
@@ -108,8 +95,6 @@ class _UserInfoPage1State extends State<UserInfoPage1>
         // 其他类型的错误处理
         print('Error: ${e.toString()}');
       }
-    } finally {
-      _isPickingImage = false;
     }
   }
 
@@ -492,44 +477,71 @@ class _UserInfoPage1State extends State<UserInfoPage1>
           children: [
             kIsWeb
                 ? imageChooseWidget(
-                    _image1Data,
+                    userProvider.imageWeb01,
                     () => getImage(true, ImageSource.gallery),
-                    "Tap to select image 1")
+                    "Tap to select image 1",
+                    userProvider.isUploading01)
                 : pictureTakeWidget(
                     0, () => _takePicture(0), "Tap to select image 1"),
             kIsWeb
                 ? imageChooseWidget(
-                    _image2Data,
+                    userProvider.imageWeb02,
                     () => getImage(false, ImageSource.gallery),
-                    "Tap to select image 2")
+                    "Tap to select image 2",
+                    userProvider.isUploading02)
                 : pictureTakeWidget(
-                    1, () => _takePicture(1), "Tap to select image 1"),
+                    1, () => _takePicture(1), "Tap to select image 2"),
           ],
         ));
   }
 
-  Widget imageChooseWidget(
-      Uint8List? imageData, VoidCallback onTap, String placeholder) {
-    return Center(
-        child: GestureDetector(
+  // Widget imageChooseWidget(
+  //     Uint8List? imageData, VoidCallback onTap, String placeholder) {
+  //   return Center(
+  //       child: GestureDetector(
+  //     onTap: onTap,
+  //     child: Container(
+  //       width: (MediaQuery.of(context).size.width - 30) / 2,
+  //       height: 80,
+  //       decoration: BoxDecoration(
+  //         color: Colors.grey[300],
+  //         image: imageData != null
+  //             ? DecorationImage(
+  //                 image: MemoryImage(imageData), fit: BoxFit.cover)
+  //             : null,
+  //         border: Border.all(color: Colors.grey[300]!, width: 2),
+  //         borderRadius: BorderRadius.circular(12),
+  //       ),
+  //       child: imageData == null
+  //           ? Icon(Icons.camera_alt, color: Colors.grey[700])
+  //           : null,
+  //     ),
+  //   ));
+  // }
+
+  Widget imageChooseWidget(Uint8List? imageData, VoidCallback onTap,
+      String placeholder, bool isUploading) {
+    return GestureDetector(
       onTap: onTap,
-      child: Container(
-        width: (MediaQuery.of(context).size.width - 30) / 2,
-        height: 80,
-        decoration: BoxDecoration(
-          color: Colors.grey[300],
-          image: imageData != null
-              ? DecorationImage(
-                  image: MemoryImage(imageData), fit: BoxFit.cover)
-              : null,
-          border: Border.all(color: Colors.grey[300]!, width: 2),
-          borderRadius: BorderRadius.circular(12),
-        ),
-        child: imageData == null
-            ? Icon(Icons.camera_alt, color: Colors.grey[700])
-            : null,
+      child: Stack(
+        alignment: Alignment.center,
+        children: [
+          Container(
+            width: (MediaQuery.of(context).size.width - 30) / 2,
+            height: 80,
+            decoration: BoxDecoration(
+              color: Colors.grey[300],
+              image: imageData != null
+                  ? DecorationImage(
+                      image: MemoryImage(imageData), fit: BoxFit.cover)
+                  : null,
+              borderRadius: BorderRadius.circular(12),
+            ),
+          ),
+          if (isUploading) CircularProgressIndicator(), // 显示加载指示器
+        ],
       ),
-    ));
+    );
   }
 
   Widget pictureTakeWidget(

@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'dart:typed_data';
+import 'package:flutter/foundation.dart';
 import 'package:flutter_image_compress/flutter_image_compress.dart';
 import 'package:image_picker/image_picker.dart';
 
@@ -18,13 +19,18 @@ class ImageUtils {
     return compressedImageData;
   }
 
-  Future<Uint8List?> pickImage(ImageSource source) async {
+  static Future<String?> pickImageWeb() async {
     final ImagePicker picker = ImagePicker();
-    final XFile? pickedFile = await picker.pickImage(source: source);
+    final XFile? pickedFile = await picker.pickImage(
+      source: ImageSource.camera,
+      imageQuality:
+          50, // Optionally reduce the image quality to reduce file size
+    );
+    return pickedFile?.path;
+  }
 
-    if (pickedFile != null) {
-      return await pickedFile.readAsBytes();
-    }
-    return null;
+  static String getExtensionFromPath(String filePath) {
+    final parts = filePath.split('.');
+    return parts.last;
   }
 }

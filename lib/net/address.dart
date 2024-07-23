@@ -16,4 +16,8 @@ class Address {
   static getRegionList() {
     return "${host}/philippines_loan/user/get_region_list";
   }
+
+   static uploadImage() {
+    return "${host}/philippines_loan/user/pic_upload";
+  }
 }
