@@ -1,18 +1,17 @@
 import 'dart:async';
-import 'dart:convert';
 import 'dart:io';
 
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter_redux/flutter_redux.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:path_provider/path_provider.dart';
-import 'package:redux/redux.dart';
 import 'package:wg_pro_002/app/model/UserInfo.dart';
 import 'package:wg_pro_002/utils/navigator_utils.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
+import 'package:flutter_datetime_picker_plus/flutter_datetime_picker_plus.dart'
+    as picker;
 
 /// 通用逻辑
 
@@ -306,6 +305,12 @@ class CommonUtils {
                           return const Center(child: Text('No Data Available'));
                         }
 
+                        // 确保当数据加载后设置默认选项
+                        if (tempSelectedOption == null &&
+                            snapshot.data!.isNotEmpty) {
+                          tempSelectedOption = snapshot.data!.first;
+                        }
+
                         return CupertinoPicker(
                           itemExtent: 36.0,
                           onSelectedItemChanged: (int index) {
@@ -318,11 +323,9 @@ class CommonUtils {
                               .map((option) => Center(
                                     child: Padding(
                                       padding: const EdgeInsets.symmetric(
-                                          vertical: 8.0), // 增加垂直内边距进行调整
+                                          vertical: 8.0),
                                       child: Text(option.value ?? "",
-                                          style: const TextStyle(
-                                              fontSize: 16) // 根据需要调整字体大小
-                                          ),
+                                          style: const TextStyle(fontSize: 16)),
                                     ),
                                   ))
                               .toList(),
@@ -336,6 +339,33 @@ class CommonUtils {
           },
         );
       },
+    );
+  }
+
+  static void showDatePicker(
+    BuildContext context,
+    Function(DateTime) onComplete,
+  ) {
+    picker.DatePicker.showDatePicker(
+      context,
+      showTitleActions: true,
+      minTime: DateTime(1949),
+      maxTime: DateTime.now().add(Duration(days: 365)), // 举例：未来一年内可选
+      theme: const picker.DatePickerTheme(
+        itemStyle: TextStyle(
+          fontWeight: FontWeight.bold,
+          fontSize: 18,
+        ),
+        doneStyle: TextStyle(
+          fontSize: 16,
+          color: Colors.blue, // 确认按钮颜色
+        ),
+      ),
+      onConfirm: (date) {
+        onComplete(date); // 用户确认后，调用 onComplete 回调函数
+      },
+      currentTime: DateTime.now(), // 默认显示当前时间
+      locale: picker.LocaleType.en, // 设置本地化
     );
   }
 }

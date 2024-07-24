@@ -56,6 +56,9 @@ class UserInfoProvider extends ChangeNotifier {
   String _educationDegree = "";
   String get educationDegree => _educationDegree;
 
+  String _birthday = "";
+  String get birthday => _birthday;
+
   String _maritalStatus = "";
   String get maritalStatus => _maritalStatus;
   String _maritalStatusId = "";
@@ -95,6 +98,11 @@ class UserInfoProvider extends ChangeNotifier {
 
   void selectArea(String area) {
     selectedArea = area;
+    notifyListeners();
+  }
+
+  void setBirthday(String date) {
+    _birthday = date;
     notifyListeners();
   }
 

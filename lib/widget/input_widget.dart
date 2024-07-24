@@ -4,21 +4,19 @@ class SelectInputWithBottom extends StatelessWidget {
   final String labelText;
   final String currentValue; // 作为参数传递
   final VoidCallback onTap;
-  final double leftPadding;
-  final double rightPadding;
+  final double sizePadding;
 
   SelectInputWithBottom({
     required this.labelText,
     required this.currentValue,
     required this.onTap,
-    this.leftPadding = 0.0,
-    this.rightPadding = 0.0,
+    this.sizePadding = 0.0,
   });
 
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: EdgeInsets.symmetric(horizontal: leftPadding + rightPadding),
+      padding: EdgeInsets.symmetric(horizontal: sizePadding),
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: <Widget>[
@@ -26,6 +24,10 @@ class SelectInputWithBottom extends StatelessWidget {
             controller: TextEditingController(text: currentValue),
             readOnly: true,
             decoration: InputDecoration(
+              suffixIcon: Icon(
+                Icons.navigate_next,
+                color: Colors.grey.withOpacity(0.5), // 使颜色变浅
+              ),
               labelText: labelText,
               hintText: "Please select",
               border: OutlineInputBorder(

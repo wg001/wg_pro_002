@@ -19,6 +19,7 @@ import 'package:wg_pro_002/utils/image_utils.dart';
 import 'package:wg_pro_002/widget/address_selector.dart';
 import 'package:wg_pro_002/widget/camera_preview_widget.dart';
 import 'package:wg_pro_002/widget/input_widget.dart';
+import 'package:intl/intl.dart';
 
 const double paddingNum = 10;
 
@@ -33,17 +34,6 @@ class _UserInfoPage1State extends State<UserInfoPage1>
     with AutomaticKeepAliveClientMixin<UserInfoPage1>, Disposable {
   @override
   bool get wantKeepAlive => true;
-  late TextEditingController idController;
-  late TextEditingController firstController;
-  TextEditingController? idTypeController;
-
-  Future<List<CommonListOption>>? genderOptionsFuture;
-  Future<List<CommonListOption>>? maritalStatusOptionsFuture;
-
-  UserInfo? userInfo;
-
-  String? genderId; //
-  String? maritalStatusId;
 
   late UserInfoProvider userProvider;
 
@@ -53,7 +43,6 @@ class _UserInfoPage1State extends State<UserInfoPage1>
     WidgetsBinding.instance.addPostFrameCallback((_) {
       userProvider = Provider.of<UserInfoProvider>(context, listen: false);
       userProvider.loadUserData();
-      // Provider.of<UserInfoProvider>(context, listen: false).loadUserData();
     });
   }
 
@@ -144,99 +133,107 @@ class _UserInfoPage1State extends State<UserInfoPage1>
 
   Widget main_container() {
     return SingleChildScrollView(
-      child: Container(
-        decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(20),
-          color: Colors.white,
-        ),
-        width: MediaQuery.of(context).size.width * 1,
-        padding: const EdgeInsets.all(0), // Appropriate padding
-        child: Consumer<UserInfoProvider>(
-            builder: (BuildContext context, userInfoProvider, Widget? child) {
-          return Column(children: [
-            const SizedBox(height: 10),
-
-            InputWidget(
-              label: "ID NO",
-              initialValue: userInfoProvider.idNo,
-              onChanged: (value) => userInfoProvider.setIdNo(value),
-              context: context,
-            ), // Ensure these widgets do not have a fixed height that could cause overflow
-            const SizedBox(height: 10),
-
-            InputWidget(
-              label: "First Name1",
-              initialValue: userInfoProvider.firstName,
-              onChanged: (value) => userInfoProvider.setFirstName(value),
-              context: context,
+        child: Container(
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(20),
+              color: Colors.white,
             ),
-            const SizedBox(height: 10),
-            imageContainer(),
-            const Gap(10),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                SizedBox(
-                  width: (MediaQuery.of(context).size.width / 2),
-                  child: SelectInputWithBottom(
-                    labelText: 'Gender',
-                    currentValue: userInfoProvider.gender,
-                    onTap: () => CommonUtils.showCommonListOptionBottomSheet(
-                        context,
-                        'Please Choose Gender',
-                        userInfoProvider.genderOptionsFuture!,
-                        (String id, String value) {
-                      userInfoProvider.setGender(id, value);
-                    }, align: Alignment.center),
-                    leftPadding: paddingNum,
-                    rightPadding: paddingNum / 2,
-                  ),
-                ),
-                SizedBox(
-                  width: (MediaQuery.of(context).size.width / 2),
-                  child: SelectInputWithBottom(
-                    labelText: 'Marital Status',
-                    currentValue: userInfoProvider.maritalStatus,
-                    onTap: () => CommonUtils.showCommonListOptionBottomSheet(
-                        context,
-                        'Please Choose Marital Status',
-                        userInfoProvider.maritalStatusOptionsFuture!,
-                        (String id, String value) {
-                      userInfoProvider.setMaritalStatus(id, value);
-                    }, align: Alignment.center),
-                    leftPadding: paddingNum,
-                    rightPadding: paddingNum / 2,
-                  ),
-                ),
-              ],
-            ),
-            const Gap(10),
-            SizedBox(
-              width: MediaQuery.of(context).size.width,
-              child: SelectInputWithBottom(
-                labelText: 'Educational Degress',
-                currentValue: userInfoProvider.educationDegree,
-                onTap: () => CommonUtils.showCommonListOptionBottomSheet(
-                    context,
-                    'Please Education Degress',
-                    userInfoProvider.edutionDegreeOptionsFuture!,
-                    (String id, String value) {
-                  userInfoProvider.setEducationDegree(id, value);
-                }, align: Alignment.center),
-                leftPadding: paddingNum,
-                rightPadding: paddingNum / 2,
+            width: MediaQuery.of(context).size.width * 1,
+            padding: const EdgeInsets.all(0), // Appropriate padding
+            child: Column(children: [
+              const SizedBox(height: 10),
+              InputWidget(
+                label: "ID NO",
+                initialValue: userProvider.idNo,
+                onChanged: (value) => userProvider.setIdNo(value),
+                context: context,
+              ), // Ensure these widgets do not have a fixed height that could cause overflow
+              const SizedBox(height: 10),
+
+              InputWidget(
+                label: "First Name1",
+                initialValue: userProvider.firstName,
+                onChanged: (value) => userProvider.setFirstName(value),
+                context: context,
               ),
-            ),
-            const Gap(10),
-            maritalStatus(),
-            const Gap(10),
-            _handleAddressSelect01(),
-            const Gap(10),
-          ]);
-        }),
-      ),
-    );
+              const SizedBox(height: 10),
+              imageContainer(),
+              const Gap(10),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  SizedBox(
+                    width: (MediaQuery.of(context).size.width / 2),
+                    child: SelectInputWithBottom(
+                      labelText: 'Gender',
+                      currentValue: userProvider.gender,
+                      onTap: () => CommonUtils.showCommonListOptionBottomSheet(
+                          context,
+                          'Please Choose Gender',
+                          userProvider.genderOptionsFuture!,
+                          (String id, String value) {
+                        userProvider.setGender(id, value);
+                      }, align: Alignment.center),
+                      sizePadding: paddingNum,
+                    ),
+                  ),
+                  SizedBox(
+                    width: (MediaQuery.of(context).size.width / 2),
+                    child: SelectInputWithBottom(
+                      labelText: 'Marital Status',
+                      currentValue: userProvider.maritalStatus,
+                      onTap: () => CommonUtils.showCommonListOptionBottomSheet(
+                          context,
+                          'Please Choose Marital Status',
+                          userProvider.maritalStatusOptionsFuture!,
+                          (String id, String value) {
+                        userProvider.setMaritalStatus(id, value);
+                      }, align: Alignment.center),
+                      sizePadding: paddingNum,
+                    ),
+                  ),
+                ],
+              ),
+              const Gap(10),
+              SizedBox(
+                width: MediaQuery.of(context).size.width,
+                child: SelectInputWithBottom(
+                  labelText: 'Educational Degress',
+                  currentValue: userProvider.educationDegree,
+                  onTap: () => CommonUtils.showCommonListOptionBottomSheet(
+                      context,
+                      'Please Education Degress',
+                      userProvider.edutionDegreeOptionsFuture!,
+                      (String id, String value) {
+                    userProvider.setEducationDegree(id, value);
+                  }, align: Alignment.center),
+                  sizePadding: paddingNum,
+                ),
+              ),
+              const Gap(10),
+              SizedBox(
+                width: MediaQuery.of(context).size.width,
+                child: SelectInputWithBottom(
+                  labelText: 'Birthday',
+                  currentValue: userProvider.birthday,
+                  onTap: () => {
+                    CommonUtils.showDatePicker(context, (date) {
+                      String confirmedBirthday =
+                          DateFormat('yyyy-MM-dd').format(date);
+                      print(">>>>$confirmedBirthday");
+                      userProvider.setBirthday(confirmedBirthday);
+                    })
+                  },
+                  sizePadding: paddingNum,
+                ),
+              ),
+              const Gap(10),
+              maritalStatus(),
+              const Gap(10),
+              _handleAddressSelect01(),
+              const Gap(10),
+            ])));
   }
 
   Padding maritalStatus() {
@@ -427,9 +424,6 @@ class _UserInfoPage1State extends State<UserInfoPage1>
                 child: SizedBox(
                   width: 300,
                   height: 60,
-                  child: CustomPaint(
-                    painter: LineWithCirclesPainter(),
-                  ),
                 ),
               )
             ],
@@ -652,86 +646,5 @@ class _UserInfoPage1State extends State<UserInfoPage1>
     Fluttertoast.showToast(msg: "Form is valid");
     Navigator.of(context)
         .push(MaterialPageRoute(builder: (context) => const UserInfoPage2()));
-  }
-}
-
-class LineWithCirclesPainter extends CustomPainter {
-  @override
-  void paint(Canvas canvas, Size size) {
-    // 线条画笔
-    final linePaint = Paint()
-      ..color = const Color.fromARGB(255, 221, 221, 221)
-      ..strokeWidth = 2
-      ..style = PaintingStyle.stroke;
-
-    // 圆的画笔
-    final circlePaintBig = Paint()
-      ..color = Colors.white
-      ..style = PaintingStyle.fill;
-
-    final circlePaintSmall = Paint()
-      ..color = const Color.fromARGB(255, 221, 221, 221)
-      ..style = PaintingStyle.fill;
-
-    // 文字样式
-    // 文字样式
-    const textStyle = TextStyle(
-      color: Colors.white,
-      fontSize: 16,
-      fontWeight: FontWeight.bold,
-      fontStyle: FontStyle.italic,
-      decoration: TextDecoration.underline,
-      decorationColor: Colors.white,
-      decorationStyle: TextDecorationStyle.dotted,
-    );
-    const textStyleNormal = TextStyle(
-      color: Colors.grey,
-      fontSize: 12,
-      fontWeight: FontWeight.bold,
-      fontStyle: FontStyle.italic,
-      decoration: TextDecoration.underline,
-      decorationColor: Colors.grey,
-      decorationStyle: TextDecorationStyle.dotted,
-    );
-
-    // 计算位置
-    final double midY = size.height / 2;
-    final double thirdWidth = size.width / 2;
-
-    // 圆的位置
-    final Offset firstCirclePos = Offset(0, midY);
-    final Offset secondCirclePos = Offset(thirdWidth, midY);
-    final Offset thirdCirclePos = Offset(2 * thirdWidth, midY);
-    // 画线
-    canvas.drawLine(Offset(0, midY), Offset(size.width, midY), linePaint);
-    // 画圆
-    canvas.drawCircle(firstCirclePos, 11, circlePaintBig);
-    canvas.drawCircle(secondCirclePos, 10, circlePaintSmall);
-    canvas.drawCircle(thirdCirclePos, 10, circlePaintSmall);
-
-    // 连接圆的线
-
-    // 绘制文字
-    drawText(
-        canvas, "First", firstCirclePos + const Offset(-20, 20), textStyle);
-    drawText(canvas, "Second", secondCirclePos + const Offset(-20, 20),
-        textStyleNormal);
-    drawText(canvas, "Third", thirdCirclePos + const Offset(-20, 20),
-        textStyleNormal);
-  }
-
-  void drawText(Canvas canvas, String text, Offset position, TextStyle style) {
-    final textSpan = TextSpan(text: text, style: style);
-    final textPainter = TextPainter(
-      text: textSpan,
-      textDirection: TextDirection.ltr,
-    );
-    textPainter.layout();
-    textPainter.paint(canvas, position);
-  }
-
-  @override
-  bool shouldRepaint(covariant CustomPainter oldDelegate) {
-    return false;
   }
 }
