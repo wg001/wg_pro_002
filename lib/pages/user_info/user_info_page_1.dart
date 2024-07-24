@@ -1,20 +1,23 @@
 import 'dart:io';
 
+import 'package:camera/camera.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:gap/gap.dart';
 import 'package:image_picker/image_picker.dart';
-import 'package:flutter/foundation.dart' show kDebugMode, kIsWeb;
+import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:provider/provider.dart';
 import 'package:wg_pro_002/app/model/UserInfo.dart';
 import 'package:wg_pro_002/mixins/disposable_mixin.dart';
 import 'package:wg_pro_002/pages/user_info/user_info_page_2.dart';
 import 'package:app_settings/app_settings.dart';
+import 'package:wg_pro_002/provider/camera_provider.dart';
 import 'package:wg_pro_002/provider/user_info_provider.dart';
 import 'package:wg_pro_002/utils/common_utils.dart';
 import 'package:wg_pro_002/utils/image_utils.dart';
 import 'package:wg_pro_002/widget/address_selector.dart';
+import 'package:wg_pro_002/widget/camera_preview_widget.dart';
 import 'package:wg_pro_002/widget/input_widget.dart';
 
 const double paddingNum = 10;
@@ -39,13 +42,9 @@ class _UserInfoPage1State extends State<UserInfoPage1>
 
   UserInfo? userInfo;
 
-  Uint8List? _image1Data;
-  Uint8List? _image2Data;
-
   String? genderId; //
   String? maritalStatusId;
 
-  bool _isPickingImage = false;
   late UserInfoProvider userProvider;
 
   @override
@@ -481,16 +480,14 @@ class _UserInfoPage1State extends State<UserInfoPage1>
                     () => getImage(true, ImageSource.gallery),
                     "Tap to select image 1",
                     userProvider.isUploading01)
-                : pictureTakeWidget(
-                    0, () => _takePicture(0), "Tap to select image 1"),
+                : pictureTakeWidget(0, context),
             kIsWeb
                 ? imageChooseWidget(
                     userProvider.imageWeb02,
                     () => getImage(false, ImageSource.gallery),
                     "Tap to select image 2",
                     userProvider.isUploading02)
-                : pictureTakeWidget(
-                    1, () => _takePicture(1), "Tap to select image 2"),
+                : pictureTakeWidget(1, context),
           ],
         ));
   }
@@ -538,51 +535,72 @@ class _UserInfoPage1State extends State<UserInfoPage1>
               borderRadius: BorderRadius.circular(12),
             ),
           ),
-          if (isUploading) CircularProgressIndicator(), // 显示加载指示器
+          if (isUploading) const CircularProgressIndicator(), // 显示加载指示器
         ],
       ),
     );
   }
 
-  Widget pictureTakeWidget(
-      int imageIndex, VoidCallback onTap, String placeholder) {
+  Widget pictureTakeWidget(int imageIndex, BuildContext context) {
     return Center(
       child: GestureDetector(
-        onTap: onTap,
-        child: Consumer<UserInfoProvider>(
-          builder: (context, provider, child) {
-            var imagePath =
-                imageIndex == 0 ? provider.imagePath01 : provider.imagePath02;
-            var isUploading = imageIndex == 0
-                ? provider.isUploading01
-                : provider.isUploading02;
-
-            return Stack(
-              alignment: Alignment.center,
-              children: [
-                Container(
-                  width: (MediaQuery.of(context).size.width - 30) / 2,
-                  height: 80,
-                  decoration: BoxDecoration(
-                    color: Colors.grey[300],
-                    image: imagePath != null
-                        ? DecorationImage(
-                            image: FileImage(File(imagePath)),
-                            fit: BoxFit.cover)
-                        : null,
-                    border: Border.all(color: Colors.grey[300]!, width: 2),
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                  child: imagePath == null
-                      ? Icon(Icons.camera_alt, color: Colors.grey[700])
-                      : null,
+        onTap: () async {
+          final cameraManager =
+              Provider.of<CameraProvider>(context, listen: false);
+          if (!cameraManager.isInitialized) {
+            await cameraManager.initCamera(CameraLensDirection.back);
+          }
+          Navigator.of(context).push(
+            MaterialPageRoute(
+              builder: (context) => Scaffold(
+                appBar: AppBar(title: const Text("Camera Preview")),
+                body: CameraPreviewWidget(
+                  onImageCaptured: (path) {
+                    Provider.of<UserInfoProvider>(context, listen: false)
+                        .setImagePath(imageIndex, path);
+                    Navigator.pop(context);
+                  },
                 ),
-                if (isUploading) CircularProgressIndicator(),
-              ],
-            );
-          },
-        ),
+              ),
+            ),
+          );
+        },
+        child: buildImageStack(context, imageIndex),
       ),
+    );
+  }
+
+  Widget buildImageStack(BuildContext context, int imageIndex) {
+    return Consumer<UserInfoProvider>(
+      builder: (context, provider, child) {
+        var imagePath =
+            imageIndex == 0 ? provider.imagePath01 : provider.imagePath02;
+        var isUploading =
+            imageIndex == 0 ? provider.isUploading01 : provider.isUploading02;
+
+        return Stack(
+          alignment: Alignment.center,
+          children: [
+            Container(
+              width: (MediaQuery.of(context).size.width - 30) / 2,
+              height: 80,
+              decoration: BoxDecoration(
+                color: Colors.grey[300],
+                image: imagePath != null
+                    ? DecorationImage(
+                        image: FileImage(File(imagePath)), fit: BoxFit.cover)
+                    : null,
+                border: Border.all(color: Colors.grey[300]!, width: 2),
+                borderRadius: BorderRadius.circular(12),
+              ),
+              child: imagePath == null
+                  ? Icon(Icons.camera_alt, color: Colors.grey[700])
+                  : null,
+            ),
+            if (isUploading) const CircularProgressIndicator(),
+          ],
+        );
+      },
     );
   }
 

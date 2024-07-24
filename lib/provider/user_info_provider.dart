@@ -111,6 +111,15 @@ class UserInfoProvider extends ChangeNotifier {
     notifyListeners();
   }
 
+  void setImagePath(int imageIndex, String imagePath) {
+    if (imageIndex == 0) {
+      imagePath01 = imagePath;
+    } else {
+      imagePath02 = imagePath;
+    }
+    notifyListeners();
+  }
+
   void updateAddress(String province, city, area) {
     selectProvince(province);
     selectCity(city);
