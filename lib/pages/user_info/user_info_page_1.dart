@@ -30,48 +30,18 @@ class UserInfoPage1 extends StatefulWidget {
   _UserInfoPage1State createState() => _UserInfoPage1State();
 }
 
-class _UserInfoPage1State extends State<UserInfoPage1>
-    with AutomaticKeepAliveClientMixin<UserInfoPage1>, Disposable {
-  @override
-  bool get wantKeepAlive => true;
-
-  late UserInfoProvider userProvider;
-
+class _UserInfoPage1State extends State<UserInfoPage1> {
   @override
   void initState() {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      userProvider = Provider.of<UserInfoProvider>(context, listen: false);
-      userProvider.loadUserData();
+      Provider.of<UserInfoProvider>(context, listen: false).loadUserData();
     });
-  }
-
-  // 选择相册
-  Future<void> getImage(bool isFirstImage, ImageSource source) async {
-    final ImagePicker picker = ImagePicker();
-    try {
-      final XFile? pickedFile = await picker.pickImage(source: source);
-      if (pickedFile != null) {
-        Uint8List imageData = await pickedFile.readAsBytes();
-        final extension = ImageUtils.getExtensionFromPath(pickedFile.path);
-
-        isFirstImage
-            ? userProvider.setIdCardWebImage(imageData, extension)
-            : userProvider.setHandIdCardWebImage(imageData, extension);
-      }
-    } catch (e) {
-      // 处理异常
-      if (e is PlatformException) {
-        _handleCameraPermissionDenied(e);
-      } else {
-        // 其他类型的错误处理
-        print('Error: ${e.toString()}');
-      }
-    }
   }
 
   Future<void> _takePicture(int imageIndex) async {
     try {
+      var userProvider = Provider.of<UserInfoProvider>(context, listen: false);
       await userProvider
           .ensureCameraInitialized(true); // Initialize camera when needed
       await userProvider.takeAndUploadPicture(imageIndex: imageIndex);
@@ -88,15 +58,14 @@ class _UserInfoPage1State extends State<UserInfoPage1>
 
   @override
   void dispose() {
-    disposeResources(); // 调用 mixin 的 disposeResources 方法清理资源
     super.dispose(); // 确保父类的 dispose 方法被调用
   }
 
   @override
   Widget build(BuildContext context) {
-    super.build(context);
     return Consumer<UserInfoProvider>(
         builder: (BuildContext context, userInfoProvider, Widget? child) {
+      userInfoProvider.loadUserData();
       return userInfoProvider.isLoading
           ? Scaffold(
               appBar: AppBar(title: const Text('Loading...')),
@@ -132,108 +101,113 @@ class _UserInfoPage1State extends State<UserInfoPage1>
   }
 
   Widget main_container() {
-    return SingleChildScrollView(
-        child: Container(
-            decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(20),
-              color: Colors.white,
-            ),
-            width: MediaQuery.of(context).size.width * 1,
-            padding: const EdgeInsets.all(0), // Appropriate padding
-            child: Column(children: [
-              const SizedBox(height: 10),
-              InputWidget(
-                label: "ID NO",
-                initialValue: userProvider.idNo,
-                onChanged: (value) => userProvider.setIdNo(value),
-                context: context,
-              ), // Ensure these widgets do not have a fixed height that could cause overflow
-              const SizedBox(height: 10),
+    return Consumer<UserInfoProvider>(
+        builder: (BuildContext context, userInfoProvider, Widget? child) {
+      return SingleChildScrollView(
+          child: Container(
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(20),
+                color: Colors.white,
+              ),
+              width: MediaQuery.of(context).size.width * 1,
+              padding: const EdgeInsets.all(0), // Appropriate padding
+              child: Column(children: [
+                const SizedBox(height: 10),
+                InputWidget(
+                  label: "ID NO",
+                  initialValue: userInfoProvider.idNo,
+                  onChanged: (value) => userInfoProvider.setIdNo(value),
+                  context: context,
+                ), // Ensure these widgets do not have a fixed height that could cause overflow
+                const SizedBox(height: 10),
 
-              InputWidget(
-                label: "First Name1",
-                initialValue: userProvider.firstName,
-                onChanged: (value) => userProvider.setFirstName(value),
-                context: context,
-              ),
-              const SizedBox(height: 10),
-              imageContainer(),
-              const Gap(10),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  SizedBox(
-                    width: (MediaQuery.of(context).size.width / 2),
-                    child: SelectInputWithBottom(
-                      labelText: 'Gender',
-                      currentValue: userProvider.gender,
-                      onTap: () => CommonUtils.showCommonListOptionBottomSheet(
-                          context,
-                          'Please Choose Gender',
-                          userProvider.genderOptionsFuture!,
-                          (String id, String value) {
-                        userProvider.setGender(id, value);
-                      }, align: Alignment.center),
-                      sizePadding: paddingNum,
-                    ),
-                  ),
-                  SizedBox(
-                    width: (MediaQuery.of(context).size.width / 2),
-                    child: SelectInputWithBottom(
-                      labelText: 'Marital Status',
-                      currentValue: userProvider.maritalStatus,
-                      onTap: () => CommonUtils.showCommonListOptionBottomSheet(
-                          context,
-                          'Please Choose Marital Status',
-                          userProvider.maritalStatusOptionsFuture!,
-                          (String id, String value) {
-                        userProvider.setMaritalStatus(id, value);
-                      }, align: Alignment.center),
-                      sizePadding: paddingNum,
-                    ),
-                  ),
-                ],
-              ),
-              const Gap(10),
-              SizedBox(
-                width: MediaQuery.of(context).size.width,
-                child: SelectInputWithBottom(
-                  labelText: 'Educational Degress',
-                  currentValue: userProvider.educationDegree,
-                  onTap: () => CommonUtils.showCommonListOptionBottomSheet(
-                      context,
-                      'Please Education Degress',
-                      userProvider.edutionDegreeOptionsFuture!,
-                      (String id, String value) {
-                    userProvider.setEducationDegree(id, value);
-                  }, align: Alignment.center),
-                  sizePadding: paddingNum,
+                InputWidget(
+                  label: "First Name1",
+                  initialValue: userInfoProvider.firstName,
+                  onChanged: (value) => userInfoProvider.setFirstName(value),
+                  context: context,
                 ),
-              ),
-              const Gap(10),
-              SizedBox(
-                width: MediaQuery.of(context).size.width,
-                child: SelectInputWithBottom(
-                  labelText: 'Birthday',
-                  currentValue: userProvider.birthday,
-                  onTap: () => {
-                    CommonUtils.showDatePicker(context, (date) {
-                      String confirmedBirthday =
-                          DateFormat('yyyy-MM-dd').format(date);
-                      print(">>>>$confirmedBirthday");
-                      userProvider.setBirthday(confirmedBirthday);
-                    })
-                  },
-                  sizePadding: paddingNum,
+                // const SizedBox(height: 10),
+                // imageContainer(),
+                const Gap(10),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    SizedBox(
+                      width: (MediaQuery.of(context).size.width / 2),
+                      child: SelectInputWithBottom(
+                        labelText: 'Gender',
+                        currentValue: userInfoProvider.gender,
+                        onTap: () =>
+                            CommonUtils.showCommonListOptionBottomSheet(
+                                context,
+                                'Please Choose Gender',
+                                userInfoProvider.genderOptionsFuture!,
+                                (String id, String value) {
+                          userInfoProvider.setGender(id, value);
+                        }, align: Alignment.center),
+                        sizePadding: paddingNum,
+                      ),
+                    ),
+                    SizedBox(
+                      width: (MediaQuery.of(context).size.width / 2),
+                      child: SelectInputWithBottom(
+                        labelText: 'Marital Status',
+                        currentValue: userInfoProvider.maritalStatus,
+                        onTap: () =>
+                            CommonUtils.showCommonListOptionBottomSheet(
+                                context,
+                                'Please Choose Marital Status',
+                                userInfoProvider.maritalStatusOptionsFuture!,
+                                (String id, String value) {
+                          userInfoProvider.setMaritalStatus(id, value);
+                        }, align: Alignment.center),
+                        sizePadding: paddingNum,
+                      ),
+                    ),
+                  ],
                 ),
-              ),
-              const Gap(10),
-              maritalStatus(),
-              const Gap(10),
-              _handleAddressSelect01(),
-              const Gap(10),
-            ])));
+                const Gap(10),
+                SizedBox(
+                  width: MediaQuery.of(context).size.width,
+                  child: SelectInputWithBottom(
+                    labelText: 'Educational Degress',
+                    currentValue: userInfoProvider.educationDegree,
+                    onTap: () => CommonUtils.showCommonListOptionBottomSheet(
+                        context,
+                        'Please Education Degress',
+                        userInfoProvider.edutionDegreeOptionsFuture!,
+                        (String id, String value) {
+                      userInfoProvider.setEducationDegree(id, value);
+                    }, align: Alignment.center),
+                    sizePadding: paddingNum,
+                  ),
+                ),
+                const Gap(10),
+                SizedBox(
+                  width: MediaQuery.of(context).size.width,
+                  child: SelectInputWithBottom(
+                    labelText: 'Birthday',
+                    currentValue: userInfoProvider.birthday,
+                    onTap: () => {
+                      CommonUtils.showDatePicker(context, (date) {
+                        String confirmedBirthday =
+                            DateFormat('yyyy-MM-dd').format(date);
+                        print(">>>>$confirmedBirthday");
+                        userInfoProvider.setBirthday(confirmedBirthday);
+                      })
+                    },
+                    sizePadding: paddingNum,
+                  ),
+                ),
+                const Gap(10),
+                maritalStatus(),
+                const Gap(10),
+                _handleAddressSelect01(),
+                const Gap(10),
+              ])));
+    });
   }
 
   Padding maritalStatus() {
@@ -461,30 +435,134 @@ class _UserInfoPage1State extends State<UserInfoPage1>
       ),
     );
   }
+  // Widget imageContainer() {
+  //   return Padding(
+  //     padding: const EdgeInsets.symmetric(horizontal: paddingNum),
+  //     child: Row(
+  //       mainAxisAlignment: MainAxisAlignment.spaceBetween,
+  //       children: [
+  //         GestureDetector(
+  //           onTap: () async {
+  //             var result = await ImageUtils.pickImageWeb();
+  //             if (result['error'] != null) {
+  //             } else {
+  //               userInfoProvider.setIdCardWebImage(
+  //                   result['imageData'], result['extension']);
+  //             }
+  //           },
+  //           child: Stack(
+  //             alignment: Alignment.center,
+  //             children: [
+  //               Container(
+  //                 width: (MediaQuery.of(context).size.width - 30) / 2,
+  //                 height: 80,
+  //                 decoration: BoxDecoration(
+  //                   color: Colors.grey[300],
+  //                   image: userProvider?.localUploadIdCardSuccess == false
+  //                       ? DecorationImage(
+  //                           image: NetworkImage(userInfoProvider.idCardImg!),
+  //                           fit: BoxFit.cover,
+  //                           onError: (error, stackTrace) => Icon(Icons.error),
+  //                         )
+  //                       : DecorationImage(
+  //                           image: MemoryImage(userInfoProvider.imageWeb01!),
+  //                           fit: BoxFit.cover,
+  //                         ),
+  //                   borderRadius: BorderRadius.circular(12),
+  //                 ),
+  //               ),
+  //               if (userInfoProvider.isUploading01)
+  //                 const CircularProgressIndicator(), // 显示加载指示器
+  //             ],
+  //           ),
+  //         ),
+  //         GestureDetector(
+  //           onTap: () async {
+  //             var result = await ImageUtils.pickImageWeb();
+  //             if (result['error'] != null) {
+  //             } else {
+  //               userInfoProvider.setHandIdCardWebImage(
+  //                   result['imageData'], result['extension']);
+  //             }
+  //           },
+  //           child: Stack(
+  //             alignment: Alignment.center,
+  //             children: [
+  //               Container(
+  //                 width: (MediaQuery.of(context).size.width - 30) / 2,
+  //                 height: 80,
+  //                 decoration: BoxDecoration(
+  //                   color: Colors.grey[300],
+  //                   image: userProvider?.localUploadIdCardSuccess == false
+  //                       ? DecorationImage(
+  //                           image: NetworkImage(userInfoProvider.idCardHandImg!),
+  //                           fit: BoxFit.cover,
+  //                           onError: (error, stackTrace) => Icon(Icons.error),
+  //                         )
+  //                       : DecorationImage(
+  //                           image: MemoryImage(userInfoProvider.imageWeb02!),
+  //                           fit: BoxFit.cover,
+  //                         ),
+  //                   borderRadius: BorderRadius.circular(12),
+  //                 ),
+  //               ),
+  //               if (userInfoProvider.isUploading02)
+  //                 const CircularProgressIndicator(), // 显示加载指示器
+  //             ],
+  //           ),
+  //         ),
+  //       ],
+  //     ),
+  //   );
+  // }
 
-  Widget imageContainer() {
-    return Padding(
-        padding: const EdgeInsets.symmetric(horizontal: paddingNum),
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            kIsWeb
-                ? imageChooseWidget(
-                    userProvider.imageWeb01,
-                    () => getImage(true, ImageSource.gallery),
-                    "Tap to select image 1",
-                    userProvider.isUploading01)
-                : pictureTakeWidget(0, context),
-            kIsWeb
-                ? imageChooseWidget(
-                    userProvider.imageWeb02,
-                    () => getImage(false, ImageSource.gallery),
-                    "Tap to select image 2",
-                    userProvider.isUploading02)
-                : pictureTakeWidget(1, context),
-          ],
-        ));
-  }
+  // Widget imageContainer() {
+  //   return Padding(
+  //     padding: const EdgeInsets.symmetric(horizontal: paddingNum),
+  //     child: Row(
+  //       mainAxisAlignment: MainAxisAlignment.spaceBetween,
+  //       children: [
+  //         // 使用三元运算符来选择显示哪个 Widget
+  //         userInfoProvider.idCardImg != null
+  //             ? GestureDetector(
+  //                 onTap: () {
+  //                  imageChooseWidget(
+  //                     userInfoProvider.imageWeb01,
+  //                     () => getImage(true, ImageSource.gallery),
+  //                     "Tap to select image 1",
+  //                     userInfoProvider.isUploading01);
+  //                 },
+  //                 child: Image.network(
+  //                   width: (MediaQuery.of(context).size.width - 30) / 2,
+  //                   height: 80,
+  //                   userInfoProvider.idCardImg!,
+  //                   errorBuilder: (context, error, stackTrace) =>
+  //                       Icon(Icons.error),
+  //                   loadingBuilder: (context, child, loadingProgress) {
+  //                     if (loadingProgress == null) return child;
+  //                     return Center(child: CircularProgressIndicator());
+  //                   },
+  //                 ))
+  //             : (kIsWeb
+  //                 ? imageChooseWidget(
+  //                     userInfoProvider.imageWeb01,
+  //                     () => getImage(true, ImageSource.gallery),
+  //                     "Tap to select image 1",
+  //                     userInfoProvider.isUploading01)
+  //                 : pictureTakeWidget(0, context)),
+
+  //         // 这里假设无论在 Web 还是移动环境都可使用相同逻辑
+  //         kIsWeb
+  //             ? imageChooseWidget(
+  //                 userInfoProvider.imageWeb02,
+  //                 () => getImage(false, ImageSource.gallery),
+  //                 "Tap to select image 2",
+  //                 userInfoProvider.isUploading02)
+  //             : pictureTakeWidget(1, context),
+  //       ],
+  //     ),
+  //   );
+  // }
 
   // Widget imageChooseWidget(
   //     Uint8List? imageData, VoidCallback onTap, String placeholder) {

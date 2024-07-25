@@ -70,12 +70,16 @@ class UserInfoProvider extends ChangeNotifier {
 
   final CameraUtils _cameraUtil = CameraUtils();
   bool isUploading = false;
-  String? imagePath01;
-  Uint8List? imageWeb01;
+  String? idCardImg;
+  String? idCardHandImg;
+  String? imagePath01; //非web 本地图片路径
+  Uint8List? imageWeb01; //web 本地图片
   String? imagePath02;
   Uint8List? imageWeb02;
   bool isUploading01 = false;
   bool isUploading02 = false;
+  bool localUploadIdCardSuccess = false;
+  bool localUploadIdCardHandSuccess = false;
 
   Future<List<AddressSelect>> fetchProvince(String? id) async {
     DataResult provincesData = await AddressDao.getAddressById(id: id);
@@ -107,15 +111,27 @@ class UserInfoProvider extends ChangeNotifier {
   }
 
   void setIdCardWebImage(Uint8List img, String extension) {
-    uploadImage(idCardPicType, img, extension);
-    imageWeb01 = img;
+    try {
+      uploadImage(idCardPicType, img, extension);
+      imageWeb01 = img;
+      isUploading01 = true;
+      localUploadIdCardSuccess = true;
+    } catch (e) {
+      isUploading01 = false;
+    }
 
     notifyListeners();
   }
 
   void setHandIdCardWebImage(Uint8List img, String extension) {
-    uploadImage(handIdCardPicType, img, extension);
-    imageWeb02 = img;
+    try {
+      uploadImage(handIdCardPicType, img, extension);
+      imageWeb02 = img;
+      isUploading02 = true;
+      localUploadIdCardHandSuccess = true;
+    } catch (e) {
+      isUploading02 = false;
+    }
     notifyListeners();
   }
 
@@ -208,7 +224,8 @@ class UserInfoProvider extends ChangeNotifier {
           Future.value(userInfo?.options?.educationDegreeOptions ?? []);
       _gender = userInfo?.gender ?? '';
       _maritalStatus = userInfo?.maritalStatus ?? '';
-
+      idCardImg = userInfo?.idcardFront;
+      idCardHandImg = userInfo?.idcardFront;
       _isLoading = false;
 
       notifyListeners(); // 数据加载成功，通知更新
@@ -227,11 +244,7 @@ class UserInfoProvider extends ChangeNotifier {
 
   Future<void> takeAndUploadPicture({int imageIndex = 0}) async {
     String? imagePath;
-    if (kIsWeb) {
-      imagePath = await ImageUtils.pickImageWeb();
-    } else {
-      imagePath = (await _cameraUtil.takePicture());
-    }
+    imagePath = (await _cameraUtil.takePicture());
     if (imagePath != null) {
       if (imageIndex == 0) {
         imagePath01 = imagePath;
@@ -259,17 +272,35 @@ class UserInfoProvider extends ChangeNotifier {
   }
 
   Future<void> uploadImage(
-      String pictureType, Uint8List imageData, String extension) async {
+      String pictureType, dynamic imageData, String extension) async {
     try {
-      // 转换图片数据为Base64字符串
-      String base64Image = base64Encode(imageData);
-      Map picture = {"extension": extension, "content": base64Image};
-      // 创建请求体，包括图片数据
+      String? base64Image;
+      if (imageData is Uint8List) {
+        // Convert image data to Base64 string
+        base64Image = base64Encode(imageData);
+      } else {
+        throw Exception("Invalid image data");
+      }
+
+      if (base64Image == null) {
+        throw Exception("Failed to convert image to Base64");
+      }
+
+      Map<String, String> picture = {
+        "extension": extension,
+        "content": base64Image,
+      };
+
+      // Create the request body including the image data
       DataResult ret = await UserDao.uploadImage(pictureType, picture);
-      if (!ret.result) {}
+      if (!ret.result) {
+        throw Exception("Failed to upload image");
+      }
     } catch (e) {
-      print("Error uploading image failed: $e");
-    } finally {}
+      print("Error uploading image: $e");
+      // Optionally rethrow the error to be handled by the caller
+      throw e;
+    }
   }
 
   @override

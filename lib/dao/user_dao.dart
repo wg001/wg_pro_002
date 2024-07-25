@@ -68,12 +68,12 @@ class UserDao {
     return DataResult(resultData, true);
   }
 
-  static uploadImage(String pictureType, Map picture) async {
+  static uploadImage(String pictureType, dynamic picture) async {
     Map params = {"picture_type": pictureType, 'picture': picture};
     dynamic resultData;
     try {
-      var res =
-          await httpManager.netFetch(Address.getUserInfo(), params: params);
+      var res = await httpManager.netFetch(Address.uploadImage(),
+          params: json.encode(params));
       bool retSuccess = false;
       if (res != null && res.data != null) {
         Map<String, dynamic> resMap =
@@ -83,7 +83,7 @@ class UserDao {
 
         retSuccess = resMap.containsKey('success');
       }
-      return DataResult(null,retSuccess);
+      return DataResult(null, retSuccess);
     } catch (e) {
       if (kDebugMode) {
         print("pageIndex error: $e");
