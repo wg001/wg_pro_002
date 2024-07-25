@@ -138,8 +138,10 @@ class UserInfoProvider extends ChangeNotifier {
   void setImagePath(int imageIndex, String imagePath) {
     if (imageIndex == 0) {
       imagePath01 = imagePath;
+      localUploadIdCardSuccess = true;
     } else {
       imagePath02 = imagePath;
+      localUploadIdCardHandSuccess = true;
     }
     notifyListeners();
   }
@@ -264,8 +266,10 @@ class UserInfoProvider extends ChangeNotifier {
 
       if (imageIndex == 0) {
         isUploading01 = false;
+        localUploadIdCardSuccess = true;
       } else if (imageIndex == 1) {
         isUploading02 = false;
+        localUploadIdCardHandSuccess = true;
       }
       notifyListeners();
     }
@@ -282,10 +286,6 @@ class UserInfoProvider extends ChangeNotifier {
         throw Exception("Invalid image data");
       }
 
-      if (base64Image == null) {
-        throw Exception("Failed to convert image to Base64");
-      }
-
       Map<String, String> picture = {
         "extension": extension,
         "content": base64Image,
@@ -299,7 +299,7 @@ class UserInfoProvider extends ChangeNotifier {
     } catch (e) {
       print("Error uploading image: $e");
       // Optionally rethrow the error to be handled by the caller
-      throw e;
+      rethrow;
     }
   }
 

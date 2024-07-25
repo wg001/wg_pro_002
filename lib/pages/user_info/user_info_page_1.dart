@@ -35,7 +35,9 @@ class _UserInfoPage1State extends State<UserInfoPage1> {
   void initState() {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      Provider.of<UserInfoProvider>(context, listen: false).loadUserData();
+      if (mounted) {
+        Provider.of<UserInfoProvider>(context, listen: false).loadUserData();
+      }
     });
   }
 
@@ -65,7 +67,7 @@ class _UserInfoPage1State extends State<UserInfoPage1> {
   Widget build(BuildContext context) {
     return Consumer<UserInfoProvider>(
         builder: (BuildContext context, userInfoProvider, Widget? child) {
-      userInfoProvider.loadUserData();
+      // userInfoProvider.loadUserData();
       return userInfoProvider.isLoading
           ? Scaffold(
               appBar: AppBar(title: const Text('Loading...')),
@@ -168,6 +170,8 @@ class _UserInfoPage1State extends State<UserInfoPage1> {
                     ),
                   ],
                 ),
+                const Gap(10),
+                imageContainer(),
                 const Gap(10),
                 SizedBox(
                   width: MediaQuery.of(context).size.width,
@@ -392,9 +396,8 @@ class _UserInfoPage1State extends State<UserInfoPage1> {
                   ],
                 ),
               ),
-              Padding(
-                padding:
-                    const EdgeInsets.only(top: 0), // Remove vertical padding
+              const Padding(
+                padding: EdgeInsets.only(top: 0), // Remove vertical padding
                 child: SizedBox(
                   width: 300,
                   height: 60,
@@ -435,86 +438,169 @@ class _UserInfoPage1State extends State<UserInfoPage1> {
       ),
     );
   }
-  // Widget imageContainer() {
-  //   return Padding(
-  //     padding: const EdgeInsets.symmetric(horizontal: paddingNum),
-  //     child: Row(
-  //       mainAxisAlignment: MainAxisAlignment.spaceBetween,
-  //       children: [
-  //         GestureDetector(
-  //           onTap: () async {
-  //             var result = await ImageUtils.pickImageWeb();
-  //             if (result['error'] != null) {
-  //             } else {
-  //               userInfoProvider.setIdCardWebImage(
-  //                   result['imageData'], result['extension']);
-  //             }
-  //           },
-  //           child: Stack(
-  //             alignment: Alignment.center,
-  //             children: [
-  //               Container(
-  //                 width: (MediaQuery.of(context).size.width - 30) / 2,
-  //                 height: 80,
-  //                 decoration: BoxDecoration(
-  //                   color: Colors.grey[300],
-  //                   image: userProvider?.localUploadIdCardSuccess == false
-  //                       ? DecorationImage(
-  //                           image: NetworkImage(userInfoProvider.idCardImg!),
-  //                           fit: BoxFit.cover,
-  //                           onError: (error, stackTrace) => Icon(Icons.error),
-  //                         )
-  //                       : DecorationImage(
-  //                           image: MemoryImage(userInfoProvider.imageWeb01!),
-  //                           fit: BoxFit.cover,
-  //                         ),
-  //                   borderRadius: BorderRadius.circular(12),
-  //                 ),
-  //               ),
-  //               if (userInfoProvider.isUploading01)
-  //                 const CircularProgressIndicator(), // 显示加载指示器
-  //             ],
-  //           ),
-  //         ),
-  //         GestureDetector(
-  //           onTap: () async {
-  //             var result = await ImageUtils.pickImageWeb();
-  //             if (result['error'] != null) {
-  //             } else {
-  //               userInfoProvider.setHandIdCardWebImage(
-  //                   result['imageData'], result['extension']);
-  //             }
-  //           },
-  //           child: Stack(
-  //             alignment: Alignment.center,
-  //             children: [
-  //               Container(
-  //                 width: (MediaQuery.of(context).size.width - 30) / 2,
-  //                 height: 80,
-  //                 decoration: BoxDecoration(
-  //                   color: Colors.grey[300],
-  //                   image: userProvider?.localUploadIdCardSuccess == false
-  //                       ? DecorationImage(
-  //                           image: NetworkImage(userInfoProvider.idCardHandImg!),
-  //                           fit: BoxFit.cover,
-  //                           onError: (error, stackTrace) => Icon(Icons.error),
-  //                         )
-  //                       : DecorationImage(
-  //                           image: MemoryImage(userInfoProvider.imageWeb02!),
-  //                           fit: BoxFit.cover,
-  //                         ),
-  //                   borderRadius: BorderRadius.circular(12),
-  //                 ),
-  //               ),
-  //               if (userInfoProvider.isUploading02)
-  //                 const CircularProgressIndicator(), // 显示加载指示器
-  //             ],
-  //           ),
-  //         ),
-  //       ],
-  //     ),
-  //   );
-  // }
+
+  Widget imageContainer() {
+    return Consumer<UserInfoProvider>(
+        builder: (BuildContext context, userInfoProvider, Widget? child) {
+      ImageProvider? idcardBackgroundImage;
+      ImageProvider? idcardHandBackgroundImage;
+      if (kIsWeb) {
+        if (userInfoProvider.imageWeb02 != null) {
+          idcardBackgroundImage = MemoryImage(userInfoProvider.imageWeb02!);
+        }
+        if (userInfoProvider.imageWeb01 != null) {
+          idcardBackgroundImage = MemoryImage(userInfoProvider.imageWeb01!);
+        }
+      } else {
+        if (userInfoProvider.imagePath01 != null &&
+            File(userInfoProvider.imagePath01!).existsSync()) {
+          idcardBackgroundImage =
+              FileImage(File(userInfoProvider.imagePath01!));
+        }
+        if (userInfoProvider.imagePath02 != null &&
+            File(userInfoProvider.imagePath02!).existsSync()) {
+          idcardHandBackgroundImage =
+              FileImage(File(userInfoProvider.imagePath02!));
+        }
+      }
+      return Padding(
+        padding: const EdgeInsets.symmetric(horizontal: paddingNum),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            GestureDetector(
+              onTap: () async {
+                if (kIsWeb) {
+                  var result = await ImageUtils.pickImageWeb();
+                  if (result['error'] != null) {
+                  } else {
+                    userInfoProvider.setIdCardWebImage(
+                        result['imageData'], result['extension']);
+                  }
+                } else {
+                  print("0000000");
+                  final cameraManager =
+                      Provider.of<CameraProvider>(context, listen: false);
+                  if (!cameraManager.isInitialized) {
+                    await cameraManager.initCamera(CameraLensDirection.back);
+                  }
+                  Navigator.of(context).push(
+                    MaterialPageRoute(
+                      builder: (context) => Scaffold(
+                        appBar: AppBar(title: const Text("Camera Preview")),
+                        body: CameraPreviewWidget(
+                          onImageCaptured: (path) {
+                            Provider.of<UserInfoProvider>(context,
+                                    listen: false)
+                                .setImagePath(0, path);
+                            Navigator.pop(context);
+                          },
+                        ),
+                      ),
+                    ),
+                  );
+                  // _takePicture(0);
+                }
+              },
+              child: Stack(
+                alignment: Alignment.center,
+                children: [
+                  Container(
+                    width: (MediaQuery.of(context).size.width - 30) / 2,
+                    height: 80,
+                    decoration: BoxDecoration(
+                      color: Colors.grey[300],
+                      image: userInfoProvider.localUploadIdCardSuccess == false
+                          ? DecorationImage(
+                              image: NetworkImage(userInfoProvider.idCardImg!),
+                              fit: BoxFit.contain,
+                              onError: (error, stackTrace) =>
+                                  const Icon(Icons.error),
+                            )
+                          : (idcardBackgroundImage != null
+                              ? DecorationImage(
+                                  image: idcardBackgroundImage,
+                                  fit: BoxFit.contain,
+                                )
+                              : null),
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                  ),
+                  if (userInfoProvider.isUploading01)
+                    const CircularProgressIndicator(), // 显示加载指示器
+                ],
+              ),
+            ),
+            GestureDetector(
+              onTap: () async {
+                if (kIsWeb) {
+                  var result = await ImageUtils.pickImageWeb();
+                  if (result['error'] != null) {
+                  } else {
+                    userInfoProvider.setHandIdCardWebImage(
+                        result['imageData'], result['extension']);
+                  }
+                } else {
+                  // _takePicture(1);
+                  print("1111111");
+                  final cameraManager =
+                      Provider.of<CameraProvider>(context, listen: false);
+                  if (!cameraManager.isInitialized) {
+                    await cameraManager.initCamera(CameraLensDirection.back);
+                  }
+                  Navigator.of(context).push(
+                    MaterialPageRoute(
+                      builder: (context) => Scaffold(
+                        appBar: AppBar(title: const Text("Camera Preview")),
+                        body: CameraPreviewWidget(
+                          onImageCaptured: (path) {
+                            Provider.of<UserInfoProvider>(context,
+                                    listen: false)
+                                .setImagePath(1, path);
+                            Navigator.pop(context);
+                          },
+                        ),
+                      ),
+                    ),
+                  );
+                  // _takePicture(0);
+                }
+              },
+              child: Stack(
+                alignment: Alignment.center,
+                children: [
+                  Container(
+                    width: (MediaQuery.of(context).size.width - 30) / 2,
+                    height: 80,
+                    decoration: BoxDecoration(
+                      color: Colors.grey[300],
+                      image: userInfoProvider.localUploadIdCardSuccess == false
+                          ? DecorationImage(
+                              image:
+                                  NetworkImage(userInfoProvider.idCardHandImg!),
+                              fit: BoxFit.contain,
+                              onError: (error, stackTrace) =>
+                                  const Icon(Icons.error),
+                            )
+                          : (idcardHandBackgroundImage != null
+                              ? DecorationImage(
+                                  image: idcardHandBackgroundImage,
+                                  fit: BoxFit.contain,
+                                )
+                              : null),
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                  ),
+                  if (userInfoProvider.isUploading02)
+                    const CircularProgressIndicator(), // 显示加载指示器
+                ],
+              ),
+            ),
+          ],
+        ),
+      );
+    });
+  }
 
   // Widget imageContainer() {
   //   return Padding(

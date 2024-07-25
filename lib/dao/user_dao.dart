@@ -51,11 +51,9 @@ class UserDao {
             res.data is Map ? res.data : json.decode(res.data.toString());
 
         // Log the returned data
-        print(resMap["ret"]);
 
         resultData = resMap["ret"];
         UserInfo userInfo = UserInfo.fromJson(resMap["ret"]);
-        print('-------------');
         return DataResult(userInfo, true);
       }
     } catch (e) {

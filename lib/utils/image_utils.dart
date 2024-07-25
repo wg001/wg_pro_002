@@ -48,6 +48,34 @@ class ImageUtils {
     return {'imageData': imageData, 'extension': extension};
   }
 
+  static Future<Map<String, dynamic>> pickImageApp() async {
+    final ImagePicker picker = ImagePicker();
+    Uint8List? imageData;
+    String? extension;
+
+    try {
+      final XFile? pickedFile = await picker.pickImage(
+        source: ImageSource.camera,
+        imageQuality:
+            50, // Optionally reduce the image quality to reduce file size
+      );
+      if (pickedFile != null) {
+        imageData = await pickedFile.readAsBytes();
+        extension = ImageUtils.getExtensionFromPath(pickedFile.name);
+      }
+    } catch (e) {
+      // 处理异常
+      if (e is PlatformException) {
+        return {'error': 'Permission denied'};
+      } else {
+        // 其他类型的错误处理
+        print('Error: ${e.toString()}');
+        return {'error': e.toString()};
+      }
+    }
+    return {'imageData': imageData, 'extension': extension};
+  }
+
   static String getExtensionFromPath(String filePath) {
     final parts = filePath.split('.');
     return parts.last;
