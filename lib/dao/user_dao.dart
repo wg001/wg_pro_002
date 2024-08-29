@@ -25,7 +25,8 @@ class UserDao {
 
         // Process the returned data
         if (resMap["ret"] is Map && resMap['ret'].containsKey('token')) {
-          await LocalStorage.save(Config.TOKEN_KEY, resMap['ret']['token']);
+          await LocalStorage.secureSave(
+              Config.TOKEN_KEY, resMap['ret']['token']);
         }
 
         return DataResult(resMap["ret"], true);

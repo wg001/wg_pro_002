@@ -15,7 +15,7 @@ class UserAuthNotifier extends ChangeNotifier {
 
   Future<bool> checkLoginStatus() async {
     if (!_isLoggedIn) {
-      String? token = await LocalStorage.get(Config.TOKEN_KEY);
+      String? token = await LocalStorage.secureGet(Config.TOKEN_KEY);
       _isLoggedIn = token != null;
     }
 
@@ -106,6 +106,17 @@ class UserAuthNotifier extends ChangeNotifier {
         gravity: ToastGravity.CENTER,
       );
     }
+  }
+
+  Future<void> getAuthorization() async {
+    _token = await LocalStorage.secureGet(Config.TOKEN_KEY);
+    notifyListeners();
+  }
+
+  Future<void> clearToken() async {
+    await LocalStorage.secureRemove(Config.TOKEN_KEY);
+    _token = null;
+    notifyListeners();
   }
 
   @override

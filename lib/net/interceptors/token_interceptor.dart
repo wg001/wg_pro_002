@@ -21,11 +21,17 @@ class TokenInterceptor extends InterceptorsWrapper {
   }
 
   getAuthorization() async {
-    String? token = await LocalStorage.get(Config.TOKEN_KEY);
+    String? token = await LocalStorage.secureGet(Config.TOKEN_KEY);
     if (token == null) {
     } else {
       _token = token;
       return token;
     }
+  }
+
+  Future<void> clearToken() async {
+    await LocalStorage.secureRemove(
+        Config.TOKEN_KEY); // Clear token from storage
+    _token = null; // Clear token from memory
   }
 }
