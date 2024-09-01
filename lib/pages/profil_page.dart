@@ -4,6 +4,7 @@ import 'package:wg_pro_002/common/response_conf.dart';
 import 'package:wg_pro_002/config/config.dart';
 import 'package:wg_pro_002/local/local_storage.dart';
 import 'package:wg_pro_002/net/interceptors/token_interceptor.dart';
+import 'package:wg_pro_002/pages/login_page.dart';
 import 'package:wg_pro_002/utils/common_utils.dart';
 
 class ProfilPage extends StatelessWidget {
@@ -54,6 +55,8 @@ class ProfilPage extends StatelessWidget {
     CommonUtils.showToast("operator successfully");
 
     // 可选: 重置应用状态或导航到登陆页
-    // Navigator.of(context).pushReplacementNamed('/login');
+    // ignore: use_build_context_synchronously
+    Config.navigatorKey.currentState?.pushNamedAndRemoveUntil(
+        LoginPage.sName, (Route<dynamic> route) => false);
   }
 }

@@ -7,7 +7,7 @@ import 'package:flutter/material.dart';
 import 'package:keyboard_actions/keyboard_actions.dart';
 import 'package:wg_pro_002/config/colors.dart';
 
-class JhKeyboardUtils {
+class WgKeyboardUtils {
   /// 三方键盘配置
   static KeyboardActionsConfig getKeyboardConfig(
       BuildContext context, List<FocusNode> list) {

@@ -7,6 +7,7 @@ import 'package:wg_pro_002/config/config.dart';
 import 'package:wg_pro_002/dao/dao_result.dart';
 import 'package:wg_pro_002/dao/user_dao.dart';
 import 'package:wg_pro_002/local/local_storage.dart';
+import 'package:wg_pro_002/pages/main_page.dart';
 import 'package:wg_pro_002/utils/navigator_utils.dart';
 
 class UserAuthNotifier extends ChangeNotifier {
@@ -93,7 +94,9 @@ class UserAuthNotifier extends ChangeNotifier {
           toastLength: Toast.LENGTH_SHORT,
           gravity: ToastGravity.CENTER,
         );
-        NavigatorUtils.goMainPage(context);
+        // NavigatorUtils.goMainPage(context);
+        Config.navigatorKey.currentState?.pushNamedAndRemoveUntil(
+            MainPage.sName, (Route<dynamic> route) => false);
       } else {
         throw Exception('Login failed');
       }

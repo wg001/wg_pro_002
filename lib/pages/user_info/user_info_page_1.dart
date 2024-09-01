@@ -5,11 +5,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:gap/gap.dart';
-import 'package:image_picker/image_picker.dart';
-import 'package:flutter/foundation.dart' show kIsWeb;
+import 'package:flutter/foundation.dart' show kDebugMode, kIsWeb;
 import 'package:provider/provider.dart';
 import 'package:wg_pro_002/app/model/UserInfo.dart';
-import 'package:wg_pro_002/mixins/disposable_mixin.dart';
 import 'package:wg_pro_002/pages/user_info/user_info_page_2.dart';
 import 'package:app_settings/app_settings.dart';
 import 'package:wg_pro_002/provider/camera_provider.dart';
@@ -18,8 +16,12 @@ import 'package:wg_pro_002/utils/common_utils.dart';
 import 'package:wg_pro_002/utils/image_utils.dart';
 import 'package:wg_pro_002/widget/address_selector.dart';
 import 'package:wg_pro_002/widget/camera_preview_widget.dart';
+import 'package:wg_pro_002/widget/form/wg_form.dart';
+import 'package:wg_pro_002/widget/form/wg_form_input_cell.dart';
+import 'package:wg_pro_002/widget/form/wg_form_select_cell.dart';
 import 'package:wg_pro_002/widget/input_widget.dart';
 import 'package:intl/intl.dart';
+import 'package:wg_pro_002/widget/wg_picker_tool.dart';
 
 const double paddingNum = 10;
 
@@ -31,6 +33,8 @@ class UserInfoPage1 extends StatefulWidget {
 }
 
 class _UserInfoPage1State extends State<UserInfoPage1> {
+  final FocusNode _node1 = FocusNode();
+  final FocusNode _node2 = FocusNode();
   @override
   void initState() {
     super.initState();
@@ -60,158 +64,194 @@ class _UserInfoPage1State extends State<UserInfoPage1> {
 
   @override
   void dispose() {
+    print("page 1 disposed");
+    _node1.dispose();
+    _node2.dispose();
     super.dispose(); // 确保父类的 dispose 方法被调用
   }
 
   @override
   Widget build(BuildContext context) {
     return Consumer<UserInfoProvider>(
-        builder: (BuildContext context, userInfoProvider, Widget? child) {
-      // userInfoProvider.loadUserData();
-      return userInfoProvider.isLoading
-          ? Scaffold(
-              appBar: AppBar(title: const Text('Loading...')),
-              body: const Center(child: CircularProgressIndicator()),
-            )
-          : GestureDetector(
-              onTap: () {
-                // 当点击非输入字段区域时，关闭键盘
-                FocusScope.of(context).unfocus();
-              },
-              child: Scaffold(
-                body: SafeArea(
-                  child: Stack(
-                    children: [
-                      Positioned(
-                        top: 0,
-                        left: 0,
-                        right: 0,
-                        child: background_container(context),
-                      ),
-                      Positioned(
-                        top: 120, // Adjust this value as needed
-                        left: 0,
-                        right: 0,
-                        bottom: 0,
-                        child: main_container(),
-                      ),
-                    ],
-                  ),
-                ),
-              ));
-    });
+      builder: (BuildContext context, userInfoProvider, Widget? child) {
+        if (userInfoProvider.isLoading) {
+          // Display loading screen when data is being fetched
+          return Scaffold(
+            appBar: AppBar(title: const Text('Loading...')),
+            body: const Center(child: CircularProgressIndicator()),
+          );
+        } else {
+          // Display user information page when data is loaded
+          return GestureDetector(
+            onTap: () {
+              // Dismiss the keyboard when the user taps anywhere on the screen outside input fields
+              FocusScope.of(context).unfocus();
+            },
+            child: Scaffold(
+              appBar: AppBar(title: const Text('User Information Page 1')),
+              body: KeyboardActions(
+                config: WgKeyboardUtils.getKeyboardConfig(
+                    context, [_node1, _node2]),
+                child: SafeArea(child: _body(userInfoProvider)),
+              ),
+              // body: SafeArea(child: _body(userInfoProvider)),
+            ),
+          );
+        }
+      },
+    );
   }
 
-  Widget main_container() {
-    return Consumer<UserInfoProvider>(
-        builder: (BuildContext context, userInfoProvider, Widget? child) {
-      return SingleChildScrollView(
-          child: Container(
-              decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(20),
-                color: Colors.white,
+  Widget _body(UserInfoProvider userInfoProvider) {
+    return SingleChildScrollView(
+        child: Container(
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(20),
+              color: Colors.white,
+            ),
+            width: MediaQuery.of(context).size.width * 1,
+            padding: const EdgeInsets.all(0), // Appropriate padding
+            child: Column(children: [
+              WgFormInputCell(
+                title: 'ID No.',
+                text: userInfoProvider.idNo,
+                hintText: 'plz input your ID No.',
+                focusNode: _node1,
+                showRedStar: true,
+                keyboardType: TextInputType.number,
+                inputCallBack: (value) => {print("hahdhhd----")},
+                inputCompletionCallBack: (value, isSubmitted) {
+                  userInfoProvider.setIdNo(value);
+                },
               ),
-              width: MediaQuery.of(context).size.width * 1,
-              padding: const EdgeInsets.all(0), // Appropriate padding
-              child: Column(children: [
-                const SizedBox(height: 10),
-                InputWidget(
-                  label: "ID NO",
-                  initialValue: userInfoProvider.idNo,
-                  onChanged: (value) => userInfoProvider.setIdNo(value),
-                  context: context,
-                ), // Ensure these widgets do not have a fixed height that could cause overflow
-                const SizedBox(height: 10),
+              WgFormInputCell(
+                title: 'First Name',
+                text: userInfoProvider.userInfo?.firstName ?? '',
+                hintText: 'plz input your first name',
+                showRedStar: true,
+                focusNode: _node2,
+                keyboardType: TextInputType.text,
+                inputCallBack: (value) => {print("hahdhhd----")},
+                inputCompletionCallBack: (value, isSubmitted) {
+                  userInfoProvider.setFirstName(value);
+                },
+              ),
+              WgFormInputCell(
+                title: 'Last Name',
+                text: userInfoProvider.lastName,
+                hintText: 'plz input your last name',
+                showRedStar: true,
+                keyboardType: TextInputType.text,
+                inputCallBack: (value) => {print("hahdhhd----")},
+                inputCompletionCallBack: (value, isSubmitted) {
+                  userInfoProvider.setLastName(value);
+                },
+              ),
+              WgFormInputCell(
+                title: 'middle Name',
+                text: userInfoProvider.middleName,
+                hintText: 'plz input your Middle name',
+                showRedStar: true,
+                keyboardType: TextInputType.text,
+                // inputCallBack: (value) => {print("hgogogog----")},
+                inputCompletionCallBack: (value, isSubmitted) {
+                  print('===>$value');
+                  userInfoProvider.setMiddleName(value);
+                },
+              ),
 
-                InputWidget(
-                  label: "First Name1",
-                  initialValue: userInfoProvider.firstName,
-                  onChanged: (value) => userInfoProvider.setFirstName(value),
-                  context: context,
+              WgFormSelectCell(
+                title: 'gender',
+                text: userInfoProvider.gender,
+                hintText: 'plz select your gender',
+                // textAlign: TextAlign.right,
+                showRedStar: true,
+                clickCallBack: () async {
+                  List<CommonListOption> genderOptions =
+                      await userInfoProvider.genderOptionsFuture ?? [];
+                  WgPickerTool.showStringPicker(context,
+                      data: genderOptions, title: '请选择类型', labelKey: 'value',
+                      clickCallBack: (selectValue, selectIndex) {
+                    CommonListOption selectedGenderOption =
+                        selectValue as CommonListOption;
+                    userInfoProvider.setGender(selectedGenderOption.id ?? '',
+                        selectedGenderOption.value);
+                    if (kDebugMode) {
+                      print('gender selected:$selectValue,$selectIndex');
+                    }
+                  });
+                },
+              ),
+              WgFormSelectCell(
+                title: 'Marital Status',
+                text: userInfoProvider.maritalStatus,
+                showRedStar: true,
+                hintText: 'plz select your marital status',
+                // textAlign: TextAlign.right,
+                clickCallBack: () async {
+                  List<CommonListOption> maritalStatusOptions =
+                      await userInfoProvider.maritalStatusOptionsFuture ?? [];
+                  // ignore: use_build_context_synchronously
+                  WgPickerTool.showStringPicker(context,
+                      data: maritalStatusOptions,
+                      title: '请选择类型',
+                      labelKey: 'value',
+                      clickCallBack: (selectValue, selectIndex) {
+                    CommonListOption selectedGenderOption =
+                        selectValue as CommonListOption;
+                    userInfoProvider.setMaritalStatus(
+                        selectedGenderOption.id ?? '',
+                        selectedGenderOption.value);
+                    if (kDebugMode) {
+                      print('gender selected:$selectValue,$selectIndex');
+                    }
+                  });
+                },
+              ),
+              // const SizedBox(height: 10),
+              // imageContainer(),
+
+              imageContainer(),
+              const Gap(10),
+              SizedBox(
+                width: MediaQuery.of(context).size.width,
+                child: SelectInputWithBottom(
+                  labelText: 'Educational Degress',
+                  currentValue: userInfoProvider.educationDegree,
+                  onTap: () => CommonUtils.showCommonListOptionBottomSheet(
+                      context,
+                      'Please Education Degress',
+                      userInfoProvider.edutionDegreeOptionsFuture!,
+                      (String id, String value) {
+                    userInfoProvider.setEducationDegree(id, value);
+                  }, align: Alignment.center),
+                  sizePadding: paddingNum,
                 ),
-                // const SizedBox(height: 10),
-                // imageContainer(),
-                const Gap(10),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    SizedBox(
-                      width: (MediaQuery.of(context).size.width / 2),
-                      child: SelectInputWithBottom(
-                        labelText: 'Gender',
-                        currentValue: userInfoProvider.gender,
-                        onTap: () =>
-                            CommonUtils.showCommonListOptionBottomSheet(
-                                context,
-                                'Please Choose Gender',
-                                userInfoProvider.genderOptionsFuture!,
-                                (String id, String value) {
-                          userInfoProvider.setGender(id, value);
-                        }, align: Alignment.center),
-                        sizePadding: paddingNum,
-                      ),
-                    ),
-                    SizedBox(
-                      width: (MediaQuery.of(context).size.width / 2),
-                      child: SelectInputWithBottom(
-                        labelText: 'Marital Status',
-                        currentValue: userInfoProvider.maritalStatus,
-                        onTap: () =>
-                            CommonUtils.showCommonListOptionBottomSheet(
-                                context,
-                                'Please Choose Marital Status',
-                                userInfoProvider.maritalStatusOptionsFuture!,
-                                (String id, String value) {
-                          userInfoProvider.setMaritalStatus(id, value);
-                        }, align: Alignment.center),
-                        sizePadding: paddingNum,
-                      ),
-                    ),
-                  ],
+              ),
+              const Gap(10),
+              SizedBox(
+                width: MediaQuery.of(context).size.width,
+                child: SelectInputWithBottom(
+                  labelText: 'Birthday',
+                  currentValue: userInfoProvider.birthday,
+                  onTap: () => {
+                    CommonUtils.showDatePicker(context, (date) {
+                      String confirmedBirthday =
+                          DateFormat('yyyy-MM-dd').format(date);
+                      print(">>>>$confirmedBirthday");
+                      userInfoProvider.setBirthday(confirmedBirthday);
+                    })
+                  },
+                  sizePadding: paddingNum,
                 ),
-                const Gap(10),
-                imageContainer(),
-                const Gap(10),
-                SizedBox(
-                  width: MediaQuery.of(context).size.width,
-                  child: SelectInputWithBottom(
-                    labelText: 'Educational Degress',
-                    currentValue: userInfoProvider.educationDegree,
-                    onTap: () => CommonUtils.showCommonListOptionBottomSheet(
-                        context,
-                        'Please Education Degress',
-                        userInfoProvider.edutionDegreeOptionsFuture!,
-                        (String id, String value) {
-                      userInfoProvider.setEducationDegree(id, value);
-                    }, align: Alignment.center),
-                    sizePadding: paddingNum,
-                  ),
-                ),
-                const Gap(10),
-                SizedBox(
-                  width: MediaQuery.of(context).size.width,
-                  child: SelectInputWithBottom(
-                    labelText: 'Birthday',
-                    currentValue: userInfoProvider.birthday,
-                    onTap: () => {
-                      CommonUtils.showDatePicker(context, (date) {
-                        String confirmedBirthday =
-                            DateFormat('yyyy-MM-dd').format(date);
-                        print(">>>>$confirmedBirthday");
-                        userInfoProvider.setBirthday(confirmedBirthday);
-                      })
-                    },
-                    sizePadding: paddingNum,
-                  ),
-                ),
-                const Gap(10),
-                maritalStatus(),
-                const Gap(10),
-                _handleAddressSelect01(),
-                const Gap(10),
-              ])));
-    });
+              ),
+              const Gap(10),
+              maritalStatus(),
+              const Gap(10),
+              _handleAddressSelect01(),
+              const Gap(10),
+              submitButton()
+            ])));
   }
 
   Padding maritalStatus() {

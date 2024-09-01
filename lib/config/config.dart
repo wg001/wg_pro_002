@@ -1,3 +1,5 @@
+import 'package:flutter/cupertino.dart';
+
 class Config {
   static bool? DEBUG = true;
 
@@ -21,10 +23,6 @@ class Config {
   static const API_VERSION_KEY = 'api-version';
   static const APP_INSTALLMENT = 'intallment';
 
-
-
-
-
   String appName = "Prima Loan";
   String clientVersion = "1.9.9";
   String apiVersion = "1.5";
@@ -34,6 +32,8 @@ class Config {
   }
 
   static final Config _singleton = Config._internal();
+
+  static GlobalKey<NavigatorState> navigatorKey = GlobalKey();
 
   factory Config() {
     return _singleton;

@@ -102,13 +102,13 @@ class _Strategies {
 }
 
 /// 定义策略类
-class JhValidate extends _Strategies {
+class WgValidate extends _Strategies {
   var rules;
   var params;
 
   List<Function> validateList = [];
 
-  JhValidate(this.rules, this.params) {
+  WgValidate(this.rules, this.params) {
     addRule(rules);
   }
 

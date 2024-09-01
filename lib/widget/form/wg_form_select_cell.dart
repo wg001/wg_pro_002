@@ -18,8 +18,8 @@ const double _hintTextFontSize = 15.0;
 
 typedef _ClickCallBack = void Function();
 
-class JhFormSelectCell extends StatefulWidget {
-  const JhFormSelectCell({
+class WgFormSelectCell extends StatefulWidget {
+  const WgFormSelectCell({
     Key? key,
     this.title = '',
     this.text = '',
@@ -65,10 +65,10 @@ class JhFormSelectCell extends StatefulWidget {
   final Color? bgColor; // 背景颜色，默认白色
 
   @override
-  _JhFormSelectCellState createState() => _JhFormSelectCellState();
+  _WgFormSelectCellState createState() => _WgFormSelectCellState();
 }
 
-class _JhFormSelectCellState extends State<JhFormSelectCell> {
+class _WgFormSelectCellState extends State<WgFormSelectCell> {
   bool _hiddenArrow = false;
 
   @override
@@ -154,7 +154,7 @@ class _JhFormSelectCellState extends State<JhFormSelectCell> {
                 ),
               ),
               Expanded(
-                child: JhTextField(
+                child: WgTextField(
                   text: widget.text,
                   hintText: widget.hintText,
                   labelText: widget.labelText,

@@ -24,8 +24,8 @@ typedef _InputCallBack = void Function(String value);
 typedef _InputCompletionCallBack = void Function(
     String value, bool isSubmitted);
 
-class JhTextField extends StatefulWidget {
-  const JhTextField({
+class WgTextField extends StatefulWidget {
+  const WgTextField({
     Key? key,
     this.text = '',
     this.hintText = '请输入',
@@ -79,10 +79,10 @@ class JhTextField extends StatefulWidget {
   final TextInputAction? textInputAction; // 键盘右下角按钮类型
 
   @override
-  _JhTextFieldState createState() => _JhTextFieldState();
+  _WgTextFieldState createState() => _WgTextFieldState();
 }
 
-class _JhTextFieldState extends State<JhTextField> {
+class _WgTextFieldState extends State<WgTextField> {
   TextEditingController? _textController;
   FocusNode? _focusNode;
   bool _isFocused = false;
@@ -116,7 +116,7 @@ class _JhTextFieldState extends State<JhTextField> {
   }
 
   @override
-  void didUpdateWidget(covariant JhTextField oldWidget) {
+  void didUpdateWidget(covariant WgTextField oldWidget) {
     // TODO: implement didUpdateWidget
     super.didUpdateWidget(oldWidget);
 

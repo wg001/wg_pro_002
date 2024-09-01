@@ -1,14 +1,12 @@
 import 'dart:convert';
 
 import 'package:flutter/foundation.dart';
-import 'package:flutter/material.dart';
 import 'package:wg_pro_002/app/model/AddressSelect.dart';
 import 'package:wg_pro_002/app/model/UserInfo.dart';
 import 'package:wg_pro_002/dao/address_dao.dart';
 import 'package:wg_pro_002/dao/dao_result.dart';
 import 'package:wg_pro_002/dao/user_dao.dart';
 import 'package:wg_pro_002/utils/camera_utils.dart';
-import 'package:wg_pro_002/utils/image_utils.dart';
 
 class UserInfoProvider extends ChangeNotifier {
   final String idCardPicType = "1";
@@ -210,7 +208,10 @@ class UserInfoProvider extends ChangeNotifier {
   }
 
   Future<void> loadUserData() async {
-    if (_isDataLoaded) return; // 如果数据已加载，直接返回
+    // if (_isDataLoaded) {
+    //   print('hahahah');
+    //   return;
+    // } // 如果数据已加载，直接返回
     _isLoading = true;
     notifyListeners();
 

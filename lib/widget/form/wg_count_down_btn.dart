@@ -16,8 +16,8 @@ const double _fontSize = 13.0; // 文字大小
 const double _borderWidth = 0.8; // 边框宽度
 const double _borderRadius = 1.0; // 边框圆角
 
-class JhCountDownBtn extends StatefulWidget {
-  const JhCountDownBtn({
+class WgCountDownBtn extends StatefulWidget {
+  const WgCountDownBtn({
     Key? key,
     this.getVCode,
     this.getCodeText = _normalText,
@@ -41,10 +41,10 @@ class JhCountDownBtn extends StatefulWidget {
   final bool showBorder;
 
   @override
-  State<JhCountDownBtn> createState() => _JhCountDownBtnState();
+  State<WgCountDownBtn> createState() => _WgCountDownBtnState();
 }
 
-class _JhCountDownBtnState extends State<JhCountDownBtn> {
+class _WgCountDownBtnState extends State<WgCountDownBtn> {
   Timer? _countDownTimer;
   String _btnStr = _normalText;
   int _countDownNum = _normalTime;

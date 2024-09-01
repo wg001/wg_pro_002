@@ -22,8 +22,8 @@ const double _textFontSize = 15.0;
 
 typedef _ClickCallBack = void Function();
 
-class JhSetCell extends StatefulWidget {
-  const JhSetCell({
+class WgSetCell extends StatefulWidget {
+  const WgSetCell({
     Key? key,
     this.title = '',
     this.leftImgPath,
@@ -63,10 +63,10 @@ class JhSetCell extends StatefulWidget {
   final TextAlign textAlign; // 默认靠右
 
   @override
-  _JhSetCellState createState() => _JhSetCellState();
+  _WgSetCellState createState() => _WgSetCellState();
 }
 
-class _JhSetCellState extends State<JhSetCell> {
+class _WgSetCellState extends State<WgSetCell> {
   bool _hiddenArrow = false;
 
   @override
@@ -137,7 +137,7 @@ class _JhSetCellState extends State<JhSetCell> {
                     child: Text(widget.title, style: titleStyle)),
               ),
               Expanded(
-                child: JhTextField(
+                child: WgTextField(
                   text: widget.text,
                   hintText: '',
                   enabled: false,

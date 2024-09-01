@@ -1,6 +1,4 @@
-///  jh_picker_tool.dart
 ///
-///  Created by iotjin on 2020/02/17.
 ///  description:  底部选择器 包含日期，单列、多列文本
 
 // ignore_for_file: constant_identifier_names, library_private_types_in_public_api
@@ -45,7 +43,7 @@ enum PickerType {
   date,
 }
 
-class JhPickerTool {
+class WgPickerTool {
   static bool _isShowPicker = false;
 
   /// 单列

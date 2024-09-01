@@ -22,8 +22,8 @@ typedef _InputCallBack = void Function(String value);
 typedef _InputCompletionCallBack = void Function(
     String value, bool isSubmitted);
 
-class JhFormInputCell extends StatefulWidget {
-  const JhFormInputCell({
+class WgFormInputCell extends StatefulWidget {
+  const WgFormInputCell({
     Key? key,
     this.title = '',
     this.text = '',
@@ -89,10 +89,10 @@ class JhFormInputCell extends StatefulWidget {
   final Color? bgColor; // 背景颜色，默认白色
 
   @override
-  State<JhFormInputCell> createState() => _JhFormInputCellState();
+  State<WgFormInputCell> createState() => _WgFormInputCellState();
 }
 
-class _JhFormInputCellState extends State<JhFormInputCell> {
+class _WgFormInputCellState extends State<WgFormInputCell> {
   @override
   Widget build(BuildContext context) {
     return _body();
@@ -165,7 +165,7 @@ class _JhFormInputCellState extends State<JhFormInputCell> {
               ),
             ),
             Expanded(
-              child: JhTextField(
+              child: WgTextField(
                 text: widget.text,
                 keyboardType: widget.keyboardType,
                 textInputAction: widget.textInputAction,

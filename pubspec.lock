@@ -358,6 +358,14 @@ packages:
     description: flutter
     source: sdk
     version: "0.0.0"
+  flutter_colorpicker:
+    dependency: "direct main"
+    description:
+      name: flutter_colorpicker
+      sha256: "969de5f6f9e2a570ac660fb7b501551451ea2a1ab9e2097e89475f60e07816ea"
+      url: "https://pub.dev"
+    source: hosted
+    version: "1.1.0"
   flutter_datetime_picker_plus:
     dependency: "direct main"
     description:
@@ -433,11 +441,12 @@ packages:
   flutter_picker:
     dependency: "direct main"
     description:
-      name: flutter_picker
-      sha256: "2f94c6eefba8697b07e3cd008b75f06b4ba7053cb26d23ae0fcd5932b7dc75af"
-      url: "https://pub.dev"
-    source: hosted
-    version: "2.1.0"
+      path: "."
+      ref: HEAD
+      resolved-ref: "676e577f252d1afe2f10313feaf262a6169598f5"
+      url: "https://github.com/herowws/flutter_picker.git"
+    source: git
+    version: "2.1.1"
   flutter_plugin_android_lifecycle:
     dependency: transitive
     description:
@@ -1213,6 +1222,38 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "3.0.0"
+  webview_flutter:
+    dependency: "direct main"
+    description:
+      name: webview_flutter
+      sha256: "6869c8786d179f929144b4a1f86e09ac0eddfe475984951ea6c634774c16b522"
+      url: "https://pub.dev"
+    source: hosted
+    version: "4.8.0"
+  webview_flutter_android:
+    dependency: "direct main"
+    description:
+      name: webview_flutter_android
+      sha256: "6e64fcb1c19d92024da8f33503aaeeda35825d77142c01d0ea2aa32edc79fdc8"
+      url: "https://pub.dev"
+    source: hosted
+    version: "3.16.7"
+  webview_flutter_platform_interface:
+    dependency: transitive
+    description:
+      name: webview_flutter_platform_interface
+      sha256: d937581d6e558908d7ae3dc1989c4f87b786891ab47bb9df7de548a151779d8d
+      url: "https://pub.dev"
+    source: hosted
+    version: "2.10.0"
+  webview_flutter_wkwebview:
+    dependency: transitive
+    description:
+      name: webview_flutter_wkwebview
+      sha256: "9c62cc46fa4f2d41e10ab81014c1de470a6c6f26051a2de32111b2ee55287feb"
+      url: "https://pub.dev"
+    source: hosted
+    version: "3.14.0"
   win32:
     dependency: transitive
     description:

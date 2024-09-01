@@ -41,6 +41,7 @@ class LoginPage extends StatelessWidget {
                               TextField(
                                 onChanged: (value) =>
                                     userAuthModel.updatePhone(value),
+                                keyboardType: TextInputType.number,
                                 decoration: const InputDecoration(
                                   hintText: "请输入用户名",
                                   icon: Icon(Icons.person),
@@ -54,6 +55,7 @@ class LoginPage extends StatelessWidget {
                                       onChanged: (value) =>
                                           userAuthModel.updateValidCode(value),
                                       obscureText: true,
+                                      keyboardType: TextInputType.number,
                                       decoration: const InputDecoration(
                                         hintText: "请输入验证码",
                                         icon: Icon(Icons.lock),
