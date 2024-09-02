@@ -1,7 +1,9 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:gap/gap.dart';
 import 'package:url_launcher/url_launcher.dart';
+import 'package:wg_pro_002/widget/form/wg_form_input_cell.dart';
 
 class LoginOrRegister extends StatefulWidget {
   static const String sName = "loginOrRegister";
@@ -90,17 +92,11 @@ class _LoginOrRegisterPageState extends State<LoginOrRegister> {
                               width: 10,
                             ),
                             Expanded(
-                              child: TextField(
-                                decoration: InputDecoration(
-                                  hintText: "enter your phone",
-                                  fillColor: Colors.transparent,
-                                  filled: true,
-                                  border: OutlineInputBorder(
-                                    borderSide: BorderSide.none,
-                                  ),
-                                  contentPadding:
-                                      EdgeInsets.zero, // 调整内部文字的padding
-                                ),
+                              child: WgFormInputCell(
+                                text: "",
+                                hintText: '请输入手机号(11位)',
+                                bgColor: Colors.transparent,
+                                hiddenLine: true,
                                 keyboardType: TextInputType.phone,
                               ),
                             )
