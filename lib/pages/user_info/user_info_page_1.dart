@@ -8,7 +8,12 @@ import 'package:gap/gap.dart';
 import 'package:flutter/foundation.dart' show kDebugMode, kIsWeb;
 import 'package:provider/provider.dart';
 import 'package:wg_pro_002/app/model/UserInfo.dart';
-import 'package:wg_pro_002/pages/user_info/user_info_page_2.dart';
+import 'package:wg_pro_002/common/response_conf.dart';
+import 'package:wg_pro_002/config/colors.dart';
+import 'package:wg_pro_002/config/config.dart';
+import 'package:wg_pro_002/config/strings.dart';
+import 'package:wg_pro_002/widget/common_widget.dart';
+import 'package:wg_pro_002/pages/user_info/user_info_additional.dart';
 import 'package:app_settings/app_settings.dart';
 import 'package:wg_pro_002/provider/camera_provider.dart';
 import 'package:wg_pro_002/provider/user_info_provider.dart';
@@ -17,10 +22,6 @@ import 'package:wg_pro_002/utils/image_utils.dart';
 import 'package:wg_pro_002/widget/address_selector.dart';
 import 'package:wg_pro_002/widget/camera_preview_widget.dart';
 import 'package:wg_pro_002/widget/form/wg_form.dart';
-import 'package:wg_pro_002/widget/form/wg_form_input_cell.dart';
-import 'package:wg_pro_002/widget/form/wg_form_select_cell.dart';
-import 'package:wg_pro_002/widget/input_widget.dart';
-import 'package:intl/intl.dart';
 import 'package:wg_pro_002/widget/wg_picker_tool.dart';
 
 const double paddingNum = 10;
@@ -32,7 +33,7 @@ class UserInfoPage1 extends StatefulWidget {
   _UserInfoPage1State createState() => _UserInfoPage1State();
 }
 
-class _UserInfoPage1State extends State<UserInfoPage1> {
+class _UserInfoPage1State extends State<UserInfoPage1> with CommonWidget {
   final FocusNode _node1 = FocusNode();
   final FocusNode _node2 = FocusNode();
   @override
@@ -54,7 +55,7 @@ class _UserInfoPage1State extends State<UserInfoPage1> {
     } catch (e) {
       // 处理异常
       if (e is PlatformException) {
-        _handleCameraPermissionDenied(e);
+        // _handleCameraPermissionDenied(e);
       } else {
         // 其他类型的错误处理
         print('Error: ${e.toString()}');
@@ -72,195 +73,321 @@ class _UserInfoPage1State extends State<UserInfoPage1> {
 
   @override
   Widget build(BuildContext context) {
+    return GestureDetector(
+        onTap: () => FocusScope.of(context).unfocus(), // 点击空白区域隐藏键盘
+        child: Scaffold(
+          extendBodyBehindAppBar: true,
+          appBar: AppBar(
+            leading: IconButton(
+              icon: const Icon(Icons.arrow_back),
+              onPressed: () {
+                // 在这里添加你的逻辑
+                print("处理一些清理工作或保存数据等");
+                // 然后返回到上一个页面
+                Navigator.pop(context);
+              },
+            ),
+            title: const Text(
+              Strings.IdentityPageTitle,
+              style: TextStyle(color: Colours.white),
+            ),
+            iconTheme:
+                const IconThemeData(color: Colors.white), // 设置图标主题，包括回退按钮颜色
+            backgroundColor: Colors.transparent, // 设置 AppBar 背景透明
+            elevation: 0, // 移除阴影
+          ),
+          body: Stack(
+            children: <Widget>[
+              Positioned.fill(
+                child: Container(
+                  decoration: const BoxDecoration(
+                    gradient: LinearGradient(
+                      begin: Alignment.topCenter,
+                      end: Alignment.bottomCenter,
+                      colors: [
+                        WGColors.ThemeColor, // 从主题颜色开始
+                        Colors.white // 渐变到白色
+                      ],
+                      stops: [0.5, 0.5],
+                    ),
+                  ),
+                ),
+              ),
+              Padding(
+                  padding: const EdgeInsets.only(left: 20, top: 80),
+                  child: Stack(children: <Widget>[
+                    Positioned(
+                        top: 0, // 可以调整这个值来控制文本位置
+                        right: -10,
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.end,
+                          children: <Widget>[
+                            Image.asset(
+                              "${Config.BASE_APP_ASSETS_PATH}app_logo.png",
+                              width: MathUtils.screenWidth * 3 / 5, // 指定图片宽度
+                              height: MathUtils.screenWidth * 3 / 5, // 指定图片高度
+                              fit: BoxFit.cover, // 保证图片覆盖整个容器区域
+                            ),
+                          ],
+                        )),
+                  ])),
+              _body(),
+            ],
+          ),
+        ));
+  }
+
+  Widget _body() {
     return Consumer<UserInfoProvider>(
       builder: (BuildContext context, userInfoProvider, Widget? child) {
-        if (userInfoProvider.isLoading) {
-          // Display loading screen when data is being fetched
-          return Scaffold(
-            appBar: AppBar(title: const Text('Loading...')),
-            body: const Center(child: CircularProgressIndicator()),
-          );
-        } else {
-          // Display user information page when data is loaded
-          return GestureDetector(
-            onTap: () {
-              // Dismiss the keyboard when the user taps anywhere on the screen outside input fields
-              FocusScope.of(context).unfocus();
-            },
-            child: Scaffold(
-              appBar: AppBar(title: const Text('User Information Page 1')),
-              body: KeyboardActions(
-                config: WgKeyboardUtils.getKeyboardConfig(
-                    context, [_node1, _node2]),
-                child: SafeArea(child: _body(userInfoProvider)),
+        return SafeArea(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: <Widget>[
+              _headContainer(),
+              Expanded(
+                child: SingleChildScrollView(
+                  child: Container(
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(20),
+                      color: const Color.fromRGBO(249, 249, 249, 1),
+                    ),
+                    width: MediaQuery.of(context).size.width,
+                    child: Column(
+                      children: [
+                        _infoSection01(context, userInfoProvider),
+                        const Gap(10),
+                        _infoSection02(context, userInfoProvider),
+                        const Gap(10),
+                        // Expanded widget is not suitable here as we are inside a SingleChildScrollView
+                        submitButton(),
+                      ],
+                    ),
+                  ),
+                ),
               ),
-              // body: SafeArea(child: _body(userInfoProvider)),
-            ),
-          );
-        }
+            ],
+          ),
+        );
       },
     );
   }
 
-  Widget _body(UserInfoProvider userInfoProvider) {
-    return SingleChildScrollView(
-        child: Container(
-            decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(20),
-              color: Colors.white,
-            ),
-            width: MediaQuery.of(context).size.width * 1,
-            padding: const EdgeInsets.all(0), // Appropriate padding
-            child: Column(children: [
-              WgFormInputCell(
-                title: 'ID No.',
-                text: userInfoProvider.idNo,
-                hintText: 'plz input your ID No.',
-                focusNode: _node1,
-                showRedStar: true,
-                keyboardType: TextInputType.number,
-                inputCallBack: (value) => {print("hahdhhd----")},
-                inputCompletionCallBack: (value, isSubmitted) {
-                  userInfoProvider.setIdNo(value);
-                },
-              ),
-              WgFormInputCell(
-                title: 'First Name',
-                text: userInfoProvider.userInfo?.firstName ?? '',
-                hintText: 'plz input your first name',
-                showRedStar: true,
-                focusNode: _node2,
-                keyboardType: TextInputType.text,
-                inputCallBack: (value) => {print("hahdhhd----")},
-                inputCompletionCallBack: (value, isSubmitted) {
-                  userInfoProvider.setFirstName(value);
-                },
-              ),
-              WgFormInputCell(
-                title: 'Last Name',
-                text: userInfoProvider.lastName,
-                hintText: 'plz input your last name',
-                showRedStar: true,
-                keyboardType: TextInputType.text,
-                inputCallBack: (value) => {print("hahdhhd----")},
-                inputCompletionCallBack: (value, isSubmitted) {
-                  userInfoProvider.setLastName(value);
-                },
-              ),
-              WgFormInputCell(
-                title: 'middle Name',
-                text: userInfoProvider.middleName,
-                hintText: 'plz input your Middle name',
-                showRedStar: true,
-                keyboardType: TextInputType.text,
-                // inputCallBack: (value) => {print("hgogogog----")},
-                inputCompletionCallBack: (value, isSubmitted) {
-                  print('===>$value');
-                  userInfoProvider.setMiddleName(value);
-                },
-              ),
-
-              WgFormSelectCell(
-                title: 'gender',
-                text: userInfoProvider.gender,
-                hintText: 'plz select your gender',
-                // textAlign: TextAlign.right,
-                showRedStar: true,
-                clickCallBack: () async {
-                  List<CommonListOption> genderOptions =
-                      await userInfoProvider.genderOptionsFuture ?? [];
-                  WgPickerTool.showStringPicker(context,
-                      data: genderOptions, title: '请选择类型', labelKey: 'value',
-                      clickCallBack: (selectValue, selectIndex) {
-                    CommonListOption selectedGenderOption =
-                        selectValue as CommonListOption;
-                    userInfoProvider.setGender(selectedGenderOption.id ?? '',
-                        selectedGenderOption.value);
-                    if (kDebugMode) {
-                      print('gender selected:$selectValue,$selectIndex');
-                    }
-                  });
-                },
-              ),
-              WgFormSelectCell(
-                title: 'Marital Status',
-                text: userInfoProvider.maritalStatus,
-                showRedStar: true,
-                hintText: 'plz select your marital status',
-                // textAlign: TextAlign.right,
-                clickCallBack: () async {
-                  List<CommonListOption> maritalStatusOptions =
-                      await userInfoProvider.maritalStatusOptionsFuture ?? [];
-                  // ignore: use_build_context_synchronously
-                  WgPickerTool.showStringPicker(context,
-                      data: maritalStatusOptions,
-                      title: '请选择类型',
-                      labelKey: 'value',
-                      clickCallBack: (selectValue, selectIndex) {
-                    CommonListOption selectedGenderOption =
-                        selectValue as CommonListOption;
-                    userInfoProvider.setMaritalStatus(
-                        selectedGenderOption.id ?? '',
-                        selectedGenderOption.value);
-                    if (kDebugMode) {
-                      print('gender selected:$selectValue,$selectIndex');
-                    }
-                  });
-                },
-              ),
-              // const SizedBox(height: 10),
-              // imageContainer(),
-
-              imageContainer(),
-              const Gap(10),
-              SizedBox(
-                width: MediaQuery.of(context).size.width,
-                child: SelectInputWithBottom(
-                  labelText: 'Educational Degress',
-                  currentValue: userInfoProvider.educationDegree,
-                  onTap: () => CommonUtils.showCommonListOptionBottomSheet(
-                      context,
-                      'Please Education Degress',
-                      userInfoProvider.edutionDegreeOptionsFuture!,
-                      (String id, String value) {
-                    userInfoProvider.setEducationDegree(id, value);
-                  }, align: Alignment.center),
-                  sizePadding: paddingNum,
-                ),
-              ),
-              const Gap(10),
-              SizedBox(
-                width: MediaQuery.of(context).size.width,
-                child: SelectInputWithBottom(
-                  labelText: 'Birthday',
-                  currentValue: userInfoProvider.birthday,
-                  onTap: () => {
-                    CommonUtils.showDatePicker(context, (date) {
-                      String confirmedBirthday =
-                          DateFormat('yyyy-MM-dd').format(date);
-                      print(">>>>$confirmedBirthday");
-                      userInfoProvider.setBirthday(confirmedBirthday);
-                    })
-                  },
-                  sizePadding: paddingNum,
-                ),
-              ),
-              const Gap(10),
-              maritalStatus(),
-              const Gap(10),
-              _handleAddressSelect01(),
-              const Gap(10),
-              submitButton()
-            ])));
+  Widget _infoSection01(
+      BuildContext context, UserInfoProvider userInfoProvider) {
+    return Container(
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(20),
+        color: const Color.fromRGBO(255, 255, 255, 1),
+      ),
+      padding: const EdgeInsets.only(top: 20, left: 10, right: 10),
+      child: Column(
+        children: <Widget>[
+          getRowTitle("ID NO."),
+          WgFormInputCell(
+            bgColor: TableRowColor,
+            text: "",
+            focusNode: _node1,
+            keyboardType: TextInputType.number,
+            inputCallBack: (value) => {print("hahdhhd----")},
+            inputCompletionCallBack: (value, isSubmitted) {
+              userInfoProvider.setIdNo(value);
+            },
+          ),
+          getRowTitle("姓名."),
+          WgFormInputCell(
+            bgColor: TableRowColor,
+            text: userInfoProvider.userInfo?.firstName ?? '',
+            focusNode: _node2,
+            keyboardType: TextInputType.text,
+            inputCompletionCallBack: (value, isSubmitted) {
+              userInfoProvider.setFirstName(value);
+            },
+          ),
+          getRowTitle(Strings.IdentityImageFront),
+          _imageIdentityFront(context, userInfoProvider, null),
+          getDivider(),
+          getRowTitle(Strings.IdentityImageSelf),
+          _imageIdentityFront(context, userInfoProvider, null),
+          getDivider(),
+        ],
+      ),
+    );
   }
 
-  Padding maritalStatus() {
+  Widget _infoSection02(
+      BuildContext context, UserInfoProvider userInfoProvider) {
+    return Container(
+      decoration: const BoxDecoration(
+        borderRadius: BorderRadius.only(
+          topLeft: Radius.circular(20),
+          topRight: Radius.circular(20),
+        ),
+        color: Color.fromRGBO(255, 255, 255, 1),
+      ),
+      padding: const EdgeInsets.only(top: 20, left: 10, right: 10, bottom: 20),
+      child: Column(
+        children: <Widget>[
+          const Padding(
+              padding: EdgeInsets.only(bottom: 10),
+              child: Row(children: <Widget>[
+                Text(
+                  Strings.IdentityAdditionalInfo,
+                  style: TextStyle(
+                      color: Color.fromRGBO(229, 161, 30, 1), fontSize: 15),
+                )
+              ])),
+          getRowTitle(Strings.IdentityAdditionalInfoEdutionDegree),
+          WgFormSelectCell(
+            bgColor: TableRowColor,
+            text: userInfoProvider.gender,
+            hintText: 'plz select',
+            // textAlign: TextAlign.right,
+            clickCallBack: () async {
+              List<CommonListOption> genderOptions =
+                  await userInfoProvider.genderOptionsFuture ?? [];
+              WgPickerTool.showStringPicker(context,
+                  data: genderOptions,
+                  title: '请选择类型',
+                  labelKey: 'value', clickCallBack: (selectValue, selectIndex) {
+                CommonListOption selectedGenderOption =
+                    selectValue as CommonListOption;
+                userInfoProvider.setGender(
+                    selectedGenderOption.id ?? '', selectedGenderOption.value);
+                if (kDebugMode) {
+                  print('gender selected:$selectValue,$selectIndex');
+                }
+              });
+            },
+          ),
+          getRowTitle(Strings.IdentityAdditionalInfoJob),
+          WgFormSelectCell(
+            bgColor: TableRowColor,
+            text: userInfoProvider.maritalStatus,
+            hintText: 'plz select your marital status',
+            // textAlign: TextAlign.right,
+            clickCallBack: () async {
+              List<CommonListOption> maritalStatusOptions =
+                  await userInfoProvider.maritalStatusOptionsFuture ?? [];
+              // ignore: use_build_context_synchronously
+              WgPickerTool.showStringPicker(context,
+                  data: maritalStatusOptions,
+                  title: '请选择类型',
+                  labelKey: 'value', clickCallBack: (selectValue, selectIndex) {
+                CommonListOption selectedGenderOption =
+                    selectValue as CommonListOption;
+                userInfoProvider.setMaritalStatus(
+                    selectedGenderOption.id ?? '', selectedGenderOption.value);
+                if (kDebugMode) {
+                  print('gender selected:$selectValue,$selectIndex');
+                }
+              });
+            },
+          ),
+          getRowTitle(Strings.IdentityAdditionalInfoAddress),
+          WgFormSelectCell(
+            bgColor: TableRowColor,
+            text: userInfoProvider.maritalStatus,
+            hintText: 'plz select your marital status',
+            // textAlign: TextAlign.right,
+            clickCallBack: () async {
+              List<CommonListOption> maritalStatusOptions =
+                  await userInfoProvider.maritalStatusOptionsFuture ?? [];
+              // ignore: use_build_context_synchronously
+              WgPickerTool.showStringPicker(context,
+                  data: maritalStatusOptions,
+                  title: '请选择类型',
+                  labelKey: 'value', clickCallBack: (selectValue, selectIndex) {
+                CommonListOption selectedGenderOption =
+                    selectValue as CommonListOption;
+                userInfoProvider.setMaritalStatus(
+                    selectedGenderOption.id ?? '', selectedGenderOption.value);
+                if (kDebugMode) {
+                  print('gender selected:$selectValue,$selectIndex');
+                }
+              });
+            },
+          ),
+          getRowTitle(Strings.IdentityAdditionalInfoAddressDetail),
+          WgFormSelectCell(
+            bgColor: TableRowColor,
+            text: userInfoProvider.maritalStatus,
+            hintText: 'plz select your marital status',
+            // textAlign: TextAlign.right,
+            clickCallBack: () async {
+              List<CommonListOption> maritalStatusOptions =
+                  await userInfoProvider.maritalStatusOptionsFuture ?? [];
+              // ignore: use_build_context_synchronously
+              WgPickerTool.showStringPicker(context,
+                  data: maritalStatusOptions,
+                  title: '请选择类型',
+                  labelKey: 'value', clickCallBack: (selectValue, selectIndex) {
+                CommonListOption selectedGenderOption =
+                    selectValue as CommonListOption;
+                userInfoProvider.setMaritalStatus(
+                    selectedGenderOption.id ?? '', selectedGenderOption.value);
+                if (kDebugMode) {
+                  print('gender selected:$selectValue,$selectIndex');
+                }
+              });
+            },
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _headContainer() {
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 10),
-      child: TextField(
-        keyboardType: TextInputType.text,
-        decoration: CommonUtils.getInputDecoration(
-          label: 'Marital Status',
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 10),
+      child: Container(
+        width: double.infinity,
+        height: 90, // 指定一个高度，以便更明显地看到居中效果
+        decoration: const BoxDecoration(
+          gradient: LinearGradient(
+            begin: Alignment.topCenter,
+            end: Alignment.bottomCenter,
+            colors: [
+              Color.fromRGBO(255, 255, 241, 0.9),
+              Color.fromRGBO(234, 218, 200, 0.9),
+            ],
+          ),
+          borderRadius: BorderRadius.all(Radius.circular(10)),
+        ),
+        child: Align(
+          alignment: Alignment.center, // 使用Align确保内容完全居中
+          child: RichText(
+            textAlign: TextAlign.center, // 设置文本居中
+            text: const TextSpan(children: <InlineSpan>[
+              TextSpan(
+                text: Strings.IdentityPageHeadDesc1,
+                style: TextStyle(
+                  // 这里定义文本的样式
+                  color: Color.fromRGBO(51, 51, 51, 0.97), // 文本颜色
+                  fontSize: 17, // 文本大小
+                  fontWeight: FontWeight.bold, // 字体粗细
+                ),
+              ),
+              TextSpan(
+                text: "\n",
+                style: TextStyle(
+                  // 这里定义文本的样式
+                  color: Color.fromRGBO(51, 51, 51, 0.97), // 文本颜色
+                  fontSize: 17, // 文本大小
+                  fontWeight: FontWeight.bold, // 字体粗细
+                ),
+              ),
+              TextSpan(
+                text: Strings.IdentityPageHeadDesc2,
+                style: TextStyle(
+                  // 这里定义文本的样式
+                  color: Color.fromRGBO(51, 51, 51, 0.97), // 文本颜色
+                  fontSize: 13, // 文本大小
+                  fontWeight: FontWeight.normal, // 字体粗细
+                ),
+              ),
+            ]),
+          ),
         ),
       ),
     );
@@ -303,7 +430,7 @@ class _UserInfoPage1State extends State<UserInfoPage1> {
     );
   }
 
-  SizedBox _handleAddressSelect01() {
+  SizedBox handleAddressSelect01() {
     return SizedBox(
       width: double.infinity,
       child: Column(
@@ -336,7 +463,7 @@ class _UserInfoPage1State extends State<UserInfoPage1> {
                             color: Colors.orange.withOpacity(0.5), width: 1.0),
                       ),
                     ),
-                    onTap: () => _showAddressBottomSheet(context), // 点击输入框时调用方法
+                    onTap: () => showAddressBottomSheet(context), // 点击输入框时调用方法
                   ),
                   selector: (_, provider) => provider.fullAddress ?? '',
                 ),
@@ -348,7 +475,7 @@ class _UserInfoPage1State extends State<UserInfoPage1> {
     );
   }
 
-  void _showAddressBottomSheet(BuildContext context) {
+  void showAddressBottomSheet(BuildContext context) {
     // 直接使用 Provider.of 来获取 UserInfoProvider 的实例
     // 我们这里不使用 Selector，因为我们不需要响应任何数据的变化，仅需要调用方法
     var userInfoProvider =
@@ -397,322 +524,137 @@ class _UserInfoPage1State extends State<UserInfoPage1> {
     return null;
   }
 
-  Column background_container(BuildContext context) {
-    return Column(
-      children: [
-        Container(
-          width: double.infinity,
-          height: 240,
-          decoration: const BoxDecoration(
-            color: Colors.orange,
-            borderRadius: BorderRadius.only(
-              bottomLeft: Radius.circular(20),
-              bottomRight: Radius.circular(20),
-            ),
-          ),
-          child: Column(
-            children: [
-              const SizedBox(height: 20),
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 15),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    GestureDetector(
-                      onTap: () {
-                        Navigator.of(context).pop();
-                      },
-                      child: const Icon(Icons.arrow_back, color: Colors.white),
-                    ),
-                    const Text(
-                      'Personal Info',
-                      style: TextStyle(
-                          fontSize: 20,
-                          fontWeight: FontWeight.w600,
-                          color: Colors.white),
-                    ),
-                    const SizedBox()
-                  ],
-                ),
-              ),
-              const Padding(
-                padding: EdgeInsets.only(top: 0), // Remove vertical padding
-                child: SizedBox(
-                  width: 300,
-                  height: 60,
-                ),
-              )
-            ],
-          ),
-        ),
-      ],
-    );
-  }
-
-  // Widget userInfoDetails() {
-  //   return Column(
-  //     children: [
-  //       textField("ID NO.", idController),
-  //       textField("First Name", firstController),
-  //     ],
-  //   );
-  // }
-
-  Padding InputWidget({
-    required String label,
-    required String initialValue,
-    required void Function(String) onChanged,
-    required BuildContext context,
-  }) {
+  Widget _imageIdentityFront(BuildContext context,
+      UserInfoProvider userInfoProvider, ImageProvider? imageProvider) {
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 10),
-      child: TextField(
-        onChanged: onChanged,
-        controller: TextEditingController(text: initialValue)
-          ..selection = TextSelection.collapsed(offset: initialValue.length),
-        keyboardType: TextInputType.text,
-        decoration: CommonUtils.getInputDecoration(
-          label: label,
-        ),
-      ),
-    );
-  }
-
-  Widget imageContainer() {
-    return Consumer<UserInfoProvider>(
-        builder: (BuildContext context, userInfoProvider, Widget? child) {
-      ImageProvider? idcardBackgroundImage;
-      ImageProvider? idcardHandBackgroundImage;
-      if (kIsWeb) {
-        if (userInfoProvider.imageWeb02 != null) {
-          idcardBackgroundImage = MemoryImage(userInfoProvider.imageWeb02!);
-        }
-        if (userInfoProvider.imageWeb01 != null) {
-          idcardBackgroundImage = MemoryImage(userInfoProvider.imageWeb01!);
-        }
-      } else {
-        if (userInfoProvider.imagePath01 != null &&
-            File(userInfoProvider.imagePath01!).existsSync()) {
-          idcardBackgroundImage =
-              FileImage(File(userInfoProvider.imagePath01!));
-        }
-        if (userInfoProvider.imagePath02 != null &&
-            File(userInfoProvider.imagePath02!).existsSync()) {
-          idcardHandBackgroundImage =
-              FileImage(File(userInfoProvider.imagePath02!));
-        }
-      }
-      return Padding(
-        padding: const EdgeInsets.symmetric(horizontal: paddingNum),
+        padding: const EdgeInsets.only(top: 10, bottom: 10),
         child: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
+          children: <Widget>[
             GestureDetector(
               onTap: () async {
-                if (kIsWeb) {
-                  var result = await ImageUtils.pickImageWeb();
-                  if (result['error'] != null) {
-                  } else {
-                    userInfoProvider.setIdCardWebImage(
-                        result['imageData'], result['extension']);
-                  }
-                } else {
-                  print("0000000");
-                  final cameraManager =
-                      Provider.of<CameraProvider>(context, listen: false);
-                  if (!cameraManager.isInitialized) {
-                    await cameraManager.initCamera(CameraLensDirection.back);
-                  }
-                  Navigator.of(context).push(
-                    MaterialPageRoute(
-                      builder: (context) => Scaffold(
-                        appBar: AppBar(title: const Text("Camera Preview")),
-                        body: CameraPreviewWidget(
-                          onImageCaptured: (path) {
-                            Provider.of<UserInfoProvider>(context,
-                                    listen: false)
-                                .setImagePath(0, path);
-                            Navigator.pop(context);
-                          },
+                final cameraManager =
+                    Provider.of<CameraProvider>(context, listen: false);
+                if (!cameraManager.isInitialized) {
+                  await cameraManager.initCamera(CameraLensDirection.back);
+                }
+                CommonUtils.showCustomDialog(
+                  title: "身份证正面照",
+                  context: context,
+                  content: Column(
+                    children: <Widget>[
+                      SizedBox(
+                        width: MathUtils.screenWidth,
+                        height: MathUtils.screenWidth * 0.5,
+                        child: Image.asset(
+                            '${Config.BASE_APP_ASSETS_PATH}id_front_image_demo.png'),
+                      ),
+                      const Gap(10),
+                      const Padding(
+                        padding: EdgeInsets.symmetric(horizontal: 10),
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.start,
+                          children: <Widget>[
+                            Text(
+                              "· 请上传身份证正面照片",
+                              style: TextStyle(
+                                  fontSize: 13,
+                                  color: Color.fromRGBO(153, 153, 153, 1)),
+                            )
+                          ],
                         ),
                       ),
-                    ),
-                  );
-                  // _takePicture(0);
-                }
-              },
-              child: Stack(
-                alignment: Alignment.center,
-                children: [
-                  Container(
-                    width: (MediaQuery.of(context).size.width - 30) / 2,
-                    height: 80,
-                    decoration: BoxDecoration(
-                      color: Colors.grey[300],
-                      image: userInfoProvider.localUploadIdCardSuccess == false
-                          ? DecorationImage(
-                              image: NetworkImage(userInfoProvider.idCardImg!),
-                              fit: BoxFit.contain,
-                              onError: (error, stackTrace) =>
-                                  const Icon(Icons.error),
+                      const Padding(
+                        padding: EdgeInsets.symmetric(horizontal: 10),
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.start,
+                          children: <Widget>[
+                            Text(
+                              "· 身份证上的信息清晰可见",
+                              style: TextStyle(
+                                  fontSize: 13,
+                                  color: Color.fromRGBO(153, 153, 153, 1)),
                             )
-                          : (idcardBackgroundImage != null
-                              ? DecorationImage(
-                                  image: idcardBackgroundImage,
-                                  fit: BoxFit.contain,
-                                )
-                              : null),
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                  ),
-                  if (userInfoProvider.isUploading01)
-                    const CircularProgressIndicator(), // 显示加载指示器
-                ],
-              ),
-            ),
-            GestureDetector(
-              onTap: () async {
-                if (kIsWeb) {
-                  var result = await ImageUtils.pickImageWeb();
-                  if (result['error'] != null) {
-                  } else {
-                    userInfoProvider.setHandIdCardWebImage(
-                        result['imageData'], result['extension']);
-                  }
-                } else {
-                  // _takePicture(1);
-                  print("1111111");
-                  final cameraManager =
-                      Provider.of<CameraProvider>(context, listen: false);
-                  if (!cameraManager.isInitialized) {
-                    await cameraManager.initCamera(CameraLensDirection.back);
-                  }
-                  Navigator.of(context).push(
-                    MaterialPageRoute(
-                      builder: (context) => Scaffold(
-                        appBar: AppBar(title: const Text("Camera Preview")),
-                        body: CameraPreviewWidget(
-                          onImageCaptured: (path) {
-                            Provider.of<UserInfoProvider>(context,
-                                    listen: false)
-                                .setImagePath(1, path);
-                            Navigator.pop(context);
-                          },
+                          ],
                         ),
                       ),
-                    ),
-                  );
-                  // _takePicture(0);
-                }
-              },
-              child: Stack(
-                alignment: Alignment.center,
-                children: [
-                  Container(
-                    width: (MediaQuery.of(context).size.width - 30) / 2,
-                    height: 80,
-                    decoration: BoxDecoration(
-                      color: Colors.grey[300],
-                      image: userInfoProvider.localUploadIdCardSuccess == false
-                          ? DecorationImage(
-                              image:
-                                  NetworkImage(userInfoProvider.idCardHandImg!),
-                              fit: BoxFit.contain,
-                              onError: (error, stackTrace) =>
-                                  const Icon(Icons.error),
-                            )
-                          : (idcardHandBackgroundImage != null
-                              ? DecorationImage(
-                                  image: idcardHandBackgroundImage,
-                                  fit: BoxFit.contain,
-                                )
-                              : null),
-                      borderRadius: BorderRadius.circular(12),
-                    ),
+                      // 更多自定义的Widget
+                    ],
                   ),
-                  if (userInfoProvider.isUploading02)
-                    const CircularProgressIndicator(), // 显示加载指示器
-                ],
+                  onClose: () {
+                    Navigator.of(context).pop();
+                  },
+                  onContinue: () {
+                    Navigator.of(context).push(
+                      MaterialPageRoute(
+                        builder: (context) => Scaffold(
+                          body: CameraPreviewWidget(
+                            onImageCaptured: (path) {
+                              Provider.of<UserInfoProvider>(context,
+                                      listen: false)
+                                  .setImagePath(0, path);
+                              Navigator.pop(context);
+                              Navigator.pop(context);
+                            },
+                            overlayWidget: Padding(
+                                padding: EdgeInsets.zero,
+                                child: SizedBox(
+                                  width: MathUtils
+                                      .screenWidth, // 假设MathUtils.screenWidth是获取屏幕宽度的正确方法
+                                  height: MathUtils.screenHeight,
+                                  child: Row(
+                                    mainAxisAlignment: MainAxisAlignment.center,
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.center,
+                                    children: [
+                                      Transform.translate(
+                                        offset: const Offset(0, -30),
+                                        child: Image.asset(
+                                            '${Config.BASE_APP_ASSETS_PATH}self_camera_cover.png'),
+                                      ),
+                                    ],
+                                  ),
+                                )),
+                            initialCameraDirection: CameraLensDirection.front,
+                            // preferredOrientations: const [
+                            //   DeviceOrientation.landscapeLeft,
+                            //   DeviceOrientation.landscapeRight,
+                            // ],
+                          ),
+                        ),
+                      ),
+                    );
+                  },
+                );
+              },
+              child: Container(
+                width: (MediaQuery.of(context).size.width) / 2,
+                height: 100,
+                decoration: BoxDecoration(
+                  color: const Color.fromRGBO(243, 243, 243, 1),
+                  image: userInfoProvider.localUploadIdCardSuccess
+                      ? DecorationImage(
+                          image: NetworkImage(userInfoProvider.idCardImg!),
+                          fit: BoxFit.contain,
+                          onError: (error, stackTrace) =>
+                              const Icon(Icons.error),
+                        )
+                      : (imageProvider != null
+                          ? DecorationImage(
+                              image: imageProvider,
+                              fit: BoxFit.contain,
+                            )
+                          : const DecorationImage(
+                              image: AssetImage(
+                                  '${Config.BASE_APP_ASSETS_PATH}default_image.png'))),
+                  borderRadius: BorderRadius.circular(12),
+                ),
               ),
-            ),
+              // if (userInfoProvider.isUploading01)
+              //   const CircularProgressIndicator(), // 显示加载指示器
+            )
           ],
-        ),
-      );
-    });
+        ));
   }
-
-  // Widget imageContainer() {
-  //   return Padding(
-  //     padding: const EdgeInsets.symmetric(horizontal: paddingNum),
-  //     child: Row(
-  //       mainAxisAlignment: MainAxisAlignment.spaceBetween,
-  //       children: [
-  //         // 使用三元运算符来选择显示哪个 Widget
-  //         userInfoProvider.idCardImg != null
-  //             ? GestureDetector(
-  //                 onTap: () {
-  //                  imageChooseWidget(
-  //                     userInfoProvider.imageWeb01,
-  //                     () => getImage(true, ImageSource.gallery),
-  //                     "Tap to select image 1",
-  //                     userInfoProvider.isUploading01);
-  //                 },
-  //                 child: Image.network(
-  //                   width: (MediaQuery.of(context).size.width - 30) / 2,
-  //                   height: 80,
-  //                   userInfoProvider.idCardImg!,
-  //                   errorBuilder: (context, error, stackTrace) =>
-  //                       Icon(Icons.error),
-  //                   loadingBuilder: (context, child, loadingProgress) {
-  //                     if (loadingProgress == null) return child;
-  //                     return Center(child: CircularProgressIndicator());
-  //                   },
-  //                 ))
-  //             : (kIsWeb
-  //                 ? imageChooseWidget(
-  //                     userInfoProvider.imageWeb01,
-  //                     () => getImage(true, ImageSource.gallery),
-  //                     "Tap to select image 1",
-  //                     userInfoProvider.isUploading01)
-  //                 : pictureTakeWidget(0, context)),
-
-  //         // 这里假设无论在 Web 还是移动环境都可使用相同逻辑
-  //         kIsWeb
-  //             ? imageChooseWidget(
-  //                 userInfoProvider.imageWeb02,
-  //                 () => getImage(false, ImageSource.gallery),
-  //                 "Tap to select image 2",
-  //                 userInfoProvider.isUploading02)
-  //             : pictureTakeWidget(1, context),
-  //       ],
-  //     ),
-  //   );
-  // }
-
-  // Widget imageChooseWidget(
-  //     Uint8List? imageData, VoidCallback onTap, String placeholder) {
-  //   return Center(
-  //       child: GestureDetector(
-  //     onTap: onTap,
-  //     child: Container(
-  //       width: (MediaQuery.of(context).size.width - 30) / 2,
-  //       height: 80,
-  //       decoration: BoxDecoration(
-  //         color: Colors.grey[300],
-  //         image: imageData != null
-  //             ? DecorationImage(
-  //                 image: MemoryImage(imageData), fit: BoxFit.cover)
-  //             : null,
-  //         border: Border.all(color: Colors.grey[300]!, width: 2),
-  //         borderRadius: BorderRadius.circular(12),
-  //       ),
-  //       child: imageData == null
-  //           ? Icon(Icons.camera_alt, color: Colors.grey[700])
-  //           : null,
-  //     ),
-  //   ));
-  // }
 
   Widget imageChooseWidget(Uint8List? imageData, VoidCallback onTap,
       String placeholder, bool isUploading) {
@@ -803,13 +745,22 @@ class _UserInfoPage1State extends State<UserInfoPage1> {
   }
 
   Widget submitButton() {
-    return ElevatedButton(
-      onPressed: _submitForm,
-      child: const Text('Submit'),
-    );
+    return Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 10),
+        child: Row(mainAxisAlignment: MainAxisAlignment.end, children: <Widget>[
+          ElevatedButton(
+            style:
+                ElevatedButton.styleFrom(backgroundColor: WGColors.ThemeColor),
+            onPressed: submitForm,
+            child: const Icon(
+              Icons.arrow_forward_ios_outlined,
+              color: Colours.white,
+            ),
+          )
+        ]));
   }
 
-  void _handleCameraPermissionDenied(PlatformException e) {
+  void handleCameraPermissionDenied(PlatformException e) {
     if (e.code == 'camera_access_denied') {
       showDialog(
         context: context,
@@ -846,9 +797,9 @@ class _UserInfoPage1State extends State<UserInfoPage1> {
     AppSettings.openAppSettings();
   }
 
-  void _submitForm() {
+  void submitForm() {
     Fluttertoast.showToast(msg: "Form is valid");
-    Navigator.of(context)
-        .push(MaterialPageRoute(builder: (context) => const UserInfoPage2()));
+    Navigator.of(context).push(
+        MaterialPageRoute(builder: (context) => const UserInfoAdditional()));
   }
 }

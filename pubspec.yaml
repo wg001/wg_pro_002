@@ -67,9 +67,10 @@ dependencies:
       url: https://github.com/herowws/flutter_picker.git
   keyboard_actions: ^4.2.0
   flutter_colorpicker: ^1.1.0
-  webview_flutter: ^4.8.0
-  webview_flutter_android: ^3.16.7
   url_launcher: ^6.0.20
+  adjust_sdk: ^5.0.1
+  package_info_plus: ^8.0.2
+  webview_flutter: ^4.8.0
 
 dev_dependencies:
   flutter_test:
@@ -125,4 +126,4 @@ flutter:
   # see https://flutter.dev/custom-fonts/#from-packages
   assets:
     - static/images/
-    - static/file/
+    - static/html/

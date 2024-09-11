@@ -2,6 +2,7 @@
 ///
 ///  Created by iotjin on 2020/07/06.
 ///  description:  颜色 配置
+library;
 
 // ignore_for_file: constant_identifier_names
 
@@ -26,7 +27,7 @@ class WGColors {
 
   // 主题色（导航条背景、提交按钮背景、弹框确认文字、表单图标录入光标）
   // 暗黑模式高亮显示颜色按kThemeColor设置，如tabBar选中文字图标、提交按钮背景色、指示器选中下划线、光标等
-  static const Color ThemeColor = Color(0xFF3BB815);
+  static const Color ThemeColor = Color.fromRGBO(200, 29, 40, 1);
   static const Color ThemeDarkColor = Color(0xFF0A0A0A); // (10, 10, 10)
   static const Color ThemeBlueColor = Color(0xFF4688FA);
   static const Color ThemePurpleColor = Colors.purple;
@@ -161,15 +162,6 @@ class WGColors {
   static const Color wxThemeColor = Color(0xFF3BB815);
   static const Color wxThemeDarkColor = Color(0xFF00BE66);
 
-  // rgb(50, 179, 116)
-  static const Color wxPayColor = Color(0xFF32B374);
-
-  // rgb(0, 174, 91)
-  static const Color wxTextColor = Color(0xFF00AE5B);
-
-  // rgb(255, 139, 34)
-  static const Color wxTextOrangeColor = Color(0xFFFF8B22);
-
   static const Color wxTitleColor = Colors.white;
 
   // 微信背景色 rgb(237,237,237)
@@ -181,7 +173,7 @@ class WGColors {
 }
 
 class Colours {
-  static const Color app_main = Color(0xFF4688FA);
+  static const Color white = Colors.white;
   static const Color dark_app_main = Color(0xFF3F7AE0);
 
   static const Color bg_color = Color(0xfff1f1f1);
@@ -190,11 +182,15 @@ class Colours {
   static const Color material_bg = Color(0xFFFFFFFF);
   static const Color dark_material_bg = Color(0xFF303233);
 
-  static const Color text = Color(0xFF333333);
+  static const Color gray = Color.fromRGBO(153, 153, 153, 1.0);
+
+  static const Color inputBoxGray = Color.fromRGBO(248, 249, 251, 1);
+
+  static const Color text = Color.fromRGBO(51, 51, 51, 1);
   static const Color dark_text = Color(0xFFB8B8B8);
 
   static const Color text_gray = Color(0xFF999999);
-  static const Color dark_text_gray = Color(0xFF666666);
+  static const Color dark_text_gray = Color.fromARGB(255, 43, 33, 33);
 
   static const Color text_gray_c = Color(0xFFcccccc);
   static const Color dark_button_text = Color(0xFFF2F2F2);

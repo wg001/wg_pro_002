@@ -1,12 +1,22 @@
 import 'package:flutter/material.dart';
 import 'package:camera/camera.dart';
+import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
+import 'package:wg_pro_002/config/config.dart';
 import 'package:wg_pro_002/provider/camera_provider.dart'; // 确保路径正确
 
 class CameraPreviewWidget extends StatefulWidget {
   final Function(String) onImageCaptured;
+  final Widget? overlayWidget; // 新增一个参数用于接收遮罩层
+  final List<DeviceOrientation>? preferredOrientations;
+  final CameraLensDirection? initialCameraDirection; //前置，后置摄像头的控制
 
-  const CameraPreviewWidget({super.key, required this.onImageCaptured});
+  const CameraPreviewWidget(
+      {super.key,
+      required this.onImageCaptured,
+      this.overlayWidget,
+      this.preferredOrientations,
+      this.initialCameraDirection});
 
   @override
   _CameraPreviewWidgetState createState() => _CameraPreviewWidgetState();
@@ -21,6 +31,16 @@ class _CameraPreviewWidgetState extends State<CameraPreviewWidget> {
   @override
   void initState() {
     super.initState();
+
+    if (widget.initialCameraDirection != null) {
+      Provider.of<CameraProvider>(context, listen: false)
+          .initCamera(widget.initialCameraDirection!);
+    }
+    SystemChrome.setPreferredOrientations(widget.preferredOrientations ??
+        [
+          DeviceOrientation.portraitUp,
+          DeviceOrientation.portraitDown,
+        ]);
     initializeZoomLevel();
   }
 
@@ -59,7 +79,13 @@ class _CameraPreviewWidgetState extends State<CameraPreviewWidget> {
           },
           child: Stack(
             children: [
-              CameraPreview(cameraManager.cameraController!),
+              // CameraPreview(cameraManager.cameraController!),
+              Positioned.fill(
+                child: CameraPreview(
+                    cameraManager.cameraController!), // 确保摄像头预览填充整个屏幕
+              ),
+              if (widget.overlayWidget != null) widget.overlayWidget!,
+              widget.overlayWidget ?? const SizedBox(), // 使用传入的遮罩层或默认为空的Widget
               _buildCameraControls(context, cameraManager),
             ],
           ),
@@ -74,13 +100,15 @@ class _CameraPreviewWidgetState extends State<CameraPreviewWidget> {
       mainAxisAlignment: MainAxisAlignment.end,
       children: [
         Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 10),
+          padding: const EdgeInsets.only(left: 20, right: 20, bottom: 50),
           child: Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               IconButton(
-                icon: const Icon(Icons.flip_camera_ios, color: Colors.white),
-                onPressed: () => cameraManager.toggleCamera(),
+                icon: const Icon(Icons.close, color: Colors.white),
+                onPressed: () {
+                  Navigator.of(context).pop();
+                },
               ),
               FloatingActionButton(
                 onPressed: () async {
@@ -88,29 +116,31 @@ class _CameraPreviewWidgetState extends State<CameraPreviewWidget> {
                       await cameraManager.cameraController!.takePicture();
                   widget.onImageCaptured(photo.path);
                 },
-                backgroundColor: Colors.red,
-                child: const Icon(Icons.camera),
+                backgroundColor: Colors.transparent,
+                child: Image.asset(
+                    '${Config.BASE_APP_ASSETS_PATH}take_picture.png'),
+              ),
+              IconButton(
+                //camera_flip
+                icon: Image.asset(
+                    '${Config.BASE_APP_ASSETS_PATH}camera_flip.png'),
+                onPressed: () => cameraManager.toggleCamera(),
               ),
             ],
           ),
         ),
-        Padding(
-          padding: const EdgeInsets.all(10.0),
-          child: Slider(
-            value: _scale,
-            min: _minZoom,
-            max: _maxZoom,
-            onChanged: (value) {
-              setState(() {
-                _scale = value;
-              });
-              cameraManager.setZoom(_scale);
-            },
-            activeColor: Colors.white,
-            inactiveColor: Colors.white30,
-          ),
-        ),
       ],
     );
+  }
+
+  @override
+  void dispose() {
+    SystemChrome.setPreferredOrientations([
+      DeviceOrientation.portraitUp,
+      DeviceOrientation.portraitDown,
+      DeviceOrientation.landscapeLeft,
+      DeviceOrientation.landscapeRight,
+    ]);
+    super.dispose();
   }
 }

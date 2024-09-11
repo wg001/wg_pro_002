@@ -2,6 +2,7 @@
 ///
 ///  Created by iotjin on 2020/04/06.
 ///  description:  输入行样式，左侧title,右侧输入框，可加自定义widget
+library;
 
 // ignore_for_file: library_private_types_in_public_api
 
@@ -24,14 +25,14 @@ typedef _InputCompletionCallBack = void Function(
 
 class WgFormInputCell extends StatefulWidget {
   const WgFormInputCell({
-    Key? key,
+    super.key,
     this.title = '',
     this.text = '',
     this.labelText = '',
     this.errorText = '',
     this.keyboardType = TextInputType.text,
     this.textInputAction = TextInputAction.done,
-    this.hintText = '请输入',
+    this.hintText = 'please enter',
     this.focusNode,
     this.showRedStar = false,
     this.leftWidget,
@@ -55,7 +56,7 @@ class WgFormInputCell extends StatefulWidget {
     this.hiddenLine = false,
     this.topAlign = false,
     this.bgColor,
-  }) : super(key: key);
+  });
 
   final String title;
   final String? text;
@@ -131,7 +132,7 @@ class _WgFormInputCellState extends State<WgFormInputCell> {
           minWidth: double.infinity, // 宽度尽可能大
           minHeight: _cellHeight, // 最小高度
         ),
-        padding: const EdgeInsets.fromLTRB(5, 0, 10, 0),
+        padding: const EdgeInsets.fromLTRB(0, 0, 10, 0),
         // decoration: BoxDecoration(
         //   border: widget.hiddenLine == true ? null : Border(bottom: Divider.createBorderSide(context, width: 0.8)),
         // ),

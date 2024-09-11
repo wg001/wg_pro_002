@@ -1,13 +1,13 @@
 import 'dart:async';
 import 'dart:io';
 
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:fluttertoast/fluttertoast.dart';
+import 'package:gap/gap.dart';
 import 'package:path_provider/path_provider.dart';
-import 'package:wg_pro_002/app/model/UserInfo.dart';
+import 'package:wg_pro_002/common/response_conf.dart';
+import 'package:wg_pro_002/config/colors.dart';
 import 'package:wg_pro_002/utils/navigator_utils.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:flutter_datetime_picker_plus/flutter_datetime_picker_plus.dart'
@@ -28,7 +28,7 @@ class CommonUtils {
 
   static const double DAYS_LIMIT = 30 * HOURS_LIMIT;
 
-  static final bool isWeb = kIsWeb;
+  static const bool isWeb = kIsWeb;
   static final bool isIOS = !isWeb && Platform.isIOS;
   static final bool isAndroid = !isWeb && Platform.isAndroid;
 
@@ -43,32 +43,6 @@ class CommonUtils {
     return date.toString().substring(0, 10);
   }
 
-  static InputDecoration getInputDecoration({
-    required String label,
-    String? hintText,
-    TextStyle? labelStyle,
-  }) {
-    return InputDecoration(
-      labelText: label,
-      hintText: hintText,
-      labelStyle:
-          labelStyle ?? const TextStyle(fontSize: 17, color: Colors.grey),
-      contentPadding: const EdgeInsets.symmetric(horizontal: 10, vertical: 10),
-      border: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(10),
-      ),
-      enabledBorder: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(10),
-        borderSide: BorderSide(color: Colors.grey.withOpacity(0.5), width: 1.0),
-      ),
-      focusedBorder: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(10),
-        borderSide:
-            BorderSide(color: Colors.orange.withOpacity(0.5), width: 1.0),
-      ),
-    );
-  }
-
   static getApplicationDocumentsPath() async {
     Directory appDir;
     if (Platform.isIOS) {
@@ -80,22 +54,6 @@ class CommonUtils {
     Directory appPath = Directory(appDocPath);
     await appPath.create(recursive: true);
     return appPath.path;
-  }
-
-  static String? removeTextTag(String? description) {
-    if (description != null) {
-      String reg = "<g-emoji.*?>.+?</g-emoji>";
-      RegExp tag = RegExp(reg);
-      Iterable<Match> tags = tag.allMatches(description);
-      for (Match m in tags) {
-        String match = m
-            .group(0)!
-            .replaceAll(RegExp("<g-emoji.*?>"), "")
-            .replaceAll(RegExp("</g-emoji>"), "");
-        description = description!.replaceAll(RegExp(m.group(0)!), match);
-      }
-    }
-    return description;
   }
 
   /*static saveImage(String url) async {
@@ -115,80 +73,6 @@ class CommonUtils {
 
     return _findPath(url);
   }*/
-
-  static splitFileNameByPath(String path) {
-    return path.substring(path.lastIndexOf("/"));
-  }
-
-  static getFullName(String? repository_url) {
-    if (repository_url != null &&
-        repository_url.substring(repository_url.length - 1) == "/") {
-      repository_url = repository_url.substring(0, repository_url.length - 1);
-    }
-    String fullName = '';
-    if (repository_url != null) {
-      StringList splicurl = repository_url.split("/");
-      if (splicurl.length > 2) {
-        fullName =
-            "${splicurl[splicurl.length - 2]}/${splicurl[splicurl.length - 1]}";
-      }
-    }
-    return fullName;
-  }
-
-  static getThemeData(Color color) {
-    return ThemeData(
-      ///用来适配 Theme.of(context).primaryColorLight 和 primaryColorDark 的颜色变化，不设置可能会是默认蓝色
-      primarySwatch: color as MaterialColor,
-
-      /// Card 在 M3 下，会有 apply Overlay
-
-      colorScheme: ColorScheme.fromSeed(
-        seedColor: color,
-        primary: color,
-
-        brightness: Brightness.light,
-
-        ///影响 card 的表色，因为 M3 下是  applySurfaceTint ，在 Material 里
-        surfaceTint: Colors.transparent,
-      ),
-
-      /// 受到 iconThemeData.isConcrete 的印象，需要全参数才不会进入 fallback
-      iconTheme: const IconThemeData(
-        size: 24.0,
-        fill: 0.0,
-        weight: 400.0,
-        grade: 0.0,
-        opticalSize: 48.0,
-        color: Colors.white,
-        opacity: 0.8,
-      ),
-
-      ///修改 FloatingActionButton的默认主题行为
-      floatingActionButtonTheme: FloatingActionButtonThemeData(
-          foregroundColor: Colors.white,
-          backgroundColor: color,
-          shape: const CircleBorder()),
-      appBarTheme: AppBarTheme(
-        iconTheme: const IconThemeData(
-          color: Colors.white,
-          size: 24.0,
-        ),
-        backgroundColor: color,
-        titleTextStyle: Typography.dense2021.titleLarge,
-        systemOverlayStyle: SystemUiOverlayStyle.light,
-      ),
-
-      // 如果需要去除对应的水波纹效果
-      // splashFactory: NoSplash.splashFactory,
-      // textButtonTheme: TextButtonThemeData(
-      //   style: ButtonStyle(splashFactory: NoSplash.splashFactory),
-      // ),
-      // elevatedButtonTheme: ElevatedButtonThemeData(
-      //   style: ButtonStyle(splashFactory: NoSplash.splashFactory),
-      // ),
-    );
-  }
 
   static showToast(String message) {
     Fluttertoast.showToast(
@@ -220,126 +104,13 @@ class CommonUtils {
                       children: <Widget>[
                         const SpinKitCubeGrid(color: Colors.white),
                         Container(height: 10.0),
-                        Text("gogogog"),
+                        const Text("gogogog"),
                       ],
                     ),
                   ),
                 ),
               ));
         });
-  }
-
-  static showCommonListOptionBottomSheet(
-      BuildContext context,
-      String remindTip,
-      Future<List<CommonListOption>> listData,
-      Function(String, String) onUpdateSelectedValue,
-      {Alignment align = Alignment.centerLeft}) {
-    if (kDebugMode) {
-      print('_showCommonListOptionBottomSheet:$listData');
-    }
-
-    // Temporarily store the selected option
-    CommonListOption? tempSelectedOption;
-
-    showModalBottomSheet(
-      isScrollControlled: true,
-      context: context,
-      builder: (BuildContext context) {
-        return StatefulBuilder(
-          builder: (BuildContext context, StateSetter setState) {
-            return Container(
-              height: 320, // Adjusted height for the title bar
-              padding: EdgeInsets.only(
-                  bottom: MediaQuery.of(context).viewInsets.bottom),
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: <Widget>[
-                  // Title bar with Cancel, Title, and Confirm buttons
-                  Container(
-                    decoration: BoxDecoration(color: Colors.white, boxShadow: [
-                      BoxShadow(
-                        blurRadius: 5,
-                        color: Colors.black26,
-                        spreadRadius: 5,
-                      )
-                    ]),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        CupertinoButton(
-                          child: Text('Cancel'),
-                          onPressed: () => Navigator.pop(context),
-                        ),
-                        Expanded(
-                          child: Text(remindTip,
-                              textAlign: TextAlign.center,
-                              style: TextStyle(fontSize: 16)),
-                        ),
-                        CupertinoButton(
-                          child: Text('Confirm'),
-                          onPressed: () {
-                            if (tempSelectedOption != null) {
-                              onUpdateSelectedValue(
-                                  tempSelectedOption!.id ?? '',
-                                  tempSelectedOption!.value ?? '');
-                            }
-                            Navigator.pop(context);
-                          },
-                        ),
-                      ],
-                    ),
-                  ),
-                  Expanded(
-                    child: FutureBuilder<List<CommonListOption>>(
-                      future: listData,
-                      builder: (context, snapshot) {
-                        if (snapshot.connectionState ==
-                            ConnectionState.waiting) {
-                          return Center(child: CupertinoActivityIndicator());
-                        }
-                        if (snapshot.hasError) {
-                          return Text('Error: ${snapshot.error}');
-                        }
-                        if (!snapshot.hasData || snapshot.data!.isEmpty) {
-                          return const Center(child: Text('No Data Available'));
-                        }
-
-                        // 确保当数据加载后设置默认选项
-                        if (tempSelectedOption == null &&
-                            snapshot.data!.isNotEmpty) {
-                          tempSelectedOption = snapshot.data!.first;
-                        }
-
-                        return CupertinoPicker(
-                          itemExtent: 36.0,
-                          onSelectedItemChanged: (int index) {
-                            tempSelectedOption = snapshot.data![index];
-                          },
-                          magnification: 1.2,
-                          useMagnifier: true,
-                          backgroundColor: Colors.white,
-                          children: snapshot.data!
-                              .map((option) => Center(
-                                    child: Padding(
-                                      padding: const EdgeInsets.symmetric(
-                                          vertical: 8.0),
-                                      child: Text(option.value ?? "",
-                                          style: const TextStyle(fontSize: 16)),
-                                    ),
-                                  ))
-                              .toList(),
-                        );
-                      },
-                    ),
-                  ),
-                ],
-              ),
-            );
-          },
-        );
-      },
-    );
   }
 
   static void showDatePicker(
@@ -350,7 +121,7 @@ class CommonUtils {
       context,
       showTitleActions: true,
       minTime: DateTime(1949),
-      maxTime: DateTime.now().add(Duration(days: 365)), // 举例：未来一年内可选
+      maxTime: DateTime.now().add(const Duration(days: 365)), // 举例：未来一年内可选
       theme: const picker.DatePickerTheme(
         itemStyle: TextStyle(
           fontWeight: FontWeight.bold,
@@ -366,6 +137,88 @@ class CommonUtils {
       },
       currentTime: DateTime.now(), // 默认显示当前时间
       locale: picker.LocaleType.en, // 设置本地化
+    );
+  }
+
+  static void showCustomDialog({
+    required String title,
+    required BuildContext context,
+    required Widget content, // 接收一个Widget作为显示内容
+    VoidCallback? onClose, // 关闭按钮的回调
+    VoidCallback? onContinue, // 继续按钮的回调
+  }) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return Dialog(
+          shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(12.0)), // 设置圆角
+          child: Stack(
+            clipBehavior: Clip.none,
+            alignment: Alignment.topCenter,
+            children: <Widget>[
+              Padding(
+                padding: const EdgeInsets.fromLTRB(10, 20, 20, 10),
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  mainAxisSize: MainAxisSize.min,
+                  children: <Widget>[
+                    Text(
+                      title,
+                      style: const TextStyle(
+                          color: Color.fromRGBO(51, 51, 51, 1), fontSize: 16),
+                    ),
+                    const Gap(10),
+                    content, // 使用传入的内容
+                    const Gap(20),
+                    TextButton(
+                      onPressed: () {
+                        if (onContinue != null) {
+                          onContinue();
+                        } else {
+                          Navigator.of(context).pop(); // 如果没有特定的继续操作，关闭对话框
+                        }
+                      },
+                      style: TextButton.styleFrom(
+                        foregroundColor: Colors.white,
+                        backgroundColor: WGColors.ThemeColor,
+                      ),
+                      child: SizedBox(
+                          width: MathUtils.screenWidth * 0.5,
+                          height: 30,
+                          child: const Center(
+                            child: Text(
+                              "继续上传",
+                              style: TextStyle(fontSize: 15),
+                            ),
+                          )),
+                    ),
+                    const Gap(10),
+                  ],
+                ),
+              ),
+              Positioned(
+                right: 5.0,
+                top: 5.0,
+                child: InkResponse(
+                  onTap: () {
+                    if (onClose != null) {
+                      onClose(); // 使用传入的关闭回调
+                    } else {
+                      Navigator.of(context).pop(); // 如果没有特定的关闭操作，关闭对话框
+                    }
+                  },
+                  child: const CircleAvatar(
+                    backgroundColor: Colors.transparent,
+                    child: Icon(Icons.close,
+                        color: Color.fromRGBO(197, 197, 197, 1)),
+                  ),
+                ),
+              ),
+            ],
+          ),
+        );
+      },
     );
   }
 }

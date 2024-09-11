@@ -69,7 +69,6 @@ class UserDao {
 
   static uploadImage(String pictureType, dynamic picture) async {
     Map params = {"picture_type": pictureType, 'picture': picture};
-    dynamic resultData;
     try {
       var res = await httpManager.netFetch(Address.uploadImage(),
           params: json.encode(params));

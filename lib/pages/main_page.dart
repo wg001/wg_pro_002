@@ -4,10 +4,12 @@ import 'package:provider/provider.dart';
 import 'package:wg_pro_002/common/app_colors.dart';
 import 'package:wg_pro_002/common/text_styles.dart';
 import 'package:wg_pro_002/common/font_size.dart';
+import 'package:wg_pro_002/config/colors.dart';
+import 'package:wg_pro_002/config/config.dart';
 import 'package:wg_pro_002/pages/details_page.dart';
 import 'package:wg_pro_002/pages/forget_password_page.dart';
 import 'package:wg_pro_002/pages/home_page.dart';
-import 'package:wg_pro_002/pages/profil_page.dart';
+import 'package:wg_pro_002/pages/mine_page.dart';
 import 'package:wg_pro_002/common/response_conf.dart';
 import 'package:wg_pro_002/provider/navigation_provider.dart';
 
@@ -16,10 +18,8 @@ class MainPage extends StatelessWidget {
 
   MainPage({super.key});
   final _pages = [
-    const HomePage(),
-    const DetailsPage(),
-    const ForgetPasswordPage(),
-    const ProfilPage(),
+    HomePage(),
+    const MinePage(),
   ];
   // int _currentIndex = 0;
   @override
@@ -53,9 +53,9 @@ class MainPage extends StatelessWidget {
           type: BottomNavigationBarType.fixed,
           onTap: (index) => navigationProvider.setCurrentIndex(index),
 
-          showUnselectedLabels: false,
+          showUnselectedLabels: true,
           iconSize: getSize(24),
-          selectedItemColor: Pallete.orangePrimary, //Pallete.orangePrimary,
+          selectedItemColor: WGColors.ThemeColor, //Pallete.orangePrimary,
           selectedLabelStyle: TextStyles.bodySmallMedium
               .copyWith(fontSize: getFontSize(FontSizes.small)),
           unselectedItemColor: Pallete.neutral50,
@@ -65,12 +65,15 @@ class MainPage extends StatelessWidget {
               label: "Home",
             ),
             BottomNavigationBarItem(
-              icon: Icon(Icons.shopping_bag),
-              label: "Cart",
-            ),
-            BottomNavigationBarItem(
-                icon: Icon(CupertinoIcons.chat_bubble), label: "Messenger"),
-            BottomNavigationBarItem(icon: Icon(Icons.people), label: "Profil"),
+                // icon: Image.asset(
+                //     // '${Config.BASE_APP_ASSETS_PATH}me_no_selected.png',
+                //     navigationProvider.currentIndex != 0
+                //         ? '${Config.BASE_APP_ASSETS_PATH}me_no_selected.png'
+                //         : '${Config.BASE_APP_ASSETS_PATH}phone_pause.png',
+                //     width: 24,
+                //     height: 24) // 确保提供正确的路径和尺寸
+                icon: Icon(Icons.person),
+                label: "Me"),
           ],
           elevation: 0,
         ),

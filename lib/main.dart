@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:wg_pro_002/app/app.dart';
+import 'package:wg_pro_002/provider/app_data_provider.dart';
 import 'package:wg_pro_002/provider/camera_provider.dart';
+import 'package:wg_pro_002/provider/guest_provider.dart';
 import 'package:wg_pro_002/provider/home_page_provider.dart';
 import 'package:wg_pro_002/provider/navigation_provider.dart';
 import 'package:wg_pro_002/provider/theme_provider.dart';
@@ -18,8 +20,10 @@ void main() {
         ChangeNotifierProvider(create: (context) => UserInfoProvider()),
         ChangeNotifierProvider(create: (context) => CameraProvider()),
         ChangeNotifierProvider(create: (context) => ThemeProvider()),
+        ChangeNotifierProvider(create: (context) => GuestProvider()),
+        ChangeNotifierProvider(create: (context) => AppDataProvider()),
       ],
-      child: WgGoApp(),
+      child: const WgGoApp(),
     ),
   );
 }

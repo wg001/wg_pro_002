@@ -1,7 +1,11 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import 'package:wg_pro_002/pages/guest/login_or_register.dart';
+import 'package:wg_pro_002/provider/app_data_provider.dart';
+import 'package:wg_pro_002/provider/user_auth_provider.dart';
+import 'package:wg_pro_002/utils/navigator_utils.dart';
 
 /// 欢迎页
 
@@ -16,6 +20,17 @@ class WelcomePage extends StatefulWidget {
 
 class _WelcomePageState extends State<WelcomePage> {
   bool hadInit = false;
+
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      final appDataProvider =
+          Provider.of<AppDataProvider>(context, listen: false);
+      appDataProvider.initAdjust();
+      appDataProvider.fetchAdjustAdid();
+    });
+  }
 
   @override
   void didChangeDependencies() {
@@ -47,9 +62,9 @@ class _WelcomePageState extends State<WelcomePage> {
       //   }
       //   return true;
       // });
-      // NavigatorUtils.goMainPage(context);
-      Navigator.of(context).pushReplacement(
-          MaterialPageRoute(builder: (context) => const LoginOrRegister()));
+      NavigatorUtils.goMainPage(context);
+      // Navigator.of(context).pushReplacement(
+      //     MaterialPageRoute(builder: (context) => const LoginOrRegister()));
     });
   }
 

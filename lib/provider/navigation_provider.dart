@@ -5,8 +5,10 @@ class NavigationProvider with ChangeNotifier {
 
   int get currentIndex => _currentIndex;
 
-  void setCurrentIndex(int index) {
+  void setCurrentIndex(int index, {bool refreshScreen = true}) {
     _currentIndex = index;
-    notifyListeners(); // 通知监听器状态已更改
+    if (refreshScreen) {
+      notifyListeners(); // 通知监听器状态已更改
+    }
   }
 }

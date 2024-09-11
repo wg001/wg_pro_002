@@ -2,6 +2,7 @@
 ///
 ///  Created by iotjin on 2020/04/06.
 ///  description:  选择行样式，左侧title,右侧箭头文字
+library;
 
 // ignore_for_file: library_private_types_in_public_api
 
@@ -20,7 +21,7 @@ typedef _ClickCallBack = void Function();
 
 class WgFormSelectCell extends StatefulWidget {
   const WgFormSelectCell({
-    Key? key,
+    super.key,
     this.title = '',
     this.text = '',
     this.hintText = '请选择',
@@ -41,7 +42,7 @@ class WgFormSelectCell extends StatefulWidget {
     this.hiddenLine = false,
     this.topAlign = false,
     this.bgColor,
-  }) : super(key: key);
+  });
 
   final String title;
   final String? text;
@@ -122,7 +123,7 @@ class _WgFormSelectCellState extends State<WgFormSelectCell> {
             minWidth: double.infinity, // 宽度尽可能大
             minHeight: _cellHeight, // 最小高度为50像素
           ),
-          padding: const EdgeInsets.fromLTRB(5, 0, 10, 0),
+          padding: const EdgeInsets.fromLTRB(0, 0, 10, 0),
           decoration: UnderlineTabIndicator(
             // borderSide: BorderSide(width: _lineHeight, color: widget.hiddenLine== true ?Colors.transparent:Theme.of(context).dividerColor),
             borderSide: BorderSide(

@@ -8,7 +8,6 @@ import 'package:wg_pro_002/dao/dao_result.dart';
 import 'package:wg_pro_002/dao/user_dao.dart';
 import 'package:wg_pro_002/local/local_storage.dart';
 import 'package:wg_pro_002/pages/main_page.dart';
-import 'package:wg_pro_002/utils/navigator_utils.dart';
 
 class UserAuthNotifier extends ChangeNotifier {
   bool _isLoggedIn = false;
@@ -30,6 +29,8 @@ class UserAuthNotifier extends ChangeNotifier {
   bool _isButtonDisabled = false;
   int _countdown = 60;
   Timer? _timer;
+  String? _adid;
+  String? get adid => _adid;
 
   String? get phone => _phone;
   String? get validCode => _validCode;
@@ -132,5 +133,17 @@ class UserAuthNotifier extends ChangeNotifier {
     _isLoggedIn = false;
     _token = null;
     notifyListeners();
+  }
+
+  Future<void> fetchAdjustAdid() async {
+    try {
+      // 模拟一个耗时的上传过程
+      await Future.delayed(const Duration(seconds: 10));
+      print('Data uploaded successfully');
+      // 更新状态或处理结果，如果需要通知监听者
+    } catch (e) {
+      print('Failed to upload data: $e');
+      // 处理错误
+    }
   }
 }

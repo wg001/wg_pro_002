@@ -1,0 +1,16 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Demo Page</title>
+  </head>
+  <body>
+    <h1>Hello from Web!</h1>
+    <button onclick="sendToFlutter()">Send Message to Flutter</button>
+
+    <script>
+      function sendToFlutter() {
+        Flutter.postMessage("app://goback");
+      }
+    </script>
+  </body>
+</html>
