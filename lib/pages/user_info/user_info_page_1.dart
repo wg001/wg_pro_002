@@ -18,7 +18,6 @@ import 'package:app_settings/app_settings.dart';
 import 'package:wg_pro_002/provider/camera_provider.dart';
 import 'package:wg_pro_002/provider/user_info_provider.dart';
 import 'package:wg_pro_002/utils/common_utils.dart';
-import 'package:wg_pro_002/utils/image_utils.dart';
 import 'package:wg_pro_002/widget/address_selector.dart';
 import 'package:wg_pro_002/widget/camera_preview_widget.dart';
 import 'package:wg_pro_002/widget/form/wg_form.dart';
@@ -606,10 +605,11 @@ class _UserInfoPage1State extends State<UserInfoPage1> with CommonWidget {
                                     crossAxisAlignment:
                                         CrossAxisAlignment.center,
                                     children: [
-                                      Transform.translate(
-                                        offset: const Offset(0, -30),
+                                      Flexible(
                                         child: Image.asset(
-                                            '${Config.BASE_APP_ASSETS_PATH}self_camera_cover.png'),
+                                          '${Config.BASE_APP_ASSETS_PATH}self_camera_cover.png',
+                                          fit: BoxFit.contain, // 确保图片按比例缩放
+                                        ),
                                       ),
                                     ],
                                   ),
