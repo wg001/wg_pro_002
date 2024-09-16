@@ -1,6 +1,4 @@
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/widgets.dart';
 import 'package:wg_pro_002/app/model/Home.dart';
 import 'package:wg_pro_002/common/response_conf.dart';
 import 'package:wg_pro_002/pages/home/actions/action_start.dart';
@@ -42,7 +40,7 @@ class HomePageRepayContent extends StatelessWidget {
         mainAxisAlignment: MainAxisAlignment.spaceEvenly, // 平均分配空间
         children: <Widget>[
           SizedBox(
-            width: MathUtils.screenWidth*0.3,
+            width: MathUtils.screenWidth * 0.3,
             child: ElevatedButton(
               onPressed: () {
                 // 按钮1的点击事件
@@ -63,7 +61,7 @@ class HomePageRepayContent extends StatelessWidget {
             ),
           ),
           SizedBox(
-              width: MathUtils.screenWidth*0.3,
+              width: MathUtils.screenWidth * 0.3,
               child: ElevatedButton(
                 onPressed: () {
                   // 按钮1的点击事件
@@ -85,7 +83,7 @@ class HomePageRepayContent extends StatelessWidget {
           if (homePageData.userLoanInfo.displayPostponementButton ?? false)
             // 条件判断
             SizedBox(
-                width: MathUtils.screenWidth*0.3,
+                width: MathUtils.screenWidth * 0.3,
                 child: ElevatedButton(
                   onPressed: () {
                     // 按钮1的点击事件

@@ -71,6 +71,9 @@ dependencies:
   adjust_sdk: ^5.0.1
   package_info_plus: ^8.0.2
   webview_flutter: ^4.8.0
+  webview_flutter_android: ^3.16.7
+  flutter_dash: ^1.0.0
+  timeline_tile: ^2.0.0
 
 dev_dependencies:
   flutter_test:

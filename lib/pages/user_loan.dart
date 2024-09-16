@@ -1,21 +1,11 @@
 import 'package:flutter/material.dart';
-import 'package:fluttertoast/fluttertoast.dart';
-import 'package:gap/gap.dart';
-import 'package:flutter/foundation.dart' show kDebugMode;
 import 'package:provider/provider.dart';
-import 'package:wg_pro_002/app/model/UserInfo.dart';
-import 'package:wg_pro_002/common/response_conf.dart';
 import 'package:wg_pro_002/config/colors.dart';
-import 'package:wg_pro_002/config/config.dart';
 import 'package:wg_pro_002/config/strings.dart';
-import 'package:wg_pro_002/pages/user_loan_detail/loan_audit_failed.dart';
-import 'package:wg_pro_002/pages/user_loan_detail/loan_repay.dart';
+import 'package:wg_pro_002/pages/user_loan/loan_audit_failed.dart';
+import 'package:wg_pro_002/pages/user_loan/loan_repay.dart';
 import 'package:wg_pro_002/widget/common_widget.dart';
-import 'package:app_settings/app_settings.dart';
 import 'package:wg_pro_002/provider/user_info_provider.dart';
-import 'package:wg_pro_002/widget/custom_progress_bar.dart';
-import 'package:wg_pro_002/widget/form/wg_form.dart';
-import 'package:wg_pro_002/widget/wg_picker_tool.dart';
 
 class UserLoan extends StatefulWidget {
   const UserLoan({super.key});

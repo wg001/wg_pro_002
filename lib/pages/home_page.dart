@@ -4,8 +4,11 @@ import 'package:wg_pro_002/common/response_conf.dart';
 import 'package:wg_pro_002/config/colors.dart';
 import 'package:wg_pro_002/config/config.dart';
 import 'package:wg_pro_002/config/strings.dart';
+import 'package:wg_pro_002/pages/deposit/deposit_index.dart';
 import 'package:wg_pro_002/pages/home_widget/home_head_main_content_no_auth.dart';
 import 'package:wg_pro_002/pages/user_loan.dart';
+import 'package:wg_pro_002/pages/user_loan/loan_option.dart';
+import 'package:wg_pro_002/pages/user_points/points_mall.dart';
 import 'package:wg_pro_002/utils/common_utils.dart';
 
 class HomePage extends StatelessWidget {
@@ -51,10 +54,10 @@ class HomePage extends StatelessWidget {
             const Gap(30),
             _headMainContent(),
             const Gap(20),
-            _middleContent(),
+            _middleContent(context),
             const SizedBox(height: 20),
             if (existLoan) _loanSection(context),
-            _bottomSection(),
+            _bottomSection(context),
           ])))
         ]));
   }
@@ -100,7 +103,7 @@ class HomePage extends StatelessWidget {
     );
   }
 
-  Widget _depositAndBorrow() {
+  Widget _depositAndBorrow(BuildContext context) {
     return Padding(
       padding: const EdgeInsets.only(top: 10, bottom: 10),
       child: Row(
@@ -112,7 +115,8 @@ class HomePage extends StatelessWidget {
             const Color.fromRGBO(255, 250, 236, 1),
             () {
               CommonUtils.showToast('存款 Tapped');
-              // 这里可以添加导航到存款页面的代码
+              Navigator.of(context).push(MaterialPageRoute(
+                  builder: (context) => const DepositIndex()));
             },
           ),
           _buildCard(
@@ -121,6 +125,9 @@ class HomePage extends StatelessWidget {
               const Color.fromRGBO(245, 249, 255, 1), () {
             CommonUtils.showToast('借款 Tapped');
             // 这里可以添加导航到存款页面的代码
+            CommonUtils.showToast('存款 Tapped');
+            Navigator.of(context).push(
+                MaterialPageRoute(builder: (context) => const LoanOption()));
           }),
         ],
       ),
@@ -196,7 +203,7 @@ class HomePage extends StatelessWidget {
         padding: const EdgeInsets.only(left: 10, right: 10), child: content);
   }
 
-  Widget _middleContent() {
+  Widget _middleContent(BuildContext context) {
     return Padding(
         padding: const EdgeInsets.only(left: 10, right: 10),
         child: Column(
@@ -249,7 +256,7 @@ class HomePage extends StatelessWidget {
             )));
   }
 
-  Widget _pointsSection() {
+  Widget _pointsSection(BuildContext context) {
     return Column(
       children: <Widget>[
         const Padding(
@@ -301,7 +308,8 @@ class HomePage extends StatelessWidget {
                           )),
                       TextButton(
                           onPressed: () {
-                            // 按钮点击事件
+                            Navigator.of(context).push(MaterialPageRoute(
+                                builder: (context) => const PointsMall()));
                           },
                           style: TextButton.styleFrom(
                             shape: RoundedRectangleBorder(
@@ -325,7 +333,7 @@ class HomePage extends StatelessWidget {
     );
   }
 
-  _bottomSection() {
+  _bottomSection(BuildContext context) {
     return Container(
       decoration: const BoxDecoration(
         color: Colors.white,
@@ -334,9 +342,9 @@ class HomePage extends StatelessWidget {
       ),
       child: Column(
         children: <Widget>[
-          _depositAndBorrow(),
+          _depositAndBorrow(context),
           const SizedBox(height: 10),
-          _pointsSection(),
+          _pointsSection(context),
           const Padding(
             padding: EdgeInsets.all(16.0),
             child: Row(
